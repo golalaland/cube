@@ -4584,23 +4584,30 @@ function playFullVideo(video) {
   // Remove any existing custom player
   document.querySelectorAll('.custom-video-player').forEach(el => el.remove());
 
-  // Create a hidden <video> that instantly opens native browser player
+  // Create a video element
   const videoEl = document.createElement("video");
   videoEl.src = src;
   videoEl.controls = true;
   videoEl.autoplay = true;
   videoEl.playsInline = true;
-  videoEl.style.display = "none"; // invisible — we don't want to show it
-
-  // Optional: mark it so we can clean it later
   videoEl.classList.add("custom-video-player");
 
+  // Place off-screen instead of display:none
+  videoEl.style.position = "fixed";
+  videoEl.style.top = "-9999px";
+  videoEl.style.left = "-9999px";
+  videoEl.style.width = "1px";
+  videoEl.style.height = "1px";
+  
   document.body.appendChild(videoEl);
 
-  // This triggers the native mobile/browser fullscreen player immediately
-  videoEl.play();
+  // Trigger native fullscreen
+  const playPromise = videoEl.play();
+  if (playPromise !== undefined) {
+    playPromise.catch(() => {}); // ignore if blocked
+  }
 
-  // Auto-remove after it ends or user closes (keeps DOM clean)
+  // Cleanup
   videoEl.addEventListener("ended", () => videoEl.remove());
   videoEl.addEventListener("pause", () => setTimeout(() => videoEl.remove(), 1000));
 }

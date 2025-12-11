@@ -4738,3 +4738,13 @@ function showDeleteConfirm(id, title) {
   // Close when clicking outside
   modal.onclick = (e) => e.target === modal && modal.remove();
 }
+window.revealChatAfterLogin = function() {
+  chatContainer.style.display = 'flex';   // show chat container
+  sendArea.style.display = 'flex';        // show input area
+  messagesEl.classList.add('active');     // gray placeholder
+  updateMessagesPlaceholder();            // placeholder logic
+
+  // Hide footer
+  const footer = document.getElementById('startupFooter');
+  if (footer) footer.classList.add('hidden');
+};

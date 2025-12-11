@@ -194,14 +194,16 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
   width: 80%;
 }
 
-/* Only show placeholder when chat has 'active' class */
-#messages.active:empty::before {
-  content: "No one’s messaged yet — be the first!";
+/* Default state: startup page (text blends with black background) */
+#messages:empty::before {
+  color: #000; /* black on startup */
 }
 
-#messages.active:empty::after {
-  content: "";
+/* Placeholder when chat is active (user logged in) */
+#messages.active:empty::before {
+  color: rgba(255, 255, 255, 0.45); /* gray text on login */
 }
+
 
 
 /* 🔥 Message bubble */

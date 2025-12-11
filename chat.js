@@ -107,6 +107,7 @@ const pRef = rtdbRef(rtdb, `presence/${ROOM_ID}/${safeUid}`);
   }
 }
 
+
 // SYNC UNLOCKED VIDEOS — 100% Secure & Reliable
 async function syncUserUnlocks() {
   if (!currentUser?.email) {
@@ -458,19 +459,27 @@ window.sanitizeId = sanitizeId;
 window.getUserId = getUserId;  // ← RESTORED FOR OLD CODE
 window.formatNumberWithCommas = formatNumberWithCommas;
 
-// ← MESSEGES CONTAINER
+// ==============================
+// CHAT.JS — COMPLETE REWRITE
+// ==============================
+
 document.addEventListener('DOMContentLoaded', () => {
-  const messagesEl = document.getElementById('messages');
+
+  // Grab chat elements
   const chatContainer = document.getElementById('chatContainer');
+  const messagesEl = document.getElementById('messages');
+  if (!chatContainer || !messagesEl) return;
 
-  if (!messagesEl || !chatContainer) return;
-
-  // Check if chat has real messages
+  // ------------------------------
+  // Helper: check if chat has real messages
+  // ------------------------------
   function hasRealMessages() {
     return !!messagesEl.querySelector('.msg');
   }
 
+  // ------------------------------
   // Update placeholder visibility
+  // ------------------------------
   function updateMessagesPlaceholder() {
     if (hasRealMessages()) {
       messagesEl.classList.remove('show-placeholder');
@@ -479,15 +488,37 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Observe messages changes
+  // ------------------------------
+  // MutationObserver for live updates
+  // ------------------------------
   const messagesObserver = new MutationObserver(updateMessagesPlaceholder);
   messagesObserver.observe(messagesEl, { childList: true });
 
-  // Global function to reveal entire chat after login
+  // ------------------------------
+  // Global function to reveal chat AFTER login
+  // ------------------------------
   window.revealChatAfterLogin = function() {
-    chatContainer.style.display = 'flex'; // shows everything
-    updateMessagesPlaceholder();
+    // Show everything
+    chatContainer.style.display = 'flex'; // or 'block' depending on layout
+    updateMessagesPlaceholder();          // placeholder updates if empty
   };
+
+  // ------------------------------
+  // Optional: hide everything at startup
+  // ------------------------------
+  chatContainer.style.display = 'none'; // ensures hidden on page load
+  updateMessagesPlaceholder();          // placeholder hidden initially
+
+  // ------------------------------
+  // Example: call after login
+  // Replace this with your actual login success handler
+  // ------------------------------
+  // auth.onAuthStateChanged(user => {
+  //   if (user) {
+  //     revealChatAfterLogin();
+  //   }
+  // });
+
 });
 
 

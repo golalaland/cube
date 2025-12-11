@@ -4708,3 +4708,5 @@ function showDeleteConfirm(id, title) {
   // Close when clicking outside
   modal.onclick = (e) => e.target === modal && modal.remove();
 }
+// Call this AFTER login succeeds
+revealChatAfterLogin();

@@ -4135,120 +4135,121 @@ highlightsBtn.onclick = async () => {
   }
 };
 
-/* ---------- Highlights Modal (SLUTTY MORPHINE EDITION) ---------- */
+/* ---------- Highlights Modal (SLUTTY MORPHINE EDITION – FIXED & READY) ---------- */
 function showHighlightsModal(videos) {
   document.getElementById("highlightsModal")?.remove();
   const modal = document.createElement("div");
   modal.id = "highlightsModal";
   Object.assign(modal.style, {
     position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh",
-    background: "rgba(5,2,20,0.98)", display: "flex", flexDirection: "column",
+    background: "rgba(8,3,25,0.97)",
+    backgroundImage: "linear-gradient(135deg, rgba(0,255,234,0.09), rgba(255,0,242,0.14), rgba(138,43,226,0.11))",
+    display: "flex", flexDirection: "column",
     alignItems: "center", justifyContent: "flex-start", zIndex: "999999",
     overflowY: "auto", padding: "20px", boxSizing: "border-box",
-    fontFamily: "system-ui, sans-serif",
-    backgroundImage: "linear-gradient(135deg, rgba(0,255,234,0.07), rgba(255,0,242,0.1), rgba(138,43,226,0.12))"
+    fontFamily: "system-ui, sans-serif"
   });
 
-  // STICKY INTRO 
+  // === STICKY INTRO ===
   const intro = document.createElement("div");
   intro.innerHTML = `
-    <div style="text-align:center;color:#e0b0ff;max-width:640px;margin:0 auto;line-height:1.6;font-size:15px;
-      background:linear-gradient(180deg,rgba(138,43,226,0.25),rgba(255,0,242,0.18));
-      border:2px solid #8a2be2;border-image:linear-gradient(90deg,#00ffea,#ff00f2,#8a2be2) 1);
-      border-image-slice: 1;
-      padding:18px 48px 18px 20px;border-radius:16px;position:relative;
-      box-shadow:0 0 30px rgba(255,0,242,0.35), inset 0 0 20px rgba(0,255,234,0.4);
-      backdrop-filter:blur(12px);text-shadow: 0 0 12px #ff00f2;">
+    <div style="text-align:center;color:#e4b0ff;max-width:640px;margin:0 auto;line-height:1.6;font-size:15px;
+      background:linear-gradient(180deg,rgba(138,43,226,0.3),rgba(255,0,242,0.2));
+      border:2px solid transparent;border-radius:16px;padding:18px 48px 18px 20px;position:relative;
+      box-shadow:0 0 32px rgba(255,0,242,0.4),inset 0 0 20px rgba(0,255,234,0.3);
+      backdrop-filter:blur(12px);text-shadow:0 0 10px #ff00f2;
+      border-image:linear-gradient(90deg,#00ffea,#ff00f2,#8a2be2) 1;">
       <p style="margin:0;">
         <span style="background:linear-gradient(90deg,#00ffea,#ff00f2,#8a2be2);
-        -webkit-background-clip:text;-webkit-text-fill-color:transparent;font-size:28px;font-weight:900;">
+          -webkit-background-clip:text;-webkit-text-fill-color:transparent;font-size:30px;font-weight:900;">
           Highlights
         </span><br>
-        Unlock the filthiest creator drops with STRZ to feed your addiction.
-      </div>`;
-  Object.assign(intro.style, { position: "sticky", top: "12px", z-index: 1001, marginBottom: 18px });
-  modal.append(intro);
+        Unlock the nastiest creator moments with STRZ to feed the habit.
+      </p>
+    </div>`;
+  Object.assign(intro.style, { position: "sticky", top: "12px", zIndex: 1001, marginBottom: "18px" });
+  modal.appendChild(intro);
 
   modal.addEventListener("scroll", () => {
-    intro.style.opacity = modal.scrollTop > 60 ? "0" : "1";
+    intro.style.opacity = modal.scrollTop > 60 ? "0.85" : "1";
   });
 
-  // KILLER X CLOSE (PURE SEX)
+  // === CLOSE BUTTON (NEON X) ===
   const closeBtn = document.createElement("div");
-  closeBtn.innerHTML = `<svg width="22" height="22" view 0 24 0 24" fill="none">
-    <path d="M18 6L6 18M6 6 L18 18" stroke="#00ffea" stroke-width:3 stroke-linecap=round/>
+  closeBtn.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+    <path d="M18 6L6 18M6 6L18 18" stroke="#00ffea" stroke-width="3.5" stroke-linecap="round"/>
   </svg>`;
   Object.assign(closeBtn.style, {
-    position: "absolute", top: 18px, right: 20, w:48px, h:48,
-    display: "flex", alignItems: "center", justify: "center", cursor: "pointer",
-    z: 1002, transition: "all .4s cubic-bezier(0.5, 0.8, 0.2, 4)",
-    filter: "drop-shadow(0 0 20 #ff00f2) drop-shadow(0 0 20 #8a2be2)",
-    shadow: "0 0 25 rgba(255,0,242,0.7)"
+    position: "absolute", top: "20px", right: "20px", width: "48px", height: "48px",
+    display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer",
+    zIndex: 1002, transition: "all 0.4s ease",
+    filter: "drop-shadow(0 0 16px #ff00f2)",
+    borderRadius: "50%", background: "rgba(255,0,242,0.1)"
   });
-  closeBtn.onenter = () => closeBtn.style.transform = "rotate(180deg) scale(1.4)";
-  closeBtn.onleave = () => closeBtn.style.transform = "rotate(0) scale(1)";
-  closeBtn.onclick = (e) => {
-    e.stopPropagation();
-    closeBtn.style.transform = "rotate(360deg) scale(0.3)";
+  closeBtn.onmouseenter = () => closeBtn.style.transform = "rotate(180deg) scale(1.3)";
+  closeBtn.onmouseleave = () => closeBtn.style.transform = "rotate(0) scale(1)";
+  closeBtn.onclick = () => {
+    closeBtn.style.transform = "rotate(360deg) scale(0)";
     setTimeout(() => modal.remove(), 300);
   };
-  intro.firstElementChild.appendChild(close);
+  intro.firstElementChild.appendChild(closeBtn);
 
-  // SEARCH + FILTERS 
+  // === SEARCH + FILTER BUTTONS ===
   const searchWrap = document.createElement("div");
-  Object.assign(search.style, {
-    position: "sticky", top: "88", zIndex: "100", marginB: "24",
-    display: "flex", flexDir: "col", align: "center", gap: "12"
+  Object.assign(searchWrap.style, {
+    position: "sticky", top: "88px", zIndex: 1000, marginBottom: "24px",
+    display: "flex", flexDirection: "column", alignItems: "center", gap: "12px"
   });
 
   const searchInputWrap = document.createElement("div");
-  searchInputWrap.style = `
-    display:flex;align-items:center;
-    background: rgba(15,8,30,0.6); border: 2 solid #ff00f2;
-    border-image: linear-gradient(90deg,#00ffea,#ff00f2,#8) 1;
-    radius: 30px; padding: 10 20px; w: 320px;
-    backdrop-filter: blur(12); shadow:0 0 25 rgba(255,242,0.4);
-  `;
-  searchInputWrap.inner = `
-    <svg w=20 h=20 v="0 0 24 24" fill="none">
-      <path d="M15 15L21 21M10 17C6.1 17 3 13.8 3 10C3 6.1 6.1 3 10 3C13.8 17 17 6.1 17 10C17 13.8 13.1 17 10 17Z"
-            stroke="url(#gSearch)" stroke-w=2.5 round"/>
-      <defs><linear id="gSearch" x1="3" y="3" x2="21" y2="21">
-        <stop stop-color="#00ffea"/><stop offset="1" stop="#ff00f2"/>
-      </linearGradient></defs>
+  searchInputWrap.style.cssText = `
+    display:flex;align-items:center;gap:10px;
+    background:rgba(20,10,40,0.6);
+    border:2px solid transparent;border-radius:30px;padding:10px 20px;width:320px;
+    backdrop-filter:blur(12px);box-shadow:0 0 30px rgba(255,0,242,0.35);
+    border-image:linear-gradient(90deg,#00ffea,#ff00f2,#8a2be2) 1;`;
+  searchInputWrap.innerHTML = `
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+      <path d="M15 15L21 21M10 17C6.134 17 3 13.866 3 10C3 6.134 6.134 3 10 3C13.866 3 17 6.134 17 10C17 13.866 13.866 17 10 17Z"
+            stroke="url(#gradSearch)" stroke-width="2.5" stroke-linecap="round"/>
+      <defs>
+        <linearGradient id="gradSearch" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#00ffea"/>
+          <stop offset="100%" stop-color="#ff00f2"/>
+        </linearGradient>
+      </defs>
     </svg>
-    <input id="highlightSearchInput" type="text" ph="Search by creator..."
-      style="flex:1;b:transparent;border:0;out:none;color:#e0b; f-size:14px;"/>
-  `;
-  searchWrap.append(searchInputWrap);
+    <input id="highlightSearchInput" type="text" placeholder="Search by creator..."
+           style="flex:1;background:transparent;border:none;outline:none;color:#e0b0ff;font-size:14px;"/>`;
+  searchWrap.appendChild(searchInputWrap);
 
-  const btnRow = document.createElement("div");
-  btnRow.style = "display:flex;gap:10;align:center;";
+  const buttonRow = document.createElement("div");
+  buttonRow.style.cssText = "display:flex;gap:12px;";
 
-  const toggleBtn = doc.createElement("button");
+  const toggleBtn = document.createElement("button");
   toggleBtn.id = "toggleLocked";
-  toggleBtn.text = "Show Unlocked";
-  Object.assign(toggle, {
-    pad: "8 18", borderR: "8", background: "linear-gradient(135deg, #0, #2a0f4)", color: "#ffea",
-    border: "1 solid #8a2be2", fSize: "13", cur: "point",
-    weight: "800", trans: "all .3", box: "0 0 20 rgba(138,0,234,0.7)"
+  toggleBtn.textContent = "Show Unlocked";
+  Object.assign(toggleBtn.style, {
+    padding: "8px 18px", borderRadius: "8px",
+    background: "linear-gradient(135deg, #1a0b2e, #240046)",
+    color: "#00ffea", border: "1px solid #8a2be2", fontSize: "13px", cursor: "pointer",
+    fontWeight: "800", transition: "all 0.3s", boxShadow: "0 0 20px rgba(138,43,226,0.6)"
   });
 
-  const trendBtn = doc.createElement("button");
-  trendBtn.id = "toggleTrending";
-  trend.textContent = "Trending";
-  Object.assign(trendBtn.style, {
-    padding: "8 18", borderR: "8",
-    background: "linear-gradient(135, #8a2be2, #ff00, #00f2)",
-    color: "#fff", border: "1px solid #0f2", fSize: "13", cur: "pointer",
-    weight: + "800", transition: ".3", box: "0 0 30 rgba(255,0,242,0.8)"
+  const trendingBtn = document.createElement("button");
+  trendingBtn.id = "toggleTrending";
+  trendingBtn.textContent = "Trending";
+  Object.assign(trendingBtn.style, {
+    padding: "8px 18px", borderRadius: "8px",
+    background: "linear-gradient(135deg, #8a2be2, #ff00f2, #00ffea)",
+    color: "#fff", border: "1px solid #ff00f2", fontSize: "13px", cursor: "pointer",
+    fontWeight: "800", transition: "all 0.3s", boxShadow: "0 0 30px rgba(255,0,242,0.7)"
   });
 
-  btnRow.append(toggle, trend);
-  searchWrap.append(btnRow);
-  modal.append(searchWrap);
-  background: linear-gradient(90, #00ffea, #ff00f2, #8a2be2) — now EVERYTHING breathes it.;
-
+  buttonRow.append(toggleBtn, trendingBtn);
+  searchWrap.appendChild(buttonRow);
+  modal.appendChild(searchWrap);
+  
 // === CONTENT AREA ===
 const content = document.createElement("div");
 Object.assign(content.style, {

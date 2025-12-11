@@ -744,10 +744,10 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
 .video-controls svg {
   pointer-events: none;
 }
-/* ====== Featured Hosts Styles ====== */
+/* ====== Featured Hosts Styles — Cube Vibe ====== */
 .featured-btn {
-  background: linear-gradient(90deg, #ff007a, #ffa500);
-  color: #fff;
+  background: linear-gradient(90deg, #c3f60c, #e8ff6a);  /* Cube gradient, sleek */
+  color: #000;                                         /* dark contrast for sexy edge */
   border: none;
   border-radius: 25px;
   padding: 10px 20px;
@@ -756,23 +756,43 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
   cursor: pointer;
   display: block;
   margin: 20px auto;
-  box-shadow: 0 0 10px rgba(255, 0, 122, 0.6);
-  transition: transform 0.2s;
+  box-shadow: 0 0 8px rgba(195, 246, 12, 0.4);        /* subtle glow */
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
-.featured-btn:hover { transform: scale(1.05); }
 
-/* 🌟 Featured Hosts Modal (Centered) */
+.featured-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 14px rgba(195, 246, 12, 0.7);       /* more seductive glow */
+}
+
+/* 🌟 Featured Hosts Modal — Cube Edition */
 .featured-modal {
   display: none;             /* hidden by default */
   position: fixed;
-  inset: 0;                  /* top:0; right:0; bottom:0; left:0 */
+  inset: 0;                  /* full screen */
   z-index: 10000;
-  background: rgba(0,0,0,0.85);
+  background: rgba(0,0,0,0.85);  /* dark, mysterious base */
   backdrop-filter: blur(10px);
 
   display: flex;             /* Flex container */
   justify-content: center;   /* horizontal center */
   align-items: center;       /* vertical center */
+  padding: 20px;
+  overflow-y: auto;
+}
+
+/* Optional: Modal inner content — Cube edgy glow */
+.featured-modal .modal-content {
+  background: rgba(0,0,0,0.9);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 0 12px rgba(195, 246, 12, 0.5);
+  max-width: 400px;
+  width: 100%;
+  color: #c3f60c;
+  text-align: center;
+  font-weight: 500;
+  font-family: 'Arial', sans-serif;
 }
 
 /* 🔲 Compact modal card */
@@ -1105,6 +1125,7 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
   border: none;
   border-radius: 4px;
 }
+could you have broken something?  i only asked for color change:
 /* Tab Header */
 .tab-header {
   display: flex;
@@ -1118,76 +1139,58 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
   background: rgba(255, 255, 255, 0.1);
   color: #fff;
   border: none;
-  padding: 6px 4px;
+  padding: 6px 4px; /* slightly smaller padding */
   border-radius: 4px;
   cursor: pointer;
   font-weight: 500;
-  font-size: 13px;
+  font-size: 13px; /* smaller text */
   text-align: center;
-  transition: all 0.3s ease;
 }
 
 .tab-btn.active {
-  background: linear-gradient(90deg, #c3f60c, #a0d308); /* pure #CUBETHEME energy */
-  box-shadow: 0 0 12px rgba(195, 246, 12, 0.5);
-  color: #000;
-  font-weight: 600;
-}
-
-.tab-btn:hover:not(.active) {
-  background: rgba(195, 246, 12, 0.15);
+  background: linear-gradient(90deg, #ff0099, #ff6600);
 }
 
 /* General tab content styling */
 .tab-content label {
-  display: inline-block;
-  width: 100px;
+  display: inline-block;      /* keeps label inline-friendly */
+  width: 100px;               /* fixed width for alignment */
   margin-right: 8px;
-  vertical-align: top;
+  vertical-align: top;        /* aligns with input top */
   font-size: 13px;
   color: #fff;
 }
 
-/* Inputs & textareas – subtle #CUBETHEME accent on focus */
+/* Inputs & textareas */
 .tab-content input,
 .tab-content textarea {
-  display: inline-block;
-  width: calc(100% - 120px);
+  display: inline-block;      /* allows horizontal alignment with label */
+  width: calc(100% - 120px);  /* accounts for label width + gap */
   max-width: 250px;
   margin-bottom: 8px;
   padding: 6px;
   border-radius: 4px;
   border: none;
-  background: rgba(255, 255, 255, 0.08);
-  color: #fff;
   font-size: 13px;
-  vertical-align: top;
-  resize: vertical;
-  transition: all 0.2s ease;
-}
-
-.tab-content input:focus,
-.tab-content textarea:focus {
-  outline: none;
-  box-shadow: 0 0 0 2px #c3f60c;
-  background: rgba(195, 246, 12, 0.1);
+  vertical-align: top;        /* ensures alignment with label */
+  resize: vertical;           /* allows bio to expand vertically */
 }
 
 /* Divider spacing */
 .tab-content .divider {
   margin: 12px 0;
   border: 0;
-  border-top: 1px solid rgba(195, 246, 12, 0.3); /* #CUBETHEME divider */
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-/* Smooth fade-out for loader (kept from your code) */
+
 #postLoginLoader {
   transition: opacity 0.4s ease;
 }
 #postLoginLoader[style*="display: none"] {
   opacity: 0;
 }
-
+  
 /* ===== Notifications Tab ===== */
 .notifications-header {
   display: flex;
@@ -1851,8 +1854,7 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
 <!-- Hello text -->
    <div id="helloText" aria-live="polite">HELLO</div>
       <div class="room-desc">Chat. Own your vibe.
-        
-<div id="roomSubtitle" class="room-subtitle">Log in to Chat & Start collecting $STRZ</div>
+
 <!-- Controls under the video -->
 <div id="videoUnderControls">
     <div id="onlineWrapper" style="display:flex; justify-content:center; align-items:center; gap:4px; font-family:sans-serif; font-weight:500; font-size:14px;">
@@ -1871,13 +1873,6 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
   <button class="session-btn" id="highlightsBtn">🔥 Highlights</button>
 </div>
 
-<!-- 3-in-1 tabs (unchanged) -->
-<div id="sessionModal" style="display:none;">
-  <div class="sessionTabs">
-    <button class="active" data-tab="ballers">Top Ballers</button>
-    <button data-tab="extras">Highlights</button>
-  </div>
-
   <div class="sessionContent active" id="tabBallers">
     <div class="ballerTabs">
       <button class="active" data-period="week">This Week</button>
@@ -1891,7 +1886,6 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
     <p>Coming soon — session stats or custom content.</p>
   </div>
 </div>
-
 
     <button id="openHostsBtnz" class="featured-btn" style="display:none;">🌟 Star Hosts 🌟</button>
 </div>

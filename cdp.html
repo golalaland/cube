@@ -21,10 +21,10 @@
     .container { width:100%; max-width:480px; height:100vh; padding:20px; text-align:center; overflow-y:auto; -webkit-overflow-scrolling:touch; }
 
     .title {
-      font-size:36px; font-weight:900;
+      font-size:25px; font-weight:900;
       background:linear-gradient(90deg,#00ff9d,#39ff14);
       -webkit-background-clip:text; -webkit-text-fill-color:transparent;
-      margin:10px 0 6px;
+      margin:6px 0 6px;
     }
     .welcome { color:#fff; font-size:19px; margin:12px 0 20px; font-weight:600; }
     .welcome span { color:var(--cube-green); }
@@ -151,25 +151,26 @@
 @media (max-width: 420px) { .mobile-br { display:block; } }
 .sip-logo {
   display: block;
-  margin: 0 auto 12px auto; /* center and add spacing below */
-  max-width: 180px;          /* adjust size as needed */
+  margin: 0 auto 14px auto;
+  max-width: 260px;     /* BIGGER LOGO */
   height: auto;
 }
-
   </style>
 </head>
 <body>
- <div class="container">
-    <!-- Logo above SIP PICKER -->
-    <img src="https://cdn.shopify.com/s/files/1/0962/6648/6067/files/HABA_HOUSE.png?v=1765412962" 
-         alt="HabaHouse Logo" 
-         class="sip-logo">
+<div class="container">
 
-    <div class="title">SIP PICKER</div>
-    <div class="welcome" id="welcomeMsg">
-      Welcome <span id="username">Guest</span>, you're on <span id="hostName">no one</span>'s VIP!
-    </div>
-    <div class="welcome" id="welcomeMsg">Welcome <span id="username">Guest</span>, you're on <span id="hostName">no one</span>'s VIP!</div>
+  <img src="https://cdn.shopify.com/s/files/1/0962/6648/6067/files/HABA_HOUSE.png?v=1765412962" 
+       alt="HabaHouse Logo" 
+       class="sip-logo">
+
+  <div class="title">SIP PICKER</div>
+
+  <div class="welcome" id="welcomeMsg">
+    Welcome <span id="username">Guest</span>, you're on <span id="hostName">no one</span>'s VIP!
+  </div>
+</div>
+
 
     <div class="balance">
       <div class="item"><span class="label">STRZ BALANCE:</span> <span class="value"><span id="stars-count">0</span> ⭐️</span></div>

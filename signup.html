@@ -7,12 +7,13 @@
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --neon: #c3f60c;          /* YOUR official CUBE green */
+    --neon: #c3f60c;
     --neon-dark: #a0d00a;
     --deep: #0a1400;
     --glow: rgba(195, 246, 12, 0.6);
     --input-bg: rgba(10, 25, 0, 0.65);
     --input-border: rgba(195, 246, 12, 0.5);
+    --gold-gradient: linear-gradient(135deg, #FFD700, #FFA500, #FF8C00);
   }
   * { margin:0; padding:0; box-sizing:border-box; }
   body {
@@ -28,37 +29,13 @@
     overflow-x: hidden;
   }
 
-  .hero-video {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    object-fit: cover;
-    z-index: -3;
-    opacity: 0.35;
-    filter: brightness(0.6) contrast(1.3);
-  }
-  .hero-overlay {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: linear-gradient(180deg, transparent 0%, #000 90%);
-    z-index: -2;
-  }
+  .hero-video { position: fixed; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: -3; opacity: 0.35; filter: brightness(0.6) contrast(1.3); }
+  .hero-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(180deg, transparent 0%, #000 90%); z-index: -2; }
 
-  .particles {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    pointer-events: none;
-    z-index: -1;
-  }
+  .particles { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: -1; }
   .particle {
-    position: absolute;
-    width: 5px; height: 5px;
-    background: var(--neon);
-    border-radius: 50%;
-    box-shadow: 0 0 20px var(--neon);
-    animation: float 15s infinite linear;
+    position: absolute; width: 5px; height: 5px; background: var(--neon); border-radius: 50%;
+    box-shadow: 0 0 20px var(--neon; animation: float 15s infinite linear;
   }
   @keyframes float {
     0% { transform: translateY(100vh) translateX(0); opacity: 0; }
@@ -68,203 +45,99 @@
   }
 
   h1 {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 5.5rem;
-    font-weight: 900;
+    font-family: 'Orbitron', sans-serif; font-size: 5.5rem; font-weight: 900;
     background: linear-gradient(90deg, var(--neon), #e0ff4a, var(--neon));
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    text-shadow: 0 0 50px var(--neon);
-    letter-spacing: 12px;
-    margin: 1rem 0 0.5rem;
-    animation: flicker 3s infinite;
-    text-transform: uppercase;
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 50px var(--neon); letter-spacing: 12px; margin: 1rem 0 0.5rem;
+    animation: flicker 3s infinite; text-transform: uppercase;
   }
-  @keyframes flicker {
-    0%,100% { opacity: 1; }
-    50% { opacity: 0.92; }
-    52% { opacity: 0.98; }
-  }
+  @keyframes flicker { 0%,100% { opacity: 1; } 50% { opacity: 0.92; } 52% { opacity: 0.98; } }
 
-  .tagline {
-    font-size: 1.1rem;
-    text-align: center;
-    max-width: 90%;
-    margin-bottom: 2rem;
-    font-weight: 300;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    color: #e0ff80;
-    text-shadow: 0 0 20px var(--neon);
-  }
+  .tagline { font-size: 1.1rem; text-align: center; max-width: 90%; margin-bottom: 2rem; font-weight: 300; letter-spacing: 3px; text-transform: uppercase; color: #e0ff80; text-shadow: 0 0 20px var(--neon); }
 
+  .form-group { position: relative; margin: 0.8rem 0; }
   .form-group input {
-    width: 320px;
-    max-width: 90vw;
-    padding: 1rem 1.4rem;
-    border-radius: 50px;
-    border: 1px solid var(--input-border);
-    background: var(--input-bg);
-    backdrop-filter: blur(15px);
-    color: white;
-    font-size: 1rem;
-    text-align: center;
-    margin: 0.8rem 0;
-    transition: all 0.4s;
+    width: 320px; max-width: 90vw; padding: 1rem 1.4rem; border-radius: 50px;
+    border: 1px solid var(--input-border); background: var(--input-bg); backdrop-filter: blur(15px);
+    color: white; font-size: 1rem; text-align: center; transition: all 0.4s;
     box-shadow: 0 0 20px rgba(195,246,12,0.3);
   }
   .form-group input:focus {
-    outline: none;
-    border-color: var(--neon);
-    box-shadow: 0 0 35px var(--glow);
-    transform: scale(1.03);
+    outline: none; border-color: var(--neon); box-shadow: 0 0 35px var(--glow); transform: scale(1.03);
   }
 
-  .gender-select {
-    display: flex;
-    justify-content: center;
-    gap: 30px;
-    margin: 1.5rem 0;
+  .warning-text {
+    position: absolute;
+    left: 50%; transform: translateX(-50%);
+    font-size: 0.8rem; color: #ff6b6b; margin-top: 4px;
+    width: 320px; max-width: 90vw; text-align: center;
+    opacity: 0; transition: opacity 0.3s;
   }
+  .warning-text.show { opacity: 1; }
+
+  .gender-select { display: flex; justify-content: center; gap: 30px; margin: 1.5rem 0; }
   .gender-select button {
-    width: 70px; height: 70px;
-    border-radius: 50%;
-    border: 2px solid var(--neon);
-    background: rgba(195,246,12,0.15);
-    color: #fff;
-    font-size: 1.8rem;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.4s;
-    box-shadow: 0 0 20px var(--glow);
+    width: 70px; height: 70px; border-radius: 50%; border: 2px solid var(--neon);
+    background: rgba(195,246,12,0.15); color: #fff; font-size: 1.8rem; font-weight: bold;
+    cursor: pointer; transition: all 0.4s; box-shadow: 0 0 20px var(--glow);
   }
   .gender-select button:hover,
   .gender-select button.selected {
-    background: var(--neon);
-    color: #000;
-    transform: scale(1.15);
-    box-shadow: 0 0 45px var(--neon);
+    background: var(--neon); color: #000; transform: scale(1.15); box-shadow: 0 0 45px var(--neon);
   }
 
   #dob {
-    width: 220px;
-    padding: 1rem;
-    border-radius: 50px;
-    border: 1px solid var(--input-border);
-    background: var(--input-bg);
-    backdrop-filter: blur(15px);
-    color: white;
-    text-align: center;
+    width: 220px; padding: 1rem; border-radius: 50px; border: 1px solid var(--input-border);
+    background: var(--input-bg); backdrop-filter: blur(15px); color: white; text-align: center;
     box-shadow: 0 0 20px rgba(195,246,12,0.3);
   }
 
-/* === VIP TOGGLE – NOW FULLY GREEN & WORKS WITH YOUR OLD JS === */
-#vipLabel {
-  text-align: center;
-  font-weight: 600;
-  font-size: 1rem;
-  margin: 1.3rem 0 0.4rem;
-  color: #ccc;
-}
+  #vipLabel { text-align: center; font-weight: 600; font-size: 1rem; margin: 1.3rem 0 0.4rem; color: #ccc; }
+  #vipLabel.on { color: #c3f60c; text-shadow: 0 0 15px #c3f60c; }
 
-#vipLabel.on { 
-  color: #c3f60c; 
-  text-shadow: 0 0 15px #c3f60c; 
-}
-
-.vip-toggle {
-  width: 84px; 
-  height: 40px;
-  background: #333;
-  border-radius: 50px;
-  position: relative;
-  margin: 0 auto;
-  cursor: pointer;
-  border: 2px solid rgba(195,246,12,0.4);
-}
-
-.vip-circle {
-  width: 36px; 
-  height: 36px;
-  background: #666;
-  border-radius: 50%;
-  position: absolute;
-  left: 2px; 
-  top: 2px;
-  transition: 0.4s;
-}
-
-.vip-toggle.on .vip-circle {
-  left: 44px;
-  background: #c3f60c;
-  box-shadow: 0 0 20px #c3f60c;
-}
-
-#vipMessage {
-  text-align: center;
-  color: #c3f60c;
-  font-size: 0.88rem;
-  opacity: 0;
-  margin-top: 0.6rem;
-  font-weight: 600;
-  transition: opacity 0.4s;
-}
-
-#vipMessage.show {
-  opacity: 1;
-}
-
-  #submitBtn {
-    margin: 2.5rem auto;
-    padding: 1.1rem 3rem;
-    border: none;
-    border-radius: 50px;
-    background: linear-gradient(135deg, var(--neon), var(--neon-dark));
-    color: #000;
-    font-size: 1.3rem;
-    font-weight: 900;
-    letter-spacing: 2px;
-    cursor: pointer;
-    box-shadow: 0 10px 40px var(--glow);
-    transition: all 0.4s;
+  .vip-toggle {
+    width: 84px; height: 40px; background: #333; border-radius: 50px; position: relative;
+    margin: 0 auto; cursor: pointer; border: 2px solid rgba(195,246,12,0.4);
   }
-  #submitBtn:hover {
-    transform: translateY(-5px) scale(1.05);
-    box-shadow: 0 20px 50px var(--glow);
+  .vip-circle {
+    width: 36px; height: 36px; background: #666; border-radius: 50%;
+    position: absolute; left: 2px; top: 2px; transition: 0.4s;
+  }
+  .vip-toggle.on .vip-circle {
+    left: 44px; background: #c3f60c; box-shadow: 0 0 20px #c3f60c;
+  }
+
+  #vipMessage {
+    text-align: center; color: #c3f60c; font-size: 0.88rem; margin-top: 0.6rem;
+    font-weight: 600; opacity: 0; transition: opacity 0.4s;
+  }
+  #vipMessage.show { opacity: 1; }
+
+  #submitBtn, #vipAccessBtn {
+    margin: 2.5rem auto; padding: 1.1rem 3rem; border: none; border-radius: 50px;
+    font-size: 1.3rem; font-weight: 900; letter-spacing: 2px; cursor: pointer;
+    box-shadow: 0 10px 40px var(--glow); transition: all 0.4s; display: block;
+  }
+  #submitBtn {
+    background: linear-gradient(135deg, var(--neon), var(--neon-dark)); color: #000;
+  }
+  #vipAccessBtn {
+    background: var(--gold-gradient); color: #000; display: none;
+  }
+  #submitBtn:hover, #vipAccessBtn:hover {
+    transform: translateY(-5px) scale(1.05); box-shadow: 0 20px 50px var(--glow);
   }
 
   #fomoPopup {
-    position: fixed;
-    top: 100px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(10,25,0,0.9);
-    color: #e0ff80;
-    padding: 1.2rem 2.5rem;
-    border: 1px solid var(--neon);
-    border-radius: 50px;
-    font-size: 1.3rem;
-    font-weight: 700;
-    text-shadow: 0 0 20px var(--neon);
-    box-shadow: 0 0 40px var(--glow);
-    backdrop-filter: blur(15px);
-    z-index: 9999;
-    opacity: 0;
-    transition: all 0.6s;
+    position: fixed; top: 100px; left: 50%; transform: translateX(-50%);
+    background: rgba(10,25,0,0.9); color: #e0ff80; padding: 1.2rem 2.5rem;
+    border: 1px solid var(--neon); border-radius: 50px; font-size: 1.3rem; font-weight: 700;
+    text-shadow: 0 0 20px var(--neon); box-shadow: 0 0 40px var(--glow); backdrop-filter: blur(15px);
+    z-index: 9999; opacity: 0; transition: all 0.6s;
   }
-  #fomoPopup.show {
-    opacity: 1;
-    transform: translateX(-50%) translateY(-10px);
-  }
+  #fomoPopup.show { opacity: 1; transform: translateX(-50%) translateY(-10px); }
 
-  footer {
-    margin-top: 4rem;
-    font-size: 0.8rem;
-    color: #c3f60c;
-    text-align: center;
-    opacity: 0.85;
-  }
+  footer { margin-top: 4rem; font-size: 0.8rem; color: #c3f60c; text-align: center; opacity: 0.85; }
 </style>
 </head>
 <body>
@@ -285,33 +158,34 @@
 
   <div id="fomoPopup">Someone just unlocked VIP… you next?</div>
 
-<div style="margin: 2rem 0 2.8rem; text-align: center; width: 100%;">
-  <img src="https://cdn.shopify.com/s/files/1/0962/6648/6067/files/HABA_HOUSE.png?v=1765412962"
-       alt="CUBE"
-       style="
-         height: 300px;           /* ← change this number to make it bigger/smaller */
-         width: auto;
-         max-width: 96vw;
-         object-fit: contain;
-         filter: drop-shadow(0 0 45px #c3f60c)
-                 drop-shadow(0 0 90px rgba(195,246,12,0.7));
-         animation: logoPulse 4s infinite alternate;
-       ">
-</div>
+  <div style="margin: 2rem 0 2.8rem; text-align: center; width: 100%;">
+    <img src="https://cdn.shopify.com/s/files/1/0962/6648/6067/files/HABA_HOUSE.png?v=1765412962"
+         alt="CUBE" style="height: 300px; width: auto; max-width: 96vw; object-fit: contain;
+         filter: drop-shadow(0 0 45px #c3f60c) drop-shadow(0 0 90px rgba(195,246,12,0.7));
+         animation: logoPulse 4s infinite alternate;">
+  </div>
 
-<style>
-  @keyframes logoPulse {
-    0%   { filter: drop-shadow(0 0 45px #c3f60c) drop-shadow(0 0 90px rgba(195,246,12,0.7)); }
-    100% { filter: drop-shadow(0 0 60px #c3f60c) drop-shadow(0 0 120px rgba(195,246,12,1)); }
-  }
-</style>
-
+  <style>
+    @keyframes logoPulse {
+      0%   { filter: drop-shadow(0 0 0 45px #c3f60c) drop-shadow(0 0 90px rgba(195,246,12,0.7)); }
+      100% { filter: drop-shadow(0 0 60px #c3f60c) drop-shadow(0 0 120px rgba(195,246,12,1)); }
+    }
+  </style>
 
   <div class="form-group"><input type="text" placeholder="Full Name" id="name"></div>
   <div class="form-group"><input type="text" placeholder="Choose Username" id="chatId"></div>
   <div class="form-group"><input type="tel" placeholder="Phone Number" id="phone"></div>
   <div class="form-group"><input type="email" placeholder="Email Address" id="email"></div>
-  <div class="form-group"><input type="password" placeholder="Create Password (min 8 chars)" id="password"></div>
+  
+  <div class="form-group">
+    <input type="password" placeholder="Create Password (min 8 chars)" id="password">
+    <div class="warning-text" id="passWarning"></div>
+  </div>
+  
+  <div class="form-group">
+    <input type="password" placeholder="Confirm Password" id="confirmPassword">
+    <div class="warning-text" id="confirmWarning"></div>
+  </div>
 
   <div class="gender-label" style="text-align:center;margin:1.5rem 0;color:#e0ff80;">Select Your Gender</div>
   <div class="gender-select">
@@ -322,36 +196,35 @@
   <div class="dob-label" style="text-align:center;color:#e0ff80;margin:1rem 0;">Select Your Birth Date</div>
   <input type="date" id="dob" max="">
 
-<div id="vipLabel">VIP</div>
-<div class="vip-toggle" id="vipToggle"><div class="vip-circle"></div></div>
-<div id="vipMessage">You're in VIP zone, way to go!</div>
+  <div id="vipLabel">VIP</div>
+  <div class="vip-toggle" id="vipToggle"><div class="vip-circle"></div></div>
+  <div id="vipMessage">You're in VIP zone, way to go!</div>
 
-<button id="submitBtn">
-  <span class="btn-text">Sign Up</span>
-  <span class="spinner" id="spinner"></span>
-</button>
+  <button id="submitBtn">
+    <span class="btn-text">Sign Up</span>
+  </button>
 
-<div class="message" id="message"></div>
-  <footer>
-    © 2025 CUBE — 18+ • Unlock Your Edge
-  </footer>
-</body>
-</html>
+  <button id="vipAccessBtn">VIP Access</button>
+
+  <div class="message" id="message"></div>
+
+  <footer>© 2025 CUBE — 18+ • Unlock Your Edge</footer>
+
+<script src="https://js.paystack.co/v2/inline.js"></script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, where, getDocs, query, arrayUnion, serverTimestamp, increment } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
- const firebaseConfig = {
-      apiKey: "AIzaSyD_GjkTox5tum9o4AupO0LeWzjTocJg8RI",
-      authDomain: "dettyverse.firebaseapp.com",
-      projectId: "dettyverse",
-      storageBucket: "dettyverse.firebasestorage.app",
-      messagingSenderId: "1036459652488",
-      appId: "1:1036459652488:web:e8910172ed16e9cac9b63d",
-      measurementId: "G-NX2KWZW85V"
-    };
-  
+const firebaseConfig = {
+  apiKey: "AIzaSyD_GjkTox5tum9o4AupO0LeWzjTocJg8RI",
+  authDomain: "dettyverse.firebaseapp.com",
+  projectId: "dettyverse",
+  storageBucket: "dettyverse.firebasestorage.app",
+  messagingSenderId: "1036459652488",
+  appId: "1:1036459652488:web:e8910172ed16e9cac9b63d",
+  measurementId: "G-NX2KWZW85V"
+};
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
@@ -361,30 +234,23 @@ document.addEventListener('DOMContentLoaded', () => {
   let isVIP = false;
   let gender = '';
 
-  // DOM
   const vipToggle = document.getElementById('vipToggle');
   const femaleBtn = document.getElementById('femaleBtn');
   const maleBtn = document.getElementById('maleBtn');
   const submitBtn = document.getElementById('submitBtn');
-  const spinner = document.getElementById('spinner');
-  const btnText = submitBtn.querySelector('.btn-text');
+  const vipAccessBtn = document.getElementById('vipAccessBtn');
   const messageEl = document.getElementById('message');
-  const nameInput = document.getElementById('name');
-  const chatIdInput = document.getElementById('chatId');
-  const phoneInput = document.getElementById('phone');
-  const emailInput = document.getElementById('email');
-  const dobInput = document.getElementById('dob');
-  const passwordInput = document.getElementById('password');
+  const passInput = document.getElementById('password');
+  const confirmInput = document.getElementById('confirmPassword');
+  const passWarning = document.getElementById('passWarning');
+  const confirmWarning = document.getElementById('confirmWarning');
+  const vipMessage = document.getElementById('vipMessage');
 
-  // GET AND CLEAN REFERRAL CODE
   const urlParams = new URLSearchParams(window.location.search);
   let rawRef = urlParams.get('ref') || '';
   rawRef = rawRef.trim();
-
-  // Normalize: remove @, case-insensitive
   let cleanRef = rawRef.replace(/^@+/i, '').trim().toLowerCase();
 
-  // Utility
   const sanitizeKey = email => email.trim().toLowerCase().replace(/[@.]/g, '_').replace(/[,\\/*[\]]/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '');
   const cleanChatId = input => input.toLowerCase().replace(/[^a-z0-9_]/g, '');
 
@@ -400,225 +266,166 @@ document.addEventListener('DOMContentLoaded', () => {
     return !(await getDocs(q)).empty;
   };
 
-  // MAIN FIX: Find inviter by username OR email → return REAL docId
   async function getInviterDocId(ref) {
     if (!ref) return null;
-
-    // 1. Try as email
     if (ref.includes('@')) {
       const docId = sanitizeKey(ref);
       const snap = await getDoc(doc(db, "users", docId));
       if (snap.exists()) return docId;
     }
-
-    // 2. Try as username (most common case)
     const q = query(collection(db, "users"), where("chatIdLower", "==", ref));
     const snapshot = await getDocs(q);
-    if (!snapshot.empty) {
-      return snapshot.docs[0].id;
-    }
-
+    if (!snapshot.empty) return snapshot.docs[0].id;
     return null;
   }
 
-  // Confetti (unchanged)
-  function triggerSprayConfetti() {
-    // ... your existing confetti code ...
-  }
+  // Password validation
+  const validatePassword = () => {
+    const pwd = passInput.value;
+    let msg = '';
+    if (pwd.length < 8) msg = 'Password must be at least 8 characters';
+    else if (!/(?=.*[a-z])/.test(pwd)) msg = 'Need at least one lowercase letter';
+    else if (!/(?=.*[A-Z])/.test(pwd)) msg = 'Need at least one uppercase letter';
+    else if (!/(?=.*\d)/.test(pwd)) msg = 'Need at least one number';
+    else if (!/(?=.*[@$!%*?&#^])/.test(pwd)) msg = 'Need at least one special char';
+    passWarning.textContent = msg;
+    passWarning.classList.toggle('show', !!msg);
+    return !msg;
+  };
 
-  // UI
-  phoneInput.addEventListener('input', () => phoneInput.value = phoneInput.value.replace(/\D/g, ''));
+  const validateConfirm = () => {
+    const match = passInput.value === confirmInput.value && passInput.value !== '';
+    confirmWarning.textContent = match ? '' : 'Passwords do not match';
+    confirmWarning.classList.toggle('show', !match && confirmInput.value !== '');
+    return match;
+  };
+
+  passInput.addEventListener('input', validatePassword);
+  confirmInput.addEventListener('input', () => { validatePassword(); validateConfirm(); });
+
+  // UI Toggles
   femaleBtn.onclick = () => { gender = 'Female'; femaleBtn.classList.add('selected'); maleBtn.classList.remove('selected'); };
   maleBtn.onclick = () => { gender = 'Male'; maleBtn.classList.add('selected'); femaleBtn.classList.remove('selected'); };
+
   vipToggle.onclick = () => {
     isVIP = !isVIP;
     vipToggle.classList.toggle('on', isVIP);
     document.getElementById('vipLabel').classList.toggle('on', isVIP);
-    document.getElementById('vipMessage').style.opacity = isVIP ? '1' : '0';
-    if (isVIP) triggerSprayConfetti();
+    vipMessage.classList.toggle('show', isVIP);
+    if (isVIP) triggerSprayConfetti?.();
   };
 
-submitBtn.onclick = async () => {
-  const fullName = nameInput.value.trim();
-  const chatId = cleanChatId(chatIdInput.value.trim());
-  const phone = phoneInput.value.trim();
-  const email = emailInput.value.trim().toLowerCase();
-  const dob = dobInput.value;
-  const password = passwordInput.value.trim();
+  submitBtn.onclick = async () => {
+    const fullName = document.getElementById('name').value.trim();
+    const chatId = cleanChatId(document.getElementById('chatId').value.trim());
+    const phone = document.getElementById('phone').value.trim();
+    const email = document.getElementById('email').value.trim().toLowerCase();
+    const dob = document.getElementById('dob').value;
+    const password = passInput.value;
 
-  if (!fullName || !chatId || !phone || !email || !gender || !dob || !password) {
-    messageEl.textContent = 'Fill all fields';
-    return;
-  }
-  if (chatId.length < 5 || chatId.length > 15) {
-    messageEl.textContent = 'Username 5–15 characters';
-    return;
-  }
-  if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#^])/.test(password)) {
-    messageEl.textContent = 'Password too weak';
-    return;
-  }
-  if (calculateAge(dob) < 18) {
-    messageEl.textContent = 'Must be 18+';
-    return;
-  }
-  if (!/@(gmail|yahoo|icloud|proton)\.(com|me)$/.test(email)) {
-    messageEl.textContent = 'Invalid email';
-    return;
-  }
-
-  submitBtn.classList.add('loading');
-  messageEl.textContent = 'Creating your empire...';
-
-  const docId = sanitizeKey(email);
-  const userRef = doc(db, "users", docId);
-
-  try {
-    // Check duplicates
-    const [docSnap, chatTaken] = await Promise.all([
-      getDoc(userRef),
-      isChatIdTaken(chatId)
-    ]);
-    if (docSnap.exists() || chatTaken) {
-      throw new Error("exists");
+    if (!fullName || !chatId || !phone || !email || !gender || !dob || !password) {
+      messageEl.textContent = 'Fill all fields'; return;
     }
+    if (!validatePassword() || !validateConfirm()) return;
+    if (chatId.length < 5 || chatId.length > 15) { messageEl.textContent = 'Username 5–15 chars'; return; }
+    if (calculateAge(dob) < 18) { messageEl.textContent = 'Must be 18+'; return; }
+    if (!/@(gmail|yahoo|icloud|proton)\.(com|me)$/.test(email)) { messageEl.textContent = 'Invalid email domain'; return; }
 
-    // Create Auth user
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    submitBtn.disabled = true;
+    messageEl.textContent = 'Creating your empire...';
 
-   // Resolve inviter + hiveName (HOSTS ONLY!)
-let inviterDocId = null;
-let hiveName = '';  // ← Default blank for VIPs
+    const docId = sanitizeKey(email);
+    const userRef = doc(db, "users", docId);
 
-if (cleanRef) {
-  inviterDocId = await getInviterDocId(cleanRef);
-  if (inviterDocId) {
-    const invSnap = await getDoc(doc(db, 'users', inviterDocId));
-    if (invSnap.exists()) {
-      const inviterData = invSnap.data();
-
-      // ONLY assign hiveName if:
-      // 1. New user is NOT VIP
-      // 2. Inviter is a Host and has a hiveName
-      if (!isVIP && inviterData.isHost && inviterData.hiveName) {
-        hiveName = inviterData.hiveName;
-      }
-      // Otherwise → stays blank ('')
-    }
-  }
-}
-    // Country
-    let country = 'Unknown';
     try {
-      const res = await fetch('https://ipapi.co/json/');
-      const data = await res.json();
-      country = data.country_name || 'Unknown';
-    } catch (e) {}
+      const [docSnap, chatTaken] = await Promise.all([getDoc(userRef), isChatIdTaken(chatId)]);
+      if (docSnap.exists() || chatTaken) throw new Error("exists");
 
-    // FULL USER DATA — ALL FIELDS RESTORED
-    const userData = {
-      uid: userCredential.user.uid,
-      fullName,
-      chatId,
-      chatIdLower: chatId,
-      email,
-      phone,
-      dob,
-      age: calculateAge(dob),
-      gender,
-      country,
-      city: "",
-      location: "",
-      bankName: "",
-      bankAccountNumber: "",
-      instagram: "",
-      tiktok: "",
-      whatsapp: "",
-      telegram: "",
-      bioPick: "",
-      naturePick: "",
-      fruitPick: "",
-      videoUrl: "",
-      popupPhoto: "",
-      isVIP: !!isVIP,
-      isHost: gender === 'Female' && !isVIP,
-      isTrending: false,
-      isAdmin: false,
-      featuredHosts: false,
-      invitedBy: inviterDocId,
-      referral: rawRef || null,
-      hiveName, // Your hive system
-      hostLink: (!isVIP && gender === 'Female')
-        ? `https://cube.xixi.com/signup?ref=${chatId}`
-        : null,
-      vipName: isVIP ? chatId : null,
-      socialShare: gender === 'Female' && !isVIP,
-      stars: 50,
-      starsToday: 0,
-      starsGifted: 0,
-      lastStarDate: new Date().toISOString().split("T")[0],
-      cash: 0,
-      points: 0,
-      gifts: 0,
-      views: 0,
-      inviteeGiftStars: 0,
-      inviteeGiftShown: false,
-      hostFriends: [],
-      usernameColor: '#' + Math.floor(Math.random() * 16777215).toString(16),
-      createdAt: serverTimestamp(),
-      lastUpdated: serverTimestamp()
-    };
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const uid = userCredential.user.uid;
 
-    await setDoc(userRef, userData);
+      let inviterDocId = cleanRef ? await getInviterDocId(cleanRef) : null;
+      let hiveName = '';
+      if (inviterDocId && !isVIP) {
+        const invSnap = await getDoc(doc(db, 'users', inviterDocId));
+        if (invSnap.exists() && invSnap.data().isHost && invSnap.data().hiveName) {
+          hiveName = invSnap.data().hiveName;
+        }
+      }
 
-// REWARD INVITER — 100% SAFE & WORKING (NO serverTimestamp() in arrayUnion)
-if (inviterDocId) {
-  const bonusStars = isVIP ? 100 : 50;
+      let country = 'Unknown';
+      try {
+        const res = await fetch('https://ipapi.co/json/');
+        const data = await res.json();
+        country = data.country_name || 'Unknown';
+      } catch(e) {}
 
-  await updateDoc(doc(db, "users", inviterDocId), {
-    // CLEAN ARRAY — NO serverTimestamp() inside!
-    hostFriends: arrayUnion({
-      chatId,
-      fullName,
-      email,
-      phone,
-      isVIP: !!isVIP,           // ← Keeps your old code working perfectly
-      isHost: !isVIP && gender === 'Female',
-      joinedAt: Date.now()      // ← Use client timestamp (safe)
-    }),
+      const userData = {
+        uid, fullName, chatId, chatIdLower: chatId, email, phone, dob,
+        age: calculateAge(dob), gender, country, isVIP, isHost: gender === 'Female' && !isVIP,
+        invitedBy: inviterDocId, referral: rawRef || null, hiveName,
+        hostLink: (!isVIP && gender === 'Female') ? `https://cube.xixi.com/signup?ref=${chatId}` : null,
+        vipName: isVIP ? chatId : null,
+        stars: 50, cash: 0, points: 0, createdAt: serverTimestamp(), lastUpdated: serverTimestamp()
+      };
 
-    // These are top-level → serverTimestamp() is allowed
-    hostFriendsLastUpdated: serverTimestamp(),
+      await setDoc(userRef, userData);
 
-    stars: increment(bonusStars),
+      if (inviterDocId) {
+        const bonus = isVIP ? 100 : 50;
+        await updateDoc(doc(db, "users", inviterDocId), {
+          hostFriends: arrayUnion({ chatId, fullName, email, phone, isVIP, isHost: !isVIP && gender === 'Female', joinedAt: Date.now() }),
+          stars: increment(bonus), referralCount: increment(1), vipCount: isVIP ? increment(1) : increment(0),
+          hostFriendsLastUpdated: serverTimestamp()
+        });
+      }
 
-    // Optional clean stats (safe to keep)
-    referralCount: increment(1),
-    vipCount: isVIP ? increment(1) : increment(0),
-    hostReferralCount: !isVIP ? increment(1) : increment(0)
-  }).catch(err => {
-    console.warn("Failed to update inviter:", err);
-  });
-}
+      messageEl.textContent = `Welcome ${fullName}! You got 50 stars`;
 
-    // SUCCESS — FULL REDIRECT
-    messageEl.textContent = `Welcome ${fullName}! Gifted 50 stars`;
-    localStorage.setItem("vipUser", JSON.stringify({ email, chatId }));
-    if (isVIP) triggerSprayConfetti();
+      // SUCCESS LOGIC
+      if (isVIP) {
+        // VIP → Show Paystack button, NO redirect
+        submitBtn.style.display = 'none';
+        vipAccessBtn.style.display = 'block';
+        triggerSprayConfetti?.();
+      } else if (gender === 'Female') {
+        // Host → redirect to host dashboard
+        setTimeout(() => window.location.href = 'https://your-host-dashboard.com', 2000);
+      } else {
+        // Normal user
+        setTimeout(() => window.location.href = 'shop.html', 1800);
+      }
 
-    setTimeout(() => {
-      window.location.href = "shop.html"; // Guaranteed redirect
-    }, 1800);
+    } catch (err) {
+      messageEl.textContent = err.message?.includes("exists") ? "Account already exists" : "Signup failed";
+    } finally {
+      submitBtn.disabled = false;
+    }
+  };
 
-  } catch (err) {
-    console.error(err);
-    messageEl.textContent = err.message?.includes("exists")
-      ? "Account already exists"
-      : "Signup failed — try again";
-  } finally {
-    submitBtn.classList.remove('loading');
-  }
-};
+  // PAYSTACK VIP PAYMENT
+  vipAccessBtn.onclick = () => {
+    const email = document.getElementById('email').value;
+    const chatId = cleanChatId(document.getElementById('chatId').value);
+
+    const handler = PaystackPop.setup({
+      key: 'pk_live_YOUR_PAYSTACK_PUBLIC_KEY_HERE', // CHANGE THIS
+      email: email,
+      amount: 500000, // 5000 NGN = 500000 kobo
+      currency: 'NGN',
+      ref: 'VIP_' + chatId + '_' + Date.now(),
+      metadata: { chatId, type: 'vip_access' },
+      callback: function(response) {
+        // Payment successful → update Firestore + redirect
+        const docId = sanitizeKey(email);
+        updateDoc(doc(db, "users", docId), { isVIP: true, vipPaid: true, vipPaidAt: serverTimestamp() });
+        alert('VIP Unlocked!');
+        window.location.href = 'https://cube.xixi.live/vip-zone'; // Your VIP page
+      },
+      onClose: function() { alert('Payment cancelled'); }
+    });
+    handler.openIframe();
+  };
 });
 </script>
 </body>

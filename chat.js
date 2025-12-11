@@ -107,6 +107,8 @@ const pRef = rtdbRef(rtdb, `presence/${ROOM_ID}/${safeUid}`);
   }
 }
 
+
+
 // SYNC UNLOCKED VIDEOS — 100% Secure & Reliable
 async function syncUserUnlocks() {
   if (!currentUser?.email) {
@@ -562,19 +564,66 @@ async function showGiftModal(targetUid, targetData) {
   });
 }
 
-// After user logs in:
-const messagesEl = document.getElementById('messages');
-messagesEl.classList.add('active'); // shows gray placeholder
 
-function revealChatAfterLogin() {
+
+// ==============================
+// CHAT.JS — CLEAN FULL VERSION
+// ==============================
+
+document.addEventListener('DOMContentLoaded', () => {
+
+  // Grab chat elements
   const chatContainer = document.getElementById('chatContainer');
   const messagesEl = document.getElementById('messages');
+  const sendArea = document.getElementById('sendArea');
+  if (!chatContainer || !messagesEl || !sendArea) return;
 
-  chatContainer.style.display = 'flex';  // show chat
-  messagesEl.classList.add('active');     // enable gray placeholder
-  updateMessagesPlaceholder();            // ensure placeholder logic runs
-}
+  // ------------------------------
+  // Helper: check if chat has real messages
+  // ------------------------------
+  function hasRealMessages() {
+    return !!messagesEl.querySelector('.msg');
+  }
 
+  // ------------------------------
+  // Update placeholder visibility
+  // ------------------------------
+  function updateMessagesPlaceholder() {
+    if (hasRealMessages()) {
+      messagesEl.classList.remove('show-placeholder');
+    } else if (messagesEl.classList.contains('active')) {
+      messagesEl.classList.add('show-placeholder');
+    } else {
+      // Startup page, do not show placeholder
+      messagesEl.classList.remove('show-placeholder');
+    }
+  }
+
+  // ------------------------------
+  // MutationObserver for live updates
+  // ------------------------------
+  const messagesObserver = new MutationObserver(updateMessagesPlaceholder);
+  messagesObserver.observe(messagesEl, { childList: true });
+
+  // ------------------------------
+  // Global function to reveal chat AFTER login
+  // ------------------------------
+  window.revealChatAfterLogin = function() {
+    chatContainer.style.display = 'flex';   // show chat container
+    sendArea.style.display = 'flex';        // show input area
+    messagesEl.classList.add('active');     // gray placeholder logic
+    updateMessagesPlaceholder();            // show/hide placeholder if empty
+  };
+
+  // ------------------------------
+  // Startup: everything hidden
+  // ------------------------------
+  chatContainer.style.display = 'none';
+  sendArea.style.display = 'none';
+  messagesEl.classList.remove('active');
+  updateMessagesPlaceholder();
+
+});
 
 /* ----------------------------
    REDEEM & TIP LINKS — ALWAYS VISIBLE AFTER LOGIN

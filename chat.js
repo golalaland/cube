@@ -4287,34 +4287,77 @@ function renderCards(videosToRender) {
     videoEl.preload = "metadata";
     videoEl.style.cssText = "width:100%;height:100%;object-fit:cover;";
 
-    if (isUnlocked) {
-      videoEl.src = video.previewClip || video.highlightVideo || video.videoUrl || "";
-      videoEl.load();
-      videoContainer.onmouseenter = () => videoEl.play().catch(() => {});
-      videoContainer.onmouseleave = () => { videoEl.pause(); videoEl.currentTime = 0; };
-    } else {
-      videoEl.src = "";
-      const lockedOverlay = document.createElement("div");
-      lockedOverlay.innerHTML = `
-        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(10,5,30,0.85);z-index:2;">
-          <div style="text-align:center;">
-            <svg width="80" height="80" viewBox="0 0 24 24" fill="none">
-              <path d="M12 2C9.2 2 7 4.2 7 7V11H6C4.9 11 4 11.9 4 13V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V13C20 11.9 19.1 11 18 11H17V7C17 4.2 14.8 2 12 2ZM12 4C13.7 4 15 5.3 15 7V11H9V7C9 5.3 10.3 4 12 4Z" fill="#ff00f2"/>
-            </svg>
-          </div>
-        </div>`;
-      videoContainer.appendChild(lockedOverlay);
-    }
+  if (isUnlocked) {
+  videoEl.src = video.previewClip || video.highlightVideo || video.videoUrl || "";
+  videoEl.load();
 
-    videoContainer.onclick = (e) => {
-      e.stopPropagation();
-      if (isUnlocked) {
-        playFullVideo(video);
-      } else {
-        showUnlockConfirm(video, () => renderCards(videos));
+  // Hover / preview play
+  videoContainer.onmouseenter = () => videoEl.play().catch(() => {});
+  videoContainer.onmouseleave = () => { 
+    videoEl.pause(); 
+    videoEl.currentTime = 0; 
+  };
+
+  // Fullscreen on tap (mobile) or double-click (desktop)
+  let lastTap = 0;
+  const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
+  videoContainer.onclick = (e) => {
+    e.stopPropagation();
+
+    if (isTouch) {
+      // Single tap → fullscreen
+      if (videoEl.requestFullscreen) {
+        videoEl.requestFullscreen();
+      } else if (videoEl.webkitRequestFullscreen) {
+        videoEl.webkitRequestFullscreen();
+      } else if (videoEl.msRequestFullscreen) {
+        videoEl.msRequestFullscreen();
       }
-    };
-    videoContainer.appendChild(videoEl);
+      videoEl.play().catch(() => {});
+    } else {
+      // Desktop: single click → modal, double click → fullscreen
+      const currentTime = new Date().getTime();
+      if (currentTime - lastTap < 300) {
+        // Double click → fullscreen
+        if (videoEl.requestFullscreen) {
+          videoEl.requestFullscreen();
+        } else if (videoEl.webkitRequestFullscreen) {
+          videoEl.webkitRequestFullscreen();
+        } else if (videoEl.msRequestFullscreen) {
+          videoEl.msRequestFullscreen();
+        }
+      } else {
+        // Single click → open modal / full video in page
+        playFullVideo(video);
+      }
+      lastTap = currentTime;
+    }
+  };
+
+} else {
+  // Locked video overlay
+  videoEl.src = "";
+  const lockedOverlay = document.createElement("div");
+  lockedOverlay.innerHTML = `
+    <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(10,5,30,0.85);z-index:2;">
+      <div style="text-align:center;">
+        <svg width="80" height="80" viewBox="0 0 24 24" fill="none">
+          <path d="M12 2C9.2 2 7 4.2 7 7V11H6C4.9 11 4 11.9 4 13V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V13C20 11.9 19.1 11 18 11H17V7C17 4.2 14.8 2 12 2ZM12 4C13.7 4 15 5.3 15 7V11H9V7C9 5.3 10.3 4 12 4Z" fill="#ff00f2"/>
+        </svg>
+      </div>
+    </div>`;
+  videoContainer.appendChild(lockedOverlay);
+
+  videoContainer.onclick = (e) => {
+    e.stopPropagation();
+    showUnlockConfirm(video, () => renderCards(videos));
+  };
+}
+
+// Append the video element last
+videoContainer.appendChild(videoEl);
+
 
     const infoPanel = document.createElement("div");
     infoPanel.style.cssText = "background: linear-gradient(180deg, #1a0b2e, #0f0519);padding:12px;display:flex;flex-direction:column;gap:6px;border-top: 1px solid #8a2be2;";

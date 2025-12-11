@@ -107,7 +107,6 @@ const pRef = rtdbRef(rtdb, `presence/${ROOM_ID}/${safeUid}`);
   }
 }
 
-
 // SYNC UNLOCKED VIDEOS — 100% Secure & Reliable
 async function syncUserUnlocks() {
   if (!currentUser?.email) {
@@ -459,69 +458,6 @@ window.sanitizeId = sanitizeId;
 window.getUserId = getUserId;  // ← RESTORED FOR OLD CODE
 window.formatNumberWithCommas = formatNumberWithCommas;
 
-// ==============================
-// CHAT.JS — COMPLETE REWRITE
-// ==============================
-
-document.addEventListener('DOMContentLoaded', () => {
-
-  // Grab chat elements
-  const chatContainer = document.getElementById('chatContainer');
-  const messagesEl = document.getElementById('messages');
-  if (!chatContainer || !messagesEl) return;
-
-  // ------------------------------
-  // Helper: check if chat has real messages
-  // ------------------------------
-  function hasRealMessages() {
-    return !!messagesEl.querySelector('.msg');
-  }
-
-  // ------------------------------
-  // Update placeholder visibility
-  // ------------------------------
-  function updateMessagesPlaceholder() {
-    if (hasRealMessages()) {
-      messagesEl.classList.remove('show-placeholder');
-    } else {
-      messagesEl.classList.add('show-placeholder');
-    }
-  }
-
-  // ------------------------------
-  // MutationObserver for live updates
-  // ------------------------------
-  const messagesObserver = new MutationObserver(updateMessagesPlaceholder);
-  messagesObserver.observe(messagesEl, { childList: true });
-
-  // ------------------------------
-  // Global function to reveal chat AFTER login
-  // ------------------------------
-  window.revealChatAfterLogin = function() {
-    // Show everything
-    chatContainer.style.display = 'flex'; // or 'block' depending on layout
-    updateMessagesPlaceholder();          // placeholder updates if empty
-  };
-
-  // ------------------------------
-  // Optional: hide everything at startup
-  // ------------------------------
-  chatContainer.style.display = 'none'; // ensures hidden on page load
-  updateMessagesPlaceholder();          // placeholder hidden initially
-
-  // ------------------------------
-  // Example: call after login
-  // Replace this with your actual login success handler
-  // ------------------------------
-  // auth.onAuthStateChanged(user => {
-  //   if (user) {
-  //     revealChatAfterLogin();
-  //   }
-  // });
-
-});
-
-
 /* ---------- User Colors ---------- */ 
 function setupUsersListener() { onSnapshot(collection(db, "users"), snap => { refs.userColors = refs.userColors || {}; snap.forEach(docSnap => { refs.userColors[docSnap.id] = docSnap.data()?.usernameColor || "#ffffff"; }); if (lastMessagesArray.length) renderMessagesFromArray(lastMessagesArray); }); } setupUsersListener();
   
@@ -625,6 +561,20 @@ async function showGiftModal(targetUid, targetData) {
     }
   });
 }
+
+// After user logs in:
+const messagesEl = document.getElementById('messages');
+messagesEl.classList.add('active'); // shows gray placeholder
+
+function revealChatAfterLogin() {
+  const chatContainer = document.getElementById('chatContainer');
+  const messagesEl = document.getElementById('messages');
+
+  chatContainer.style.display = 'flex';  // show chat
+  messagesEl.classList.add('active');     // enable gray placeholder
+  updateMessagesPlaceholder();            // ensure placeholder logic runs
+}
+
 
 /* ----------------------------
    REDEEM & TIP LINKS — ALWAYS VISIBLE AFTER LOGIN
@@ -4739,5 +4689,3 @@ function showDeleteConfirm(id, title) {
   // Close when clicking outside
   modal.onclick = (e) => e.target === modal && modal.remove();
 }
-// Call this AFTER login succeeds
-revealChatAfterLogin();

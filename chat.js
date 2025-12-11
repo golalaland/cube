@@ -389,9 +389,6 @@ onAuthStateChanged(auth, async (firebaseUser) => {
   }
 });
 
-document.getElementById("messages").classList.add("active");
-
-
 // NOTIFICATIONS LISTENER
 function setupNotificationsListener(userId) {
   if (!userId) return;

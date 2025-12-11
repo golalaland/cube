@@ -8,14 +8,20 @@
 <title>Xixi</title>
 <link rel="icon" href="data:," />
 <style>
-:root{
-  --bg:#000;
-  --card:#111;
-  --muted:#aaa;
-  --accent:#39FF14;   /* neon-green */
-  --glass: rgba(255,255,255,0.03);
-  --pulse-color: #39FF14; 
-  --buzz-color: #0FF;     
+:root {
+  --bg:           #000;                                    /* pure black */
+  --card:         #0a1400;                                 /* deep black-green tint */
+  --muted:        #88a066;                                 /* desaturated lime for subtle text */
+  --accent:       #c3f60c;     /* YOUR EXACT CUBE NEON GREEN */
+  --glass:        rgba(195, 246, 12, 0.06);                 /* barely-there green glass */
+  --pulse-color:  #c3f60c;     /* main pulse/glow */
+  --buzz-color:   #e0ff4a;     /* slightly lighter green for extra highlights (optional) */
+  
+  /* Easy glow control – use anywhere */
+  --glow-1:       rgba(195, 246, 12, 0.15);
+  --glow-2:       rgba(195, 246, 12, 0.35);
+  --glow-3:       rgba(195, 246, 12, 0.65);
+  --glow-max:     rgba(195, 246, 12, 1);
 }
 #videoWrapper .nav-buttons {
   display: flex;
@@ -2442,6 +2448,6 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
 
 <!-- Gift Alert -->
 <div id="giftAlert" class="gift-alert"></div>
-<script type="module" src="tcr.js"></script>
+<script type="module" src="chat.js"></script>
 </body>
 </html>

@@ -1845,6 +1845,23 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
   object-fit: contain;
   margin: 4px 0 0 0;
 }
+#startupFooter {
+  text-align: center;
+  padding: 12px 0;
+  color: rgba(255, 255, 255, 0.6);
+  background: #111;
+  font-size: 14px;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  z-index: 50;
+  transition: opacity 0.3s ease;
+}
+#startupFooter.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
 </style>
 </head>
 <body>
@@ -2461,6 +2478,11 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
 
 <!-- Gift Alert -->
 <div id="giftAlert" class="gift-alert"></div>
+
+  <footer id="startupFooter">
+  <p>Powered by HabaHouse • 2025</p>
+</footer>
+
 <script type="module" src="chat.js"></script>
 </body>
 </html>

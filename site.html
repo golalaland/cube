@@ -111,16 +111,16 @@ Usage: open this file in a browser, click "Choose images" or drop files onto the
   </div>
 
   <main class="scroller" id="scroller">
-    <div class="empty" id="emptyState">
-      <div>
-        <h1>Portrait Background Scroller</h1>
-        <p>Drop or choose portrait images and each will become a full-screen backdrop you scroll through.</p>
-        <div style="margin-top:12px">
-          <label class="btn" for="fileInput">Upload images</label>
-        </div>
-      </div>
-    </div>
-  </main>
+  <!-- Instead of dynamic uploads, we hard-code repeated background panels using the image NNAMDI provided -->
+
+  <section class="panel" style="background-image:url('https://cdn.shopify.com/s/files/1/0962/6648/6067/files/Beige_Minimal_Romantic_Love_Questions_Card_Game_Document_1080_x_1920_px.svg?v=1765496716')"></section>
+
+  <section class="panel" style="background-image:url('https://cdn.shopify.com/s/files/1/0962/6648/6067/files/Beige_Minimal_Romantic_Love_Questions_Card_Game_Document_1080_x_1920_px.svg?v=1765496716')"></section>
+
+  <section class="panel" style="background-image:url('https://cdn.shopify.com/s/files/1/0962/6648/6067/files/Beige_Minimal_Romantic_Love_Questions_Card_Game_Document_1080_x_1920_px.svg?v=1765496716')"></section>
+
+  <!-- Add more if needed later -->
+</main>
 
   <div class="drop-hint" id="dropHint">Drop images anywhere to add them</div>
 
@@ -250,9 +250,9 @@ Usage: open this file in a browser, click "Choose images" or drop files onto the
     addDemoBtn.addEventListener('click', ()=>{
       // demo images — small, data-URLs or placeholder links (external ones will still work)
       const demo = [
-        'https://cdn.shopify.com/s/files/1/0962/6648/6067/files/Beige_Minimal_Romantic_Love_Questions_Card_Game_Document_1080_x_1920_px.svg?v=1765496716',
-        'https://cdn.shopify.com/s/files/1/0962/6648/6067/files/Beige_Minimal_Romantic_Love_Questions_Card_Game_Document_1080_x_1920_px.svg?v=1765496716',
-        'https://cdn.shopify.com/s/files/1/0962/6648/6067/files/Beige_Minimal_Romantic_Love_Questions_Card_Game_Document_1080_x_1920_px.svg?v=1765496716'
+        'https://images.unsplash.com/photo-1503023345310-bd7c1de61c7d?w=1200',
+        'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=1200',
+        'https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=1200'
       ];
       demo.forEach(u=>panels.push({id:'d-'+Math.random().toString(36).slice(2,9), url:u, name:'Demo image'}));
       render();

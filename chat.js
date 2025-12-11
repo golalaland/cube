@@ -4678,19 +4678,7 @@ function showDeleteConfirm(id, title) {
 const messagesEl = document.getElementById('messages');
 
 function hasRealMessages(container) {
-  // ignore the placeholder node itself
-  for (const node of container.childNodes) {
-    if (node.nodeType === Node.ELEMENT_NODE) {
-      if (node.classList && node.classList.contains('messages-placeholder')) continue;
-      // any other element node counts as a real message
-      return true;
-    }
-    if (node.nodeType === Node.TEXT_NODE && node.textContent.trim() !== '') {
-      // stray text counts as a message (usually you don't have this)
-      return true;
-    }
-  }
-  return false;
+  return !!container.querySelector('.msg');   // simplified & bulletproof
 }
 
 function updateMessagesPlaceholder() {
@@ -4702,19 +4690,13 @@ function updateMessagesPlaceholder() {
   }
 }
 
-/* Observe mutations so it updates automatically when messages are added/removed */
-const observer = new MutationObserver(() => {
+/* NEW UNIQUE NAME — avoids conflicts */
+const messagesObserver = new MutationObserver(() => {
   updateMessagesPlaceholder();
 });
 
-/* watch for child additions/removals and text changes */
-observer.observe(messagesEl, { childList: true, subtree: false, characterData: true });
+/* Watch only direct children (messages added/removed) */
+messagesObserver.observe(messagesEl, { childList: true });
 
-/* run on load */
+/* Run on load */
 document.addEventListener('DOMContentLoaded', updateMessagesPlaceholder);
-
-/* ALSO call updateMessagesPlaceholder() after:
-   - you load messages from the server
-   - user logs in (if you show/hide chat UI)
-   - you append or remove a message manually
-*/

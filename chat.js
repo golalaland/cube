@@ -458,6 +458,33 @@ window.sanitizeId = sanitizeId;
 window.getUserId = getUserId;  // ← RESTORED FOR OLD CODE
 window.formatNumberWithCommas = formatNumberWithCommas;
 
+// ← MESSEGES CONTAINER
+const messagesEl = document.getElementById('messages');
+
+function hasRealMessages(container) {
+  return !!container.querySelector('.msg');   // simplified & bulletproof
+}
+
+function updateMessagesPlaceholder() {
+  if (!messagesEl) return;
+  if (hasRealMessages(messagesEl)) {
+    messagesEl.classList.remove('show-placeholder');
+  } else {
+    messagesEl.classList.add('show-placeholder');
+  }
+}
+
+/* NEW UNIQUE NAME — avoids conflicts */
+const messagesObserver = new MutationObserver(() => {
+  updateMessagesPlaceholder();
+});
+
+/* Watch only direct children (messages added/removed) */
+messagesObserver.observe(messagesEl, { childList: true });
+
+/* Run on load */
+document.addEventListener('DOMContentLoaded', updateMessagesPlaceholder);
+
 /* ---------- User Colors ---------- */ 
 function setupUsersListener() { onSnapshot(collection(db, "users"), snap => { refs.userColors = refs.userColors || {}; snap.forEach(docSnap => { refs.userColors[docSnap.id] = docSnap.data()?.usernameColor || "#ffffff"; }); if (lastMessagesArray.length) renderMessagesFromArray(lastMessagesArray); }); } setupUsersListener();
   
@@ -4677,28 +4704,3 @@ function showDeleteConfirm(id, title) {
   // Close when clicking outside
   modal.onclick = (e) => e.target === modal && modal.remove();
 }
-const messagesEl = document.getElementById('messages');
-
-function hasRealMessages(container) {
-  return !!container.querySelector('.msg');   // simplified & bulletproof
-}
-
-function updateMessagesPlaceholder() {
-  if (!messagesEl) return;
-  if (hasRealMessages(messagesEl)) {
-    messagesEl.classList.remove('show-placeholder');
-  } else {
-    messagesEl.classList.add('show-placeholder');
-  }
-}
-
-/* NEW UNIQUE NAME — avoids conflicts */
-const messagesObserver = new MutationObserver(() => {
-  updateMessagesPlaceholder();
-});
-
-/* Watch only direct children (messages added/removed) */
-messagesObserver.observe(messagesEl, { childList: true });
-
-/* Run on load */
-document.addEventListener('DOMContentLoaded', updateMessagesPlaceholder);

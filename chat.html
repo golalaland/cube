@@ -1856,6 +1856,15 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
   object-fit: contain;
   margin: 4px 0 0 0;
 }
+<div id="chatContainer" style="display:none;">
+    <div id="messages">
+        <div class="messages-placeholder">
+            No one’s messaged yet — be the first!
+        </div>
+    </div>
+    <!-- your input box, send button, etc -->
+</div>
+
 </style>
 </head>
 <body>
@@ -1887,8 +1896,7 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
 <!-- Hello text -->
    <div id="helloText" aria-live="polite">HELLO</div>
       <div class="room-desc">Chat. Own your vibe.
-        
-<div id="roomSubtitle" class="room-subtitle">Log in to Chat & Start collecting $STRZ</div>
+      
 <!-- Controls under the video -->
 <div id="videoUnderControls">
     <div id="onlineWrapper" style="display:flex; justify-content:center; align-items:center; gap:4px; font-family:sans-serif; font-weight:500; font-size:14px;">
@@ -1978,15 +1986,15 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
   </div>
 </div>
 
-<div id="messages">
-  <div class="messages-placeholder" aria-hidden="true">
-    No one’s messaged yet — be the first!
-  </div>
-
-  <!-- real message items will be appended here, e.g.
-  <div class="msg"><span class="meta">Alice</span> <span class="content">Hey</span></div>
-  -->
+<div id="chatContainer" style="display:none;">
+    <div id="messages">
+        <div class="messages-placeholder">
+            No one’s messaged yet — be the first!
+        </div>
+    </div>
+    <!-- your input box, send button, etc -->
 </div>
+
 
 
 

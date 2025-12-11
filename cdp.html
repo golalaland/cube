@@ -149,12 +149,26 @@
 }
 .mobile-br { display:none; }
 @media (max-width: 420px) { .mobile-br { display:block; } }
+.sip-logo {
+  display: block;
+  margin: 0 auto 12px auto; /* center and add spacing below */
+  max-width: 180px;          /* adjust size as needed */
+  height: auto;
+}
 
   </style>
 </head>
 <body>
-  <div class="container">
+ <div class="container">
+    <!-- Logo above SIP PICKER -->
+    <img src="https://cdn.shopify.com/s/files/1/0962/6648/6067/files/HABA_HOUSE.png?v=1765412962" 
+         alt="HabaHouse Logo" 
+         class="sip-logo">
+
     <div class="title">SIP PICKER</div>
+    <div class="welcome" id="welcomeMsg">
+      Welcome <span id="username">Guest</span>, you're on <span id="hostName">no one</span>'s VIP!
+    </div>
     <div class="welcome" id="welcomeMsg">Welcome <span id="username">Guest</span>, you're on <span id="hostName">no one</span>'s VIP!</div>
 
     <div class="balance">

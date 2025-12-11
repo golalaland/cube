@@ -4150,102 +4150,90 @@ function showHighlightsModal(videos) {
     fontFamily: "system-ui, sans-serif"
   });
 
-  // === STICKY INTRO ===
+   // === STICKY INTRO ===
   const intro = document.createElement("div");
   intro.innerHTML = `
-    <div style="text-align:center;color:#e4b0ff;max-width:640px;margin:0 auto;line-height:1.6;font-size:15px;
-      background:linear-gradient(180deg,rgba(138,43,226,0.3),rgba(255,0,242,0.2));
-      border:2px solid transparent;border-radius:16px;padding:18px 48px 18px 20px;position:relative;
-      box-shadow:0 0 32px rgba(255,0,242,0.4),inset 0 0 20px rgba(0,255,234,0.3);
-      backdrop-filter:blur(12px);text-shadow:0 0 10px #ff00f2;
-      border-image:linear-gradient(90deg,#00ffea,#ff00f2,#8a2be2) 1;">
+    <div style="text-align:center;color:#e0b0ff;max-width:640px;margin:0 auto;line-height:1.6;font-size:14px;
+      background:linear-gradient(135deg,rgba(255,0,242,0.15),rgba(138,43,226,0.12));
+      padding:14px 48px 14px 20px;border:1px solid rgba(138,43,226,0.5);
+      box-shadow:0 0 16px rgba(255,0,242,0.25);border-radius:12px;position:relative;">
       <p style="margin:0;">
-        <span style="background:linear-gradient(90deg,#00ffea,#ff00f2,#8a2be2);
-          -webkit-background-clip:text;-webkit-text-fill-color:transparent;font-size:30px;font-weight:900;">
+        <span style="background:linear-gradient(90deg,#00ffea,#ff00f2,#8a2be2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:700;">
           Highlights
-        </span><br>
-        Unlock the nastiest creator moments with STRZ to feed the habit.
+        </span> are exclusive creator moments.<br>
+        Unlock premium clips with STRZ to support your favorite creators.
       </p>
     </div>`;
-  Object.assign(intro.style, { position: "sticky", top: "12px", zIndex: 1001, marginBottom: "18px" });
+  Object.assign(intro.style, { position: "sticky", top: "10px", zIndex: "1001", marginBottom: "12px" });
   modal.appendChild(intro);
-
   modal.addEventListener("scroll", () => {
-    intro.style.opacity = modal.scrollTop > 60 ? "0.85" : "1";
+    intro.style.opacity = modal.scrollTop > 50 ? "0.7" : "1";
   });
 
-  // === CLOSE BUTTON (NEON X) ===
+   // === CLOSE BUTTON (YOUR DOPE X – MORPHINE EDITION) ===
   const closeBtn = document.createElement("div");
-  closeBtn.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-    <path d="M18 6L6 18M6 6L18 18" stroke="#00ffea" stroke-width="3.5" stroke-linecap="round"/>
+  closeBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M18 6L6 18M6 6L18 18" stroke="#00ffea" stroke-width="2.5" stroke-linecap="round"/>
   </svg>`;
   Object.assign(closeBtn.style, {
-    position: "absolute", top: "20px", right: "20px", width: "48px", height: "48px",
+    position: "absolute", top: "14px", right: "16px", width: "24px", height: "24px",
     display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer",
-    zIndex: 1002, transition: "all 0.4s ease",
-    filter: "drop-shadow(0 0 16px #ff00f2)",
-    borderRadius: "50%", background: "rgba(255,0,242,0.1)"
+    zIndex: "1002", transition: "transform 0.2s ease", filter: "drop-shadow(0 0 8px rgba(0,255,234,0.6))"
   });
-  closeBtn.onmouseenter = () => closeBtn.style.transform = "rotate(180deg) scale(1.3)";
-  closeBtn.onmouseleave = () => closeBtn.style.transform = "rotate(0) scale(1)";
-  closeBtn.onclick = () => {
-    closeBtn.style.transform = "rotate(360deg) scale(0)";
-    setTimeout(() => modal.remove(), 300);
+  closeBtn.onmouseenter = () => closeBtn.style.transform = "rotate(90deg) scale(1.15)";
+  closeBtn.onmouseleave = () => closeBtn.style.transform = "rotate(0deg) scale(1)";
+  closeBtn.onclick = (e) => {
+    e.stopPropagation();
+    closeBtn.style.transform = "rotate(180deg) scale(1.3)";
+    setTimeout(() => modal.remove(), 180);
   };
   intro.firstElementChild.appendChild(closeBtn);
 
-  // === SEARCH + FILTER BUTTONS ===
+   // === SEARCH + FILTER BUTTONS ===
   const searchWrap = document.createElement("div");
   Object.assign(searchWrap.style, {
-    position: "sticky", top: "88px", zIndex: 1000, marginBottom: "24px",
-    display: "flex", flexDirection: "column", alignItems: "center", gap: "12px"
+    position: "sticky", top: "84px", zIndex: "1001", marginBottom: "20px",
+    display: "flex", flexDirection: "column", alignItems: "center", gap: "6px"
   });
-
   const searchInputWrap = document.createElement("div");
   searchInputWrap.style.cssText = `
-    display:flex;align-items:center;gap:10px;
-    background:rgba(20,10,40,0.6);
-    border:2px solid transparent;border-radius:30px;padding:10px 20px;width:320px;
-    backdrop-filter:blur(12px);box-shadow:0 0 30px rgba(255,0,242,0.35);
-    border-image:linear-gradient(90deg,#00ffea,#ff00f2,#8a2be2) 1;`;
+    display:flex;align-items:center;
+    background:linear-gradient(135deg,rgba(255,0,242,0.12),rgba(138,43,226,0.08));
+    border:1px solid rgba(138,43,226,0.6);border-radius:30px;padding:8px 14px;width:280px;
+    backdrop-filter:blur(8px);box-shadow:0 0 16px rgba(255,0,242,0.3);
+  `;
   searchInputWrap.innerHTML = `
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-      <path d="M15 15L21 21M10 17C6.134 17 3 13.866 3 10C3 6.134 6.134 3 10 3C13.866 3 17 6.134 17 10C17 13.866 13.866 17 10 17Z"
-            stroke="url(#gradSearch)" stroke-width="2.5" stroke-linecap="round"/>
-      <defs>
-        <linearGradient id="gradSearch" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="#00ffea"/>
-          <stop offset="100%" stop-color="#ff00f2"/>
-        </linearGradient>
-      </defs>
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+      <path d="M15 15L21 21M10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10C17 13.866 13.866 17 10 17Z"
+            stroke="url(#gradSearch)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <defs><linearGradient id="gradSearch" x1="3" y1="3" x2="21" y2="21">
+        <stop stop-color="#00ffea"/><stop offset="1" stop-color="#ff00f2"/>
+      </linearGradient></defs>
     </svg>
     <input id="highlightSearchInput" type="text" placeholder="Search by creator..."
-           style="flex:1;background:transparent;border:none;outline:none;color:#e0b0ff;font-size:14px;"/>`;
+           style="flex:1;background:transparent;border:none;outline:none;color:#fff;font-size:13px;"/>
+  `;
   searchWrap.appendChild(searchInputWrap);
 
   const buttonRow = document.createElement("div");
-  buttonRow.style.cssText = "display:flex;gap:12px;";
-
+  buttonRow.style.cssText = "display:flex;gap:8px;align-items:center;";
   const toggleBtn = document.createElement("button");
   toggleBtn.id = "toggleLocked";
   toggleBtn.textContent = "Show Unlocked";
   Object.assign(toggleBtn.style, {
-    padding: "8px 18px", borderRadius: "8px",
-    background: "linear-gradient(135deg, #1a0b2e, #240046)",
-    color: "#00ffea", border: "1px solid #8a2be2", fontSize: "13px", cursor: "pointer",
-    fontWeight: "800", transition: "all 0.3s", boxShadow: "0 0 20px rgba(138,43,226,0.6)"
+    padding: "4px 10px", borderRadius: "6px", background: "linear-gradient(135deg, #240046, #3c0b5e)",
+    color: "#00ffea", border: "1px solid rgba(138,43,226,0.6)", fontSize: "12px", cursor: "pointer",
+    fontWeight: "600", transition: "all 0.2s", boxShadow: "0 3px 10px rgba(138,43,226,0.4)"
   });
-
   const trendingBtn = document.createElement("button");
   trendingBtn.id = "toggleTrending";
   trendingBtn.textContent = "Trending";
   Object.assign(trendingBtn.style, {
-    padding: "8px 18px", borderRadius: "8px",
-    background: "linear-gradient(135deg, #8a2be2, #ff00f2, #00ffea)",
-    color: "#fff", border: "1px solid #ff00f2", fontSize: "13px", cursor: "pointer",
-    fontWeight: "800", transition: "all 0.3s", boxShadow: "0 0 30px rgba(255,0,242,0.7)"
+    padding: "4px 10px", borderRadius: "6px",
+    background: "linear-gradient(135deg, #8a2be2, #ff00f2)", color: "#fff",
+    border: "1px solid rgba(255,0,242,0.7)", fontSize: "12px", cursor: "pointer",
+    fontWeight: "600", transition: "all 0.2s", boxShadow: "0 4px 14px rgba(255,0,242,0.5)"
   });
-
   buttonRow.append(toggleBtn, trendingBtn);
   searchWrap.appendChild(buttonRow);
   modal.appendChild(searchWrap);

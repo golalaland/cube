@@ -744,10 +744,10 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
 .video-controls svg {
   pointer-events: none;
 }
-/* ====== Featured Hosts Styles — Cube Vibe ====== */
+/* ====== Featured Hosts Styles — Cube Theme (Crisp & Sexy) ====== */
 .featured-btn {
-  background: linear-gradient(90deg, #c3f60c, #e8ff6a);  /* Cube gradient, sleek */
-  color: #000;                                         /* dark contrast for sexy edge */
+  background: linear-gradient(90deg, rgba(195,246,12,0.85), rgba(232,255,106,0.85));
+  color: #000;                         /* dark text for contrast */
   border: none;
   border-radius: 25px;
   padding: 10px 20px;
@@ -756,31 +756,31 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
   cursor: pointer;
   display: block;
   margin: 20px auto;
-  box-shadow: 0 0 8px rgba(195, 246, 12, 0.4);        /* subtle glow */
+  box-shadow: 0 0 6px rgba(195,246,12,0.3);  /* subtle glow */
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .featured-btn:hover {
   transform: scale(1.05);
-  box-shadow: 0 0 14px rgba(195, 246, 12, 0.7);       /* more seductive glow */
+  box-shadow: 0 0 12px rgba(195,246,12,0.5); /* soft pop on hover */
 }
 
-/* 🌟 Featured Hosts Modal — Cube Edition */
+/* 🌟 Featured Hosts Modal (Centered) */
 .featured-modal {
-  display: none;             /* hidden by default */
+  display: none;                       /* hidden by default */
   position: fixed;
-  inset: 0;                  /* full screen */
+  inset: 0;                             /* full screen */
   z-index: 10000;
-  background: rgba(0,0,0,0.85);  /* dark, mysterious base */
-  backdrop-filter: blur(10px);
+  background: rgba(0,0,0,0.85);        /* dark and moody */
+  backdrop-filter: blur(10px);          /* soft blur behind modal */
 
-  display: flex;             /* Flex container */
-  justify-content: center;   /* horizontal center */
-  align-items: center;       /* vertical center */
-  padding: 20px;
-  overflow-y: auto;
+  display: flex;                        /* center modal content */
+  justify-content: center;              /* horizontal centering */
+  align-items: center;                  /* vertical centering */
+  padding: 20px;                        /* spacing from edges */
+  overflow-y: auto;                     /* scroll if content is tall */
+  border-radius: 12px;                  /* slight rounding */
 }
-
 /* Optional: Modal inner content — Cube edgy glow */
 .featured-modal .modal-content {
   background: rgba(0,0,0,0.9);

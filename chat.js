@@ -460,13 +460,12 @@ window.formatNumberWithCommas = formatNumberWithCommas;
 
 // ← MESSEGES CONTAINER
 document.addEventListener('DOMContentLoaded', () => {
-
   const messagesEl = document.getElementById('messages');
   const chatContainer = document.getElementById('chatContainer');
 
-  if (!messagesEl || !chatContainer) return; // safety check
+  if (!messagesEl || !chatContainer) return;
 
-  // Check if there are real messages
+  // Check if chat has real messages
   function hasRealMessages() {
     return !!messagesEl.querySelector('.msg');
   }
@@ -480,21 +479,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Observer for live message updates
+  // Observe messages changes
   const messagesObserver = new MutationObserver(updateMessagesPlaceholder);
   messagesObserver.observe(messagesEl, { childList: true });
 
-  // Enable chat UI AFTER login
-  function enableChatUI() {
-    chatContainer.style.display = 'flex';  // or 'block' depending on layout
+  // Global function to reveal entire chat after login
+  window.revealChatAfterLogin = function() {
+    chatContainer.style.display = 'flex'; // shows everything
     updateMessagesPlaceholder();
-  }
-
-  // Expose globally so you can call it after login
-  window.enableChatUI = enableChatUI;
-
-  // Example: call enableChatUI() AFTER login:
-  // auth.onAuthStateChanged(user => { if (user) enableChatUI(); });
+  };
 });
 
 

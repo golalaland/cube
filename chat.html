@@ -1746,33 +1746,72 @@ could you have broken something?  i only asked for color change:
   opacity: 1;
 }
 
-/* STAR HOSTS — GOLD EDITION */
-.star-hosts-btn {
-  background: linear-gradient(90deg, #FFD700, #FFEC8B, #FFD700); /* gold gradient */
-  background-size: 200% 200%;
-  animation: goldPulse 4s ease infinite;                        /* slow pulse across gradient */
-  color: #000;                                                   /* dark text for contrast */
-  font-weight: 700;
-  text-shadow: 0 0 6px rgba(0, 0, 0, 0.5);                      /* subtle depth */
-  border-radius: 25px;
-  padding: 10px 20px;
-  font-size: 16px;
+/* Unified compact session buttons — now with maximum drip */
+.session-btn {
+  background: #111;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
   cursor: pointer;
+  display: inline-block;
   box-shadow: 
-    0 0 12px rgba(255, 215, 0, 0.6),                            /* subtle gold glow */
-    0 0 24px rgba(255, 236, 139, 0.5);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+    0 0 8px rgba(255, 255, 255, 0.15),
+    inset 0 1px 2px rgba(255, 255, 255, 0.1);
+  transition: all 0.25s ease;
+  margin: 0 2px;
+  position: relative;
+  overflow: hidden;
+}
+
+.session-btn::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(90deg, 
+    rgba(100, 255, 255, 0.08),
+    rgba(255, 100, 255, 0.08),
+    rgba(100, 100, 255, 0.08));
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.session-btn:hover {
+  transform: scale(1.05);
+  background: #1a1a1a;
+  box-shadow: 
+    0 0 20px rgba(0, 255, 255, 0.4),
+    0 0 30px rgba(255, 0, 255, 0.25);
+}
+
+.session-btn:hover::before {
+  opacity: 1;
+}
+
+/* STAR HOSTS = GOD TIER ENERGY */
+.star-hosts-btn {
+  background: linear-gradient(90deg, #00ffea, #ff00f2, #8a2be2);
+  background-size: 200% 200%;
+  animation: starPulse 4s ease infinite;
+  color: #fff;
+  font-weight: 700;
+  text-shadow: 0 0 8px rgba(0, 0, 0, 0.6);
+  box-shadow: 
+    0 0 15px rgba(138, 43, 226, 0.6),
+    0 0 30px rgba(0, 255, 234, 0.5);
 }
 
 .star-hosts-btn:hover {
   transform: scale(1.05);
   box-shadow: 
-    0 0 22px rgba(255, 215, 0, 0.9),
-    0 0 40px rgba(255, 236, 139, 0.8);
-  animation-duration: 2s;                                        /* faster pulse on hover */
+    0 0 25px rgba(138, 43, 226, 0.9),
+    0 0 50px rgba(0, 255, 234, 0.8);
+  animation-duration: 1.5s;
 }
 
-@keyframes goldPulse {
+@keyframes starPulse {
   0%, 100% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
 }

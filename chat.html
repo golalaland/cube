@@ -1105,7 +1105,6 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
   border: none;
   border-radius: 4px;
 }
-could you have broken something?  i only asked for color change:
 /* Tab Header */
 .tab-header {
   display: flex;
@@ -1119,51 +1118,69 @@ could you have broken something?  i only asked for color change:
   background: rgba(255, 255, 255, 0.1);
   color: #fff;
   border: none;
-  padding: 6px 4px; /* slightly smaller padding */
+  padding: 6px 4px;
   border-radius: 4px;
   cursor: pointer;
   font-weight: 500;
-  font-size: 13px; /* smaller text */
+  font-size: 13px;
   text-align: center;
+  transition: all 0.3s ease;
 }
 
 .tab-btn.active {
-  background: linear-gradient(90deg, #ff0099, #ff6600);
+  background: linear-gradient(90deg, #c3f60c, #a0d308); /* pure #CUBETHEME energy */
+  box-shadow: 0 0 12px rgba(195, 246, 12, 0.5);
+  color: #000;
+  font-weight: 600;
+}
+
+.tab-btn:hover:not(.active) {
+  background: rgba(195, 246, 12, 0.15);
 }
 
 /* General tab content styling */
 .tab-content label {
-  display: inline-block;      /* keeps label inline-friendly */
-  width: 100px;               /* fixed width for alignment */
+  display: inline-block;
+  width: 100px;
   margin-right: 8px;
-  vertical-align: top;        /* aligns with input top */
+  vertical-align: top;
   font-size: 13px;
   color: #fff;
 }
 
-/* Inputs & textareas */
+/* Inputs & textareas – subtle #CUBETHEME accent on focus */
 .tab-content input,
 .tab-content textarea {
-  display: inline-block;      /* allows horizontal alignment with label */
-  width: calc(100% - 120px);  /* accounts for label width + gap */
+  display: inline-block;
+  width: calc(100% - 120px);
   max-width: 250px;
   margin-bottom: 8px;
   padding: 6px;
   border-radius: 4px;
   border: none;
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
   font-size: 13px;
-  vertical-align: top;        /* ensures alignment with label */
-  resize: vertical;           /* allows bio to expand vertically */
+  vertical-align: top;
+  resize: vertical;
+  transition: all 0.2s ease;
+}
+
+.tab-content input:focus,
+.tab-content textarea:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #c3f60c;
+  background: rgba(195, 246, 12, 0.1);
 }
 
 /* Divider spacing */
 .tab-content .divider {
   margin: 12px 0;
   border: 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  border-top: 1px solid rgba(195, 246, 12, 0.3); /* #CUBETHEME divider */
 }
 
-
+/* Smooth fade-out for loader (kept from your code) */
 #postLoginLoader {
   transition: opacity 0.4s ease;
 }

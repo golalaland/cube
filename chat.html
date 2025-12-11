@@ -151,9 +151,8 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
 }
 
 #guestMsg{font-size:16px;font-weight:700;margin:4px 0;color:var(--accent);text-align:center;}
-/* container */
 #chatContainer {
-  display: none; /* hidden until login */
+  display: none; /* HIDDEN until login */
   flex-direction: column;
   width: 100%;
   max-width: 600px;
@@ -186,6 +185,7 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
   width: 80%;
   pointer-events: none;
   user-select: none;
+  z-index: 0;
 }
 
 #messages.show-placeholder .messages-placeholder {
@@ -193,16 +193,13 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
 }
 
 .msg {
-  position: relative;
-  z-index: 1;
   padding: 8px 10px;
   border-radius: 8px;
-  background: rgba(255,255,255,0.03);
+  background: rgba(255, 255, 255, 0.03);
   color: #fff;
   display: block;
   text-align: left;
 }
-
 
 /* your color for ME stays untouched */
 .msg.me { 
@@ -1972,7 +1969,7 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
   </div>
 </div>
 
-<div id="chatContainer" style="display:none;">
+<div id="chatContainer" style="display:none;"> <!-- HIDDEN by default -->
   <!-- Messages container -->
   <div id="messages">
     <div class="messages-placeholder">

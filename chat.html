@@ -744,26 +744,6 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
 .video-controls svg {
   pointer-events: none;
 }
-/* ====== Featured Hosts Styles — Cube Theme (Crisp & Sexy) ====== */
-.featured-btn {
-  background: linear-gradient(90deg, rgba(195,246,12,0.85), rgba(232,255,106,0.85));
-  color: #000;                         /* dark text for contrast */
-  border: none;
-  border-radius: 25px;
-  padding: 10px 20px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  display: block;
-  margin: 20px auto;
-  box-shadow: 0 0 6px rgba(195,246,12,0.3);  /* subtle glow */
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.featured-btn:hover {
-  transform: scale(1.05);
-  box-shadow: 0 0 12px rgba(195,246,12,0.5); /* soft pop on hover */
-}
 
 /* 🌟 Featured Hosts Modal (Centered) */
 .featured-modal {
@@ -1635,6 +1615,7 @@ could you have broken something?  i only asked for color change:
   0%,100% { box-shadow: 0 0 12px rgba(255,255,255,0.2); }
   50% { box-shadow: 0 0 24px rgba(255,255,255,0.8); }
 }
+  
 /* ---------- Chat Tap Modal ---------- */
 .tap-modal {
   position: absolute;
@@ -1723,11 +1704,26 @@ could you have broken something?  i only asked for color change:
   background: #333;
 }
 
-/* Star Hosts gets the gradient */
+/* Star Hosts — Cube Theme */
 .star-hosts-btn {
-  background: linear-gradient(90deg, #ff007a, #ffa500);
-  box-shadow: 0 0 4px rgba(255, 0, 122, 0.3);
+  background: linear-gradient(90deg, #c3f60c, #e8ff6a); /* Cube gradient */
+  color: #000;                                         /* dark contrast text */
+  border: none;
+  border-radius: 25px;
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-block;
+  box-shadow: 0 0 6px rgba(195,246,12,0.3);           /* subtle glow */
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
+
+.star-hosts-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 12px rgba(195,246,12,0.5);          /* soft pop on hover */
+}
+
 /* Tiny inline spinner — no size change, no text flicker */
 .btn-spinner {
   display: inline-block;

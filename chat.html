@@ -1105,6 +1105,7 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
   border: none;
   border-radius: 4px;
 }
+could you have broken something?  i only asked for color change:
 /* Tab Header */
 .tab-header {
   display: flex;
@@ -1115,58 +1116,54 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
 /* Tab Buttons */
 .tab-btn {
   flex: 1;
-  background: rgba(195, 246, 12, 0.1); /* subtle Cube glow */
-  color: #c3f60c;                       /* Cube text color */
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
   border: none;
-  padding: 6px 4px;
+  padding: 6px 4px; /* slightly smaller padding */
   border-radius: 4px;
   cursor: pointer;
   font-weight: 500;
-  font-size: 13px;
+  font-size: 13px; /* smaller text */
   text-align: center;
 }
 
 .tab-btn.active {
-  background: linear-gradient(90deg, #c3f60c, #e8ff6a); /* Cube gradient */
-  color: #000; /* contrast for active tab */
+  background: linear-gradient(90deg, #ff0099, #ff6600);
 }
 
 /* General tab content styling */
 .tab-content label {
-  display: inline-block;
-  width: 100px;
+  display: inline-block;      /* keeps label inline-friendly */
+  width: 100px;               /* fixed width for alignment */
   margin-right: 8px;
-  vertical-align: top;
+  vertical-align: top;        /* aligns with input top */
   font-size: 13px;
-  color: #c3f60c; /* Cube label color */
+  color: #fff;
 }
 
 /* Inputs & textareas */
 .tab-content input,
 .tab-content textarea {
-  display: inline-block;
-  width: calc(100% - 120px);
+  display: inline-block;      /* allows horizontal alignment with label */
+  width: calc(100% - 120px);  /* accounts for label width + gap */
   max-width: 250px;
   margin-bottom: 8px;
   padding: 6px;
   border-radius: 4px;
   border: none;
   font-size: 13px;
-  vertical-align: top;
-  resize: vertical;
-  color: #eee; /* text contrast for dark background */
-  background: rgba(0,0,0,0.8); /* dark input background */
-  outline: none;
+  vertical-align: top;        /* ensures alignment with label */
+  resize: vertical;           /* allows bio to expand vertically */
 }
 
 /* Divider spacing */
 .tab-content .divider {
   margin: 12px 0;
   border: 0;
-  border-top: 1px solid rgba(195, 246, 12, 0.2);
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-/* Post login loader */
+
 #postLoginLoader {
   transition: opacity 0.4s ease;
 }

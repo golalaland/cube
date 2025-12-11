@@ -9,20 +9,22 @@
 <link rel="icon" href="data:," />
 <style>
 :root {
-  --bg:           #000;                                    /* pure black */
- --card:#111;                               /* deep black-green tint */
-  --muted:        #88a066;                                 /* desaturated lime for subtle text */
-  --accent:       #c3f60c;     /* YOUR EXACT CUBE NEON GREEN */
-  --glass: rgba(255,255,255,0.03);                /* barely-there green glass */
-  --pulse-color:  #c3f60c;     /* main pulse/glow */
-  --buzz-color:   #e0ff4a;     /* slightly lighter green for extra highlights (optional) */
-  
-  /* Easy glow control – use anywhere */
-  --glow-1:       rgba(195, 246, 12, 0.15);
-  --glow-2:       rgba(195, 246, 12, 0.35);
-  --glow-3:       rgba(195, 246, 12, 0.65);
-  --glow-max:     rgba(195, 246, 12, 1);
+:root {
+  --bg:           #000;
+  --card:         #111;
+  --muted:        #88a066;
+  --accent:       #c3f60c;
+  --glass:        rgba(255,255,255,0.03);
+  --pulse-color:  #c3f60c;
+  --buzz-color:   #ddff55;
+
+  /* SUBTLE GLOW LEVELS */
+  --glow-1:       rgba(195, 246, 12, 0.08);  /* softer */
+  --glow-2:       rgba(195, 246, 12, 0.18);  /* medium-soft */
+  --glow-3:       rgba(195, 246, 12, 0.28);  /* controlled */
+  --glow-max:     rgba(195, 246, 12, 0.5);   /* no more full neon */
 }
+
 #videoWrapper .nav-buttons {
   display: flex;
   justify-content: center;
@@ -351,7 +353,7 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
 }
 
 .send-btn:hover {
-  background-color: #ff33a1;
+  background-color: #c3f60c;
   transform: scale(1.05);
 }
 
@@ -380,11 +382,10 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
 #loadingBar {
   width: 0%;
   height: 100%;
-  background: linear-gradient(90deg,#FF69B4,#FF1493);
+  background: #c3f60c; /* CUBE THEME */
   border-radius: 4px;
   animation: loadingAnim 2.5s linear forwards;
 }
-
 
 /* 🔥 Glass bar with neon accent glow under input */
 .glass-bar {
@@ -633,48 +634,6 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
   pointer-events: none;
   z-index: 9999; /* ensure it's above everything */
 }
-/* ----------------------------
-   ⭐ GIFT / BALLER ALERT Glow
------------------------------ */
-.baller-highlight {
-  display: inline-block;
-  padding: 6px 14px;
-  border-radius: 10px;
-  font-weight: 900;
-  font-size: 0.95rem;
-  font-family: 'Arial Black', Gadget, sans-serif;
-  color: #000;
-  background: rgba(255, 255, 0, 0.2); /* subtle yellow */
-  box-shadow: 0 0 6px var(--pulse-color), 0 0 12px var(--pulse-color);
-  animation: baller-pulse 1.2s ease-in-out infinite alternate;
-}
-
-/* BallerAlert pulse animation */
-@keyframes baller-pulse {
-  0% { box-shadow: 0 0 10px var(--pulse-color); }
-  50% { box-shadow: 0 0 20px var(--pulse-color); }
-  100% { box-shadow: 0 0 10px var(--pulse-color); }
-}
-
-/* Optional floating stars for gifting */
-.floating-star {
-  position: absolute;
-  pointer-events: none;
-  user-select: none;
-  width: 8px;
-  height: 8px;
-  background: yellow;
-  border-radius: 50%;
-  opacity: 0.9;
-  transform: translate(var(--x,0), var(--y,0));
-  animation: sparkle-float 1.2s forwards;
-}
-
-@keyframes sparkle-float {
-  0% { transform: translate(var(--x,0), var(--y,0)) scale(1); opacity: 1; }
-  100% { transform: translate(var(--x,0), calc(var(--y,0) - 20px)) scale(0.5); opacity: 0; }
-}
-
 /* ---------- Auth Inputs ---------- */
 #authBox{display:flex;justify-content:center;margin-top:12px;}
 #emailAuthWrapper{display:flex;flex-direction:column;align-items:center;gap:10px;width:100%;}

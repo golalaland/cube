@@ -1,0 +1,332 @@
+<!-- Portrait Background Scroller — index.html
+
+Drop or select portrait images and each image becomes a full-screen background section.
+Features:
+ - Mobile-first, portrait-optimized backgrounds
+ - Vertical scroll with CSS scroll-snap
+ - Lazy-loading images (via object URLs)
+ - Simple reorder/remove controls
+ - Minimal, single-file HTML/CSS/JS ready to open in a browser
+
+Usage: open this file in a browser, click "Choose images" or drop files onto the page.
+-->
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Portrait Background Scroller</title>
+  <style>
+    :root{
+      --overlay-grad: linear-gradient(180deg, rgba(0,0,0,0.25), rgba(0,0,0,0.45));
+    }
+    html,body{height:100%;margin:0;font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial}
+
+    /* Container that scrolls vertically; each .panel is 100vh */
+    .scroller{
+      height:100vh;
+      overflow-y:auto;
+      scroll-snap-type:y mandatory;
+      -webkit-overflow-scrolling:touch;
+      background:#000;
+    }
+
+    .panel{
+      position:relative;
+      height:100vh;
+      min-height:520px; /* ensures usable area on landscape phones */
+      scroll-snap-align:start;
+      background-color:#111;
+      background-size:cover;
+      background-position:center center;
+      display:flex;
+      align-items:flex-end; /* put text/content at bottom like a backdrop */
+      justify-content:center;
+    }
+
+    /* subtle overlay so text is readable */
+    .panel::before{
+      content:'';
+      position:absolute;inset:0;
+      background:var(--overlay-grad);
+      z-index:1;
+      pointer-events:none;
+    }
+
+    .panel .content{
+      position:relative;z-index:2;color:#fff;padding:28px;max-width:980px;width:100%;box-sizing:border-box;text-align:center;
+    }
+
+    .title{font-size:20px;font-weight:700;margin:0 0 6px}
+    .subtitle{font-size:14px;opacity:0.9;margin:0}
+
+    /* Top controls */
+    .toolbar{
+      position:fixed;left:12px;right:12px;top:12px;z-index:999;display:flex;gap:8px;align-items:center;justify-content:space-between
+    }
+    .controls{display:flex;gap:8px;align-items:center}
+    .btn{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);color:#fff;padding:10px 12px;border-radius:10px;font-weight:600;text-decoration:none;cursor:pointer}
+    .btn.primary{background:linear-gradient(90deg,#00ff9d,#39ff14);border:none;color:#000}
+
+    /* mini-panel controls */
+    .panel-controls{position:absolute;right:12px;top:12px;z-index:3;display:flex;flex-direction:column;gap:8px}
+    .icon-btn{background:rgba(0,0,0,0.45);border:1px solid rgba(255,255,255,0.08);color:#fff;padding:8px;border-radius:8px;cursor:pointer}
+
+    /* Drop area hint */
+    .drop-hint{position:fixed;left:50%;transform:translateX(-50%);bottom:18px;background:rgba(0,0,0,0.5);color:#fff;padding:8px 12px;border-radius:999px;font-size:13px;z-index:999}
+
+    /* Empty state */
+    .empty{display:grid;place-items:center;height:100vh;color:#ddd;text-align:center;padding:18px}
+    .empty h1{font-size:22px;margin:0 0 8px}
+    .empty p{opacity:0.8;margin:0 0 12px}
+
+    /* responsive tweaks */
+    @media (orientation:landscape) and (max-height:600px){
+      .panel{background-position:center center}
+      .panel .content{padding:16px}
+    }
+
+    /* small helper */
+    .muted{opacity:0.85}
+    .file-list{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+
+    /* simple reorder UI visuals */
+    .badge{background:rgba(0,0,0,0.5);padding:6px 8px;border-radius:8px;font-size:13px}
+  </style>
+</head>
+<body>
+
+  <div class="toolbar">
+    <div class="controls">
+      <label class="btn" for="fileInput">Choose images</label>
+      <input id="fileInput" type="file" accept="image/*" multiple style="display:none">
+      <button id="clearAll" class="btn">Clear all</button>
+      <span class="badge muted" id="countBadge">0 images</span>
+    </div>
+    <div>
+      <a class="btn" id="downloadHtml">Download HTML</a>
+      <a class="btn primary" id="addDemo">Add demo</a>
+    </div>
+  </div>
+
+  <main class="scroller" id="scroller">
+    <div class="empty" id="emptyState">
+      <div>
+        <h1>Portrait Background Scroller</h1>
+        <p>Drop or choose portrait images and each will become a full-screen backdrop you scroll through.</p>
+        <div style="margin-top:12px">
+          <label class="btn" for="fileInput">Upload images</label>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div class="drop-hint" id="dropHint">Drop images anywhere to add them</div>
+
+  <script>
+    // Utilities
+    const scroller = document.getElementById('scroller');
+    const fileInput = document.getElementById('fileInput');
+    const emptyState = document.getElementById('emptyState');
+    const countBadge = document.getElementById('countBadge');
+    const clearAllBtn = document.getElementById('clearAll');
+    const addDemoBtn = document.getElementById('addDemo');
+    const downloadHtml = document.getElementById('downloadHtml');
+
+    let panels = []; // {id, url, name}
+
+    function updateBadge(){ countBadge.textContent = panels.length + (panels.length===1 ? ' image' : ' images'); }
+
+    function createPanelObj(file){
+      const id = 'p-' + Math.random().toString(36).slice(2,9);
+      const url = URL.createObjectURL(file);
+      return {id, url, name: file.name}
+    }
+
+    function makePanelEl(item, index){
+      const el = document.createElement('section');
+      el.className = 'panel';
+      el.dataset.id = item.id;
+      el.style.backgroundImage = `url('${item.url}')`;
+
+      // content overlay
+      const content = document.createElement('div');
+      content.className = 'content';
+      content.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
+          <div style="text-align:left">
+            <div class="title">${escapeHtml(item.name)}</div>
+            <div class="subtitle muted">Image ${index + 1} — swipe or scroll</div>
+          </div>
+          <div class="badge">${index+1}</div>
+        </div>
+      `;
+
+      // panel controls
+      const pc = document.createElement('div');
+      pc.className = 'panel-controls';
+
+      const up = document.createElement('button'); up.innerText = '↑'; up.title='Move up'; up.className='icon-btn';
+      const down = document.createElement('button'); down.innerText = '↓'; down.title='Move down'; down.className='icon-btn';
+      const remove = document.createElement('button'); remove.innerText='✕'; remove.title='Remove'; remove.className='icon-btn';
+
+      up.addEventListener('click', ()=> movePanel(item.id, -1));
+      down.addEventListener('click', ()=> movePanel(item.id, +1));
+      remove.addEventListener('click', ()=> removePanel(item.id));
+
+      pc.appendChild(up); pc.appendChild(down); pc.appendChild(remove);
+      el.appendChild(pc);
+      el.appendChild(content);
+
+      return el;
+    }
+
+    function render(){
+      // clear panels
+      scroller.querySelectorAll('.panel').forEach(n=>n.remove());
+
+      if(panels.length===0){ emptyState.style.display='grid'; } else { emptyState.style.display='none'; }
+
+      panels.forEach((p,i)=>{
+        const el = makePanelEl(p,i);
+        scroller.appendChild(el);
+      });
+      updateBadge();
+    }
+
+    function addFiles(files){
+      const arr = Array.from(files).filter(f=>f.type.startsWith('image/'));
+      arr.forEach(f=>panels.push(createPanelObj(f)));
+      render();
+    }
+
+    fileInput.addEventListener('change', (e)=>{
+      if(e.target.files) addFiles(e.target.files);
+      fileInput.value='';
+    });
+
+    // Drag & drop
+    ['dragenter','dragover'].forEach(ev=>{
+      window.addEventListener(ev,(e)=>{ e.preventDefault(); e.stopPropagation(); document.body.style.opacity=0.98; });
+    });
+    ['dragleave','drop'].forEach(ev=>{
+      window.addEventListener(ev,(e)=>{ e.preventDefault(); e.stopPropagation(); document.body.style.opacity=1; });
+    });
+
+    window.addEventListener('drop',(e)=>{
+      if(e.dataTransfer.files) addFiles(e.dataTransfer.files);
+    });
+
+    // reorder and remove
+    function movePanel(id, dir){
+      const idx = panels.findIndex(p=>p.id===id);
+      if(idx === -1) return;
+      const newIndex = idx + dir;
+      if(newIndex < 0 || newIndex >= panels.length) return;
+      const [item] = panels.splice(idx,1);
+      panels.splice(newIndex,0,item);
+      render();
+      // smooth scroll to the moved element
+      const el = scroller.querySelector(`[data-id='${id}']`);
+      if(el) el.scrollIntoView({behavior:'smooth'});
+    }
+
+    function removePanel(id){
+      const idx = panels.findIndex(p=>p.id===id);
+      if(idx === -1) return;
+      // revoke object URL
+      URL.revokeObjectURL(panels[idx].url);
+      panels.splice(idx,1);
+      render();
+    }
+
+    clearAllBtn.addEventListener('click', ()=>{
+      panels.forEach(p=>URL.revokeObjectURL(p.url));
+      panels = [];
+      render();
+    });
+
+    addDemoBtn.addEventListener('click', ()=>{
+      // demo images — small, data-URLs or placeholder links (external ones will still work)
+      const demo = [
+        'https://cdn.shopify.com/s/files/1/0962/6648/6067/files/Beige_Minimal_Romantic_Love_Questions_Card_Game_Document_1080_x_1920_px.svg?v=1765496716',
+        'https://cdn.shopify.com/s/files/1/0962/6648/6067/files/Beige_Minimal_Romantic_Love_Questions_Card_Game_Document_1080_x_1920_px.svg?v=1765496716',
+        'https://cdn.shopify.com/s/files/1/0962/6648/6067/files/Beige_Minimal_Romantic_Love_Questions_Card_Game_Document_1080_x_1920_px.svg?v=1765496716'
+      ];
+      demo.forEach(u=>panels.push({id:'d-'+Math.random().toString(36).slice(2,9), url:u, name:'Demo image'}));
+      render();
+    });
+
+    // download current HTML — simple snapshot that replaces object URLs with base64 where possible is complex,
+    // so we generate a lightweight index that references the currently loaded image URLs (works for external URLs and object URLs in the same session in many browsers)
+    downloadHtml.addEventListener('click', ()=>{
+      const html = generateExportHtml();
+      const blob = new Blob([html],{type:'text/html'});
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'portrait-scroller.html'; a.click();
+    });
+
+    function generateExportHtml(){
+      const imgs = panels.map(p=>p.url);
+      return `<!doctype html>\n<html><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>Portrait Scroller Export</title><style>html,body{height:100%;margin:0}body{background:#000}section{height:100vh;background-size:cover;background-position:center center}body{margin:0;scroll-snap-type:y mandatory;overflow-y:scroll}</style></head><body>\n${imgs.map(u=>`<section style="background-image:url('${u}')"></section>`).join('\n')}\n  <!-- GLOBAL BUTTON LAYER -->
+  <div id="buttonLayer" style="position:fixed;inset:0;pointer-events:none;z-index:9000;"></div>
+
+  <script>
+    // ============== BUTTON SYSTEM — ADD ANY BUTTON, ANYWHERE ==============
+    // Usage example:
+    // addButton({
+    //   text: "Buy Now",
+    //   x: "20px",    // left offset
+    //   y: "40px",    // top offset
+    //   onclick: () => alert("Clicked!")
+    // });
+
+    function addButton({ text="Button", x="50%", y="50%", onclick=null, className="" }){
+      const layer = document.getElementById("buttonLayer");
+      const btn = document.createElement("button");
+      btn.textContent = text;
+      btn.className = "free-btn " + className;
+      btn.style.position = "absolute";
+      btn.style.left = x;
+      btn.style.top = y;
+      btn.style.transform = "translate(-50%, -50%)";
+      btn.style.pointerEvents = "auto";
+
+      if(onclick) btn.addEventListener("click", onclick);
+
+      layer.appendChild(btn);
+      return btn;
+    }
+
+    // default styling
+    const style = document.createElement("style");
+    style.textContent = `
+      .free-btn {
+        background: rgba(0,0,0,0.65);
+        border: 1px solid rgba(255,255,255,0.2);
+        color: #fff;
+        padding: 12px 18px;
+        border-radius: 10px;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .free-btn:hover {
+        background: rgba(0,0,0,0.85);
+      }
+    `;
+    document.head.appendChild(style);
+  </script>
+
+</body></html>`;
+    }
+
+    // helpers
+    function escapeHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+    // init
+    render();
+
+  </script>
+</body>
+</html>

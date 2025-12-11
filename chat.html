@@ -1848,7 +1848,6 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
   margin: 8px 0 4px 0; /* tighter spacing */
   padding: 0;
 }
-
 .brand-logo {
   width: 110px;       /* reduced size */
   height: auto;
@@ -1859,7 +1858,6 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
 #chatContainer {
   display: none;
 }
-  
 </style>
 </head>
 <body>
@@ -1981,27 +1979,22 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
   </div>
 </div>
 
-<div id="chatContainer">
-
-    <div id="messages">
-        <div class="messages-placeholder">
-            No one’s messaged yet — be the first!
-        </div>
+<div id="chatContainer" style="display:none;">
+  <!-- Messages container -->
+  <div id="messages">
+    <div class="messages-placeholder">
+      No one’s messaged yet — be the first!
     </div>
+  </div>
 
-    <div id="inputArea">…</div>
-
+  <!-- Input area -->
+  <div class="send-area" id="sendArea">
+    <input type="text" id="messageInput" placeholder="Type your message..." autocomplete="off" />
+    <button id="buzzBtn" class="buzz-btn" title="Send BUZZ 🚨">🚨</button>
+    <button id="sendBtn" class="send-btn">Send</button>
+  </div>
 </div>
 
-
-
-
-
-<div class="send-area" id="sendArea" style="display:none;">
-  <input type="text" id="messageInput" placeholder="Type your message..." autocomplete="off" />
-  <button id="buzzBtn" class="buzz-btn" title="Send BUZZ 🚨">🚨</button>
-  <button id="sendBtn" class="send-btn">Send</button>
-</div>
     </div>
 <div class="profile" id="profileBox">
   <div class="profile-card">

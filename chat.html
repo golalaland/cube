@@ -1837,6 +1837,22 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
   0%,100% { opacity:1; }
   50% { opacity:0.4; }
 }
+.brand {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 20px 0;
+}
+
+.brand-logo {
+  width: 160px;       /* adjust size as needed */
+  height: auto;
+  display: block;
+  margin: 0 auto;
+  object-fit: contain;
+}
+
 </style>
 </head>
 <body>
@@ -1851,7 +1867,12 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
 <audio id="buzz-sound" src="https://pixabay.com/sound-effects/buzz-01-0-07.mp3" preload="auto"></audio>
 <div id="appWrapper">
   <div class="app">
-    <div class="brand">乂丨乂丨</div>
+    <div class="brand">
+  <img src="https://cdn.shopify.com/s/files/1/0962/6648/6067/files/HABA_HOUSE.png?v=1765412962" 
+       alt="乂丨乂丨" 
+       class="brand-logo">
+</div>
+
     <div id="greeting"></div>
     <div id="center">
     <div class="video-container" style="position: relative; width: 100%; max-width: 600px; margin: auto;">

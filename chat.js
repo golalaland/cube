@@ -459,39 +459,44 @@ window.getUserId = getUserId;  // ← RESTORED FOR OLD CODE
 window.formatNumberWithCommas = formatNumberWithCommas;
 
 // ← MESSEGES CONTAINER
-const messagesEl = document.getElementById('messages');
+document.addEventListener('DOMContentLoaded', () => {
 
-function hasRealMessages(container) {
-  return !!container.querySelector('.msg');   // simplified & bulletproof
-}
+  const messagesEl = document.getElementById('messages');
+  const chatContainer = document.getElementById('chatContainer');
 
-function updateMessagesPlaceholder() {
-  if (!messagesEl) return;
-  if (hasRealMessages(messagesEl)) {
-    messagesEl.classList.remove('show-placeholder');
-  } else {
-    messagesEl.classList.add('show-placeholder');
+  if (!messagesEl || !chatContainer) return; // safety check
+
+  // Check if there are real messages
+  function hasRealMessages() {
+    return !!messagesEl.querySelector('.msg');
   }
-}
 
-/* NEW UNIQUE NAME — avoids conflicts */
-const messagesObserver = new MutationObserver(() => {
-  updateMessagesPlaceholder();
+  // Update placeholder visibility
+  function updateMessagesPlaceholder() {
+    if (hasRealMessages()) {
+      messagesEl.classList.remove('show-placeholder');
+    } else {
+      messagesEl.classList.add('show-placeholder');
+    }
+  }
+
+  // Observer for live message updates
+  const messagesObserver = new MutationObserver(updateMessagesPlaceholder);
+  messagesObserver.observe(messagesEl, { childList: true });
+
+  // Enable chat UI AFTER login
+  function enableChatUI() {
+    chatContainer.style.display = 'flex';  // or 'block' depending on layout
+    updateMessagesPlaceholder();
+  }
+
+  // Expose globally so you can call it after login
+  window.enableChatUI = enableChatUI;
+
+  // Example: call enableChatUI() AFTER login:
+  // auth.onAuthStateChanged(user => { if (user) enableChatUI(); });
 });
 
-/* Watch only direct children (messages added/removed) */
-messagesObserver.observe(messagesEl, { childList: true });
-
-/* Run on load */
-document.addEventListener('DOMContentLoaded', updateMessagesPlaceholder);
-
-function enableChatUI() {
-  const chatContainer = document.getElementById("chatContainer");
-  chatContainer.style.display = "flex";   // or block
-  updateMessagesPlaceholder();
-}
-
-enableChatUI();
 
 /* ---------- User Colors ---------- */ 
 function setupUsersListener() { onSnapshot(collection(db, "users"), snap => { refs.userColors = refs.userColors || {}; snap.forEach(docSnap => { refs.userColors[docSnap.id] = docSnap.data()?.usernameColor || "#ffffff"; }); if (lastMessagesArray.length) renderMessagesFromArray(lastMessagesArray); }); } setupUsersListener();

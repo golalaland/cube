@@ -4330,9 +4330,9 @@ function renderCards(videosToRender) {
     unlockBtn.textContent = isUnlocked ? "Unlocked" : `Unlock ${video.highlightVideoPrice || 100} ⭐️`;
     Object.assign(unlockBtn.style, {
       background: isUnlocked ? "rgba(138,43,226,0.3)" : "linear-gradient(135deg, #ff00f2, #8a2be2, #00ffea)",
-      border: "1px solid #ff00f2", borderRadius: "8px", padding: "10px 0", fontWeight: "800",
+      border: "1px solid #ff00f2", borderRadius: "6px", padding: "8px 0", fontWeight: "800",
       color: "#fff", cursor: isUnlocked ? "default" : "pointer",
-      transition: "all 0.3s ease", fontSize: "14px", textShadow: "0 0 10px rgba(255,0,242,0.8)",
+      transition: "all 0.3s ease", fontSize: "13px", textShadow: "0 0 10px rgba(255,0,242,0.8)",
       boxShadow: isUnlocked ? "inset 0 2px 10px rgba(0,0,0,0.5)" : "0 0 20px rgba(255,0,242,0.6)"
     });
 
@@ -4411,7 +4411,7 @@ function showUnlockConfirm(video, onUnlockCallback) {
   document.querySelectorAll("video").forEach(v => v.pause());
   document.getElementById("unlockConfirmModal")?.remove();
 
-  const modal = document.createElement("div");
+   const modal = document.createElement("div");
   modal.id = "unlockConfirmModal";
   Object.assign(modal.style, {
     position: "fixed",
@@ -4419,8 +4419,8 @@ function showUnlockConfirm(video, onUnlockCallback) {
     left: 0,
     width: "100vw",
     height: "100vh",
-    background: "rgba(5,2,20,0.96)",
-    backdropFilter: "blur(12px)",
+    background: "rgba(0,0,0,0.93)",
+    backdropFilter: "blur(8px)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -4428,70 +4428,16 @@ function showUnlockConfirm(video, onUnlockCallback) {
     opacity: "1",
   });
   modal.innerHTML = `
-    <div style="
-      background: linear-gradient(145deg, #0f0519, #1a0b2e);
-      padding:24px;
-      border-radius:16px;
-      text-align:center;
-      color:#e0b0ff;
-      max-width:340px;
-      border: 1.5px solid rgba(138,43,226,0.7);
-      box-shadow: 
-        0 0 40px rgba(255,0,242,0.5),
-        inset 0 0 20px rgba(0,255,234,0.15);
-      backdrop-filter: blur(10px);
-    ">
-      <h3 style="
-        margin:0 0 16px 0;
-        font-weight:800;
-        font-size:18px;
-        background: linear-gradient(90deg,#00ffea,#ff00f2,#8a2be2);
-        -webkit-background-clip:text;
-        -webkit-text-fill-color:transparent;
-      ">
-        Unlock "${video.title}"?
-      </h3>
-      <p style="margin:0 0 24px 0; font-size:15px; opacity:0.9;">
-        This will cost <b style="color:#ff00f2; text-shadow:0 0 10px #ff00f2;">${video.highlightVideoPrice} STRZ</b>
-      </p>
-      <div style="display:flex;gap:14px;justify-content:center;">
-        <button id="cancelUnlock" style="
-          padding:10px 20px;
-          background: rgba(138,43,226,0.2);
-          border: 1px solid #8a2be2;
-          color: #00ffea;
-          border-radius:10px;
-          font-weight:600;
-          cursor:pointer;
-          transition:all 0.3s;
-          min-width:100px;
-        "
-        onmouseenter="this.style.background='rgba(138,43,226,0.4)'; this.style.transform='translateY(-2px)'"
-        onmouseleave="this.style.background='rgba(138,43,226,0.2)'; this.style.transform='translateY(0)'">
-          Cancel
-        </button>
-
-        <button id="confirmUnlock" style="
-          padding:10px 20px;
-          background: linear-gradient(135deg, #ff00f2, #8a2be2, #00ffea);
-          border: none;
-          color: #fff;
-          border-radius:10px;
-          font-weight:800;
-          cursor:pointer;
-          font-size:15px;
-          min-width:100px;
-          box-shadow: 0 0 25px rgba(255,0,242,0.6);
-          transition:all 0.4s;
-        "
-        onmouseenter="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 0 40px rgba(0,255,234,0.8)'"
-        onmouseleave="this.style.transform='translateY(0)'; this.style.boxShadow='0 0 25px rgba(255,0,242,0.6)'">
-          Yes, Unlock
-        </button>
+    <div style="background:#111;padding:20px;border-radius:12px;text-align:center;color:#fff;max-width:320px;box-shadow:0 0 20px rgba(0,0,0,0.5);">
+      <h3 style="margin-bottom:10px;font-weight:600;">Unlock "${video.title}"?</h3>
+      <p style="margin-bottom:16px;">This will cost <b>${video.highlightVideoPrice} STRZ</b></p>
+      <div style="display:flex;gap:12px;justify-content:center;">
+        <button id="cancelUnlock" style="padding:8px 16px;background:#333;border:none;color:#fff;border-radius:8px;font-weight:500;">Cancel</button>
+        <button id="confirmUnlock" style="padding:8px 16px;background:linear-gradient(90deg,#00ffea,#ff00f2,#8a2be2);border:none;color:#fff;border-radius:8px;font-weight:600;">Yes</button>
       </div>
     </div>
   `;
-
+  
   document.body.appendChild(modal);
 
   modal.querySelector("#cancelUnlock").onclick = () => modal.remove();

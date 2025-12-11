@@ -152,38 +152,35 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
 
 #guestMsg{font-size:16px;font-weight:700;margin:4px 0;color:var(--accent);text-align:center;}
 
-/* Chat messages container – PERFECT empty + filled states */
+/* Chat container */
 #messages {
-  flex: 1 1 100%;              /* takes ALL available space */
-  min-height: 0;                /* crucial for flex shrinking */
+  flex: 1 1 100%;
+  min-height: 0;
   overflow-y: auto;
-  padding: 20px 12px;           /* more breathing room */
+  padding: 20px 12px;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;  /* messages stick to top when few */
+  justify-content: flex-start;
   gap: 10px;
   background: #000;
   border-radius: 8px;
   box-sizing: border-box;
   position: relative;
-
-  /* This forces it to act like it already has a lot of content */
-  min-height: 300px;            /* fallback for very small screens */
+  min-height: 300px;
 }
 
-/* The magic: invisible spacer that ONLY exists when chat is empty */
+/* Invisible spacer when chat is empty */
 #messages:empty::after {
   content: "";
-  flex: 1 1 auto;               /* pushes the input bar all the way down */
-  min-height: 400px;            /* change this number to control how "tall" empty chat feels */
+  flex: 1 1 auto;
+  min-height: 400px;
 }
 
-/* Beautiful centered placeholder when empty */
+/* Placeholder text */
 #messages:empty::before {
   content: "No one’s messaged yet — be the first!";
   font-size: 16px;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.45);
   text-align: center;
   position: absolute;
   top: 50%;
@@ -192,63 +189,48 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
   pointer-events: none;
   user-select: none;
   width: 80%;
-}
-
-/* Default state: startup page (text blends with black background) */
-#messages:empty::before {
   color: #000; /* black on startup */
+  z-index: 0;
 }
 
-/* Placeholder when chat is active (user logged in) */
+/* Gray placeholder after login */
 #messages.active:empty::before {
-  color: rgba(255, 255, 255, 0.45); /* gray text on login */
+  color: rgba(255, 255, 255, 0.45);
 }
 
-
-
-/* 🔥 Message bubble */
+/* Message bubbles */
 .msg {
   padding: 8px 10px;
   border-radius: 8px;
   background: var(--glass);
   max-width: 100%;
-  
-  /* ✅ remove side-by-side column / flex alignment */
   display: block;
   text-align: left;
 }
 
-/* your color for ME stays untouched */
+/* Your own messages */
 .msg.me { 
-  background: rgba(255, 20, 147, 0.06); 
+  background: rgba(255, 20, 147, 0.06);
 }
 
-/* ✅ username */
+/* Username */
 .msg .meta {
   font-weight: 700;
   font-size: 13px;
   white-space: nowrap;
   margin-right: 4px;
-  display: inline;     /* ✅ same line */
+  display: inline;
   color: inherit;
 }
 
-/* ✅ message body */
+/* Message body */
 .msg .content {
   font-size: 13px;
   color: #fff;
-  display: inline;      /* ✅ same line + wraps naturally */
+  display: inline;
   white-space: normal;
   word-break: break-word;
 }
-
-#messages {
-  position: relative; /* ensures modal positions correctly within chat */
-}
-.msg {
-  background: transparent !important;
-}
-
 
 /* Bottom-right "New" button */
 .scroll-to-bottom-btn {

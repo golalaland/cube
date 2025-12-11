@@ -1112,11 +1112,11 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
   margin-bottom: 10px;
 }
 
-/* ==== TAB BUTTONS — CUBE THEME ==== */
+/* Tab Buttons */
 .tab-btn {
   flex: 1;
   background: rgba(195, 246, 12, 0.1); /* subtle Cube glow */
-  color: #c3f60c;
+  color: #c3f60c;                       /* Cube text color */
   border: none;
   padding: 6px 4px;
   border-radius: 4px;
@@ -1124,32 +1124,24 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
   font-weight: 500;
   font-size: 13px;
   text-align: center;
-  transition: all 0.2s ease, box-shadow 0.2s ease;
-  box-shadow: 0 0 4px rgba(195, 246, 12, 0.25);
-}
-
-.tab-btn:hover {
-  box-shadow: 0 0 8px rgba(195, 246, 12, 0.5);
-  transform: scale(1.03);
 }
 
 .tab-btn.active {
-  background: linear-gradient(90deg, #c3f60c, #e8ff6a);
-  color: #000;
-  font-weight: 600;
-  box-shadow: 0 0 12px rgba(195, 246, 12, 0.6);
+  background: linear-gradient(90deg, #c3f60c, #e8ff6a); /* Cube gradient */
+  color: #000; /* contrast for active tab */
 }
 
-/* ==== TAB CONTENT ==== */
+/* General tab content styling */
 .tab-content label {
   display: inline-block;
   width: 100px;
   margin-right: 8px;
   vertical-align: top;
   font-size: 13px;
-  color: #c3f60c;
+  color: #c3f60c; /* Cube label color */
 }
 
+/* Inputs & textareas */
 .tab-content input,
 .tab-content textarea {
   display: inline-block;
@@ -1158,20 +1150,13 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
   margin-bottom: 8px;
   padding: 6px;
   border-radius: 4px;
-  border: 1px solid rgba(195, 246, 12, 0.3);
+  border: none;
   font-size: 13px;
   vertical-align: top;
-  background: rgba(0, 0, 0, 0.8);
-  color: #eee;
   resize: vertical;
-  transition: all 0.2s ease, box-shadow 0.2s ease;
-}
-
-.tab-content input:focus,
-.tab-content textarea:focus {
+  color: #eee; /* text contrast for dark background */
+  background: rgba(0,0,0,0.8); /* dark input background */
   outline: none;
-  box-shadow: 0 0 8px rgba(195, 246, 12, 0.6);
-  border-color: #c3f60c;
 }
 
 /* Divider spacing */
@@ -1181,15 +1166,13 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
   border-top: 1px solid rgba(195, 246, 12, 0.2);
 }
 
-/* ==== POST LOGIN LOADER ==== */
+/* Post login loader */
 #postLoginLoader {
   transition: opacity 0.4s ease;
 }
-
 #postLoginLoader[style*="display: none"] {
   opacity: 0;
 }
-
 
 /* ===== Notifications Tab ===== */
 .notifications-header {
@@ -2204,10 +2187,6 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
 </div>
 
   
-
-
-
-
 <!-- HIGHLIGHTS ($ELL CONTENT) — FINAL POLISHED VERSION -->
 <div id="sellContentBar" style="margin:40px auto 0; max-width:440px; font-family:'Inter', system-ui, -apple-system, sans-serif;">
   <div style="text-align:center; margin-bottom:28px;">

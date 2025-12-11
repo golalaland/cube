@@ -1746,30 +1746,37 @@ could you have broken something?  i only asked for color change:
   opacity: 1;
 }
 
-/* STAR HOSTS = GOD TIER ENERGY */
+/* STAR HOSTS — GOLD EDITION */
 .star-hosts-btn {
- background: linear-gradient(90deg, #c3f60c, #e8ff6a, #c3f60c);
+  background: linear-gradient(90deg, #FFD700, #FFEC8B, #FFD700); /* gold gradient */
   background-size: 200% 200%;
-  animation: starPulse 4s ease infinite;
-  color: #fff;
+  animation: goldPulse 4s ease infinite;                        /* slow pulse across gradient */
+  color: #000;                                                   /* dark text for contrast */
   font-weight: 700;
-  text-shadow: 0 0 8px rgba(0, 0, 0, 0.6);
-box-shadow: 0 0 15px rgba(195,246,12,0.6), 0 0 30px rgba(232,255,106,0.5);
+  text-shadow: 0 0 6px rgba(0, 0, 0, 0.5);                      /* subtle depth */
+  border-radius: 25px;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  box-shadow: 
+    0 0 12px rgba(255, 215, 0, 0.6),                            /* subtle gold glow */
+    0 0 24px rgba(255, 236, 139, 0.5);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .star-hosts-btn:hover {
   transform: scale(1.05);
   box-shadow: 
-    0 0 25px rgba(138, 43, 226, 0.9),
-    0 0 50px rgba(0, 255, 234, 0.8);
-  animation-duration: 1.5s;
+    0 0 22px rgba(255, 215, 0, 0.9),
+    0 0 40px rgba(255, 236, 139, 0.8);
+  animation-duration: 2s;                                        /* faster pulse on hover */
 }
 
-@keyframes starPulse {
+@keyframes goldPulse {
   0%, 100% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
 }
-  
+
 /* Tiny inline spinner — no size change, no text flicker */
 .btn-spinner {
   display: inline-block;

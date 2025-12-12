@@ -2270,8 +2270,8 @@ setInterval(() => {
 
 const START_BG   = "https://cdn.shopify.com/s/files/1/0962/6648/6067/files/9F6F9EAC-F165-4C70-85CB-B2351A3B8C59.png?v=1763282422";
 const GAME_BGS   = [
-  "https://cdn.shopify.com/s/files/1/0962/6648/6067/files/Beige_Minimal_Romantic_Love_Questions_Card_Game_Document_1080_x_1920_px_5.jpg?v=1765500400",
-  "https://cdn.shopify.com/s/files/1/0962/6648/6067/files/Beige_Minimal_Romantic_Love_Questions_Card_Game_Document_1080_x_1920_px_5.jpg?v=1765500400",
+  "https://cdn.shopify.com/s/files/1/0962/6648/6067/files/IMG_6345.jpg?v=1765409020",
+  "https://cdn.shopify.com/s/files/1/0962/6648/6067/files/IMG_6351.jpg?v=1765409019",
   "https://cdn.shopify.com/s/files/1/0962/6648/6067/files/IMG_6346.jpg?v=1765409020",
   // add the rest
 ];

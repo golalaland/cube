@@ -4159,7 +4159,7 @@ function showHighlightsModal(videos) {
       <p style="margin:0;">
         <span style="background:linear-gradient(90deg,#00ffea,#ff00f2,#8a2be2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:700;">
           Cuties 💕
-        </span> watch personal & exclusive moments from girls on cube.
+        </span> are cam-worthy moments from girls on cube.
 <br>
        Unlock a cutie’s clip with STRZ and get closer.
       </p>

@@ -1542,7 +1542,7 @@ async function processWithdrawalAndCelebrate(amount, isFastTrack = false) {
 const CONFIG = {
   BID_COST: 50,                    // Stars needed to join Bid Royale
   POOL_INCREASE_PER_PLAYER: 100,   // ₦ added to prize pool when someone joins (e.g. 100, 200, 500)
-  BASE_PRIZE_POOL: 500000,          // ₦50,000 starting pool (even if 0 players)
+  BASE_PRIZE_POOL: 1000000,          // ₦50,000 starting pool (even if 0 players)
   MAX_PRIZE_POOL: 5000000,          // Max pool cap (set to null for unlimited growth)
   // Examples to copy-paste:
   // BIG HYPE MODE → POOL_INCREASE_PER_PLAYER: 500, BASE_PRIZE_POOL: 200000, MAX_PRIZE_POOL: null
@@ -1673,8 +1673,6 @@ document.getElementById('confirmBidModal')?.addEventListener('click', e => {
   }
 });
 
-
-/* ====================== FINAL BID JOIN — CLEAN & INSTANT ====================== */
 /* ====================== FINAL BID JOIN — 100% WORKING & FLAWLESS ====================== */
 document.getElementById('finalConfirmBtn')?.addEventListener('click', async () => {
   const btn = document.getElementById('finalConfirmBtn');
@@ -1815,7 +1813,7 @@ function startDailyBidEngine() {
       timerEl.style.color = "#666";
     }
 
-     // === LIVE PRIZE POOL & PLAYER COUNT ===
+  
         // === LIVE PRIZE POOL & PLAYER COUNT ===
     if (unsubStats) unsubStats();
     if (unsubLeaderboard) unsubLeaderboard();

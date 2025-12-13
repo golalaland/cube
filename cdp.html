@@ -165,6 +165,8 @@
          alt="HabaHouse Logo" 
          class="sip-logo">
 
+    <div class="title">SIP PICKER</div>
+    <div class="welcome" id="welcomeMsg">
       Welcome <span id="username">Guest</span>, you're on <span id="hostName">no one</span>'s VIP!
     </div>
    
@@ -288,7 +290,7 @@
       currentUser = { uid, ...data, email: stored.email };
 
       DOM.username.textContent = currentUser.chatId || stored.email.split('@')[0];
-      const host = currentUser.hostName || currentUser.referral || 'someone';
+      const host = currentUser.hostName || currentUser.invitedBy || 'someone';
       DOM.hostName.textContent = host.startsWith('@') ? host.slice(1) : host;
 
       DOM.stars.textContent = (currentUser.stars || 0).toLocaleString();

@@ -4286,14 +4286,14 @@ const videoEl = document.createElement("video");
 videoEl.muted = true;
 videoEl.loop = true;
 videoEl.preload = "metadata";
-videoEl.playsInline = true; // Allows inline preview + programmatic control on mobile
+videoEl.playsInline = true; // Essential for inline preview on mobile
 videoEl.style.cssText = "width:100%;height:100%;object-fit:cover;";
 
 if (isUnlocked) {
   videoEl.src = video.previewClip || video.highlightVideo || video.videoUrl || "";
   videoEl.load();
 
-  // Hover preview play (desktop)
+  // Desktop hover preview
   videoContainer.onmouseenter = () => videoEl.play().catch(() => {});
   videoContainer.onmouseleave = () => {
     videoEl.pause();
@@ -4305,26 +4305,23 @@ if (isUnlocked) {
   const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 
   const enterNativeFullscreen = () => {
-    // Ensure playback starts first (required on many mobile browsers)
+    // Start playing (required for reliable entry on many browsers)
     videoEl.play().catch(() => {});
 
-    // Temporarily add native controls for reliable native fullscreen entry
-    // (especially critical on iOS Safari for webkitEnterFullscreen)
-    videoEl.controls = true;
+    // iOS Safari: use webkitEnterFullscreen for true native player
+    if (typeof videoEl.webkitEnterFullscreen === 'function') {
+      videoEl.webkitEnterFullscreen();
+      return;
+    }
 
-    if (videoEl.webkitEnterFullscreen) {
-      videoEl.webkitEnterFullscreen(); // True native player on iOS
-    } else if (videoEl.requestFullscreen) {
+    // Fallback for Android/others: standard Fullscreen API
+    if (videoEl.requestFullscreen) {
       videoEl.requestFullscreen();
     } else if (videoEl.webkitRequestFullscreen) {
       videoEl.webkitRequestFullscreen();
     } else if (videoEl.msRequestFullscreen) {
       videoEl.msRequestFullscreen();
     }
-
-    // Optional: Remove controls after a short delay if you don't want them visible
-    // (but keep them during fullscreen for exit button reliability)
-    // setTimeout(() => { videoEl.controls = false; }, 1000);
   };
 
   videoContainer.onclick = (e) => {
@@ -4345,7 +4342,7 @@ if (isUnlocked) {
     }
   };
 } else {
-  // Locked overlay (unchanged)
+  // Locked overlay
   videoEl.src = "";
   const lockedOverlay = document.createElement("div");
   lockedOverlay.innerHTML = `
@@ -4364,10 +4361,10 @@ if (isUnlocked) {
   };
 }
 
-// Append video after overlay
+// Append video last (on top of overlay if present)
 videoContainer.appendChild(videoEl);
 
-// Info panel (unchanged from previous)
+// Info panel (unchanged)
 const infoPanel = document.createElement("div");
 infoPanel.style.cssText = "background: linear-gradient(180deg, #1a0b2e, #0f0519);padding:12px;display:flex;flex-direction:column;gap:6px;border-top: 1px solid #8a2be2;";
 
@@ -4420,7 +4417,7 @@ if (!isUnlocked) {
 infoPanel.append(title, uploader, unlockBtn);
 card.append(videoContainer, infoPanel);
 content.appendChild(card);
-
+    
 function updateButtonStates() {
   toggleBtn.textContent = "Show Unlocked";
   toggleBtn.style.background = "linear-gradient(135deg, #240046, #3c0b5e)";

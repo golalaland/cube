@@ -4158,9 +4158,10 @@ function showHighlightsModal(videos) {
       box-shadow:0 0 16px rgba(255,0,242,0.25);border-radius:12px;position:relative;">
       <p style="margin:0;">
         <span style="background:linear-gradient(90deg,#00ffea,#ff00f2,#8a2be2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:700;">
-          Highlights
-        </span> are exclusive creator moments.<br>
-        Unlock premium clips with STRZ to support your favorite creators.
+          Cuties 💕
+        </span> Cuties are personal moments from girls on Cube.
+<br>
+       Unlock a cutie’s clip with STRZ and enjoy her vibe.
       </p>
     </div>`;
   Object.assign(intro.style, { position: "sticky", top: "10px", zIndex: "1001", marginBottom: "12px" });

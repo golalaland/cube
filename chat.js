@@ -4279,38 +4279,41 @@ function renderCards(videosToRender) {
       card.style.boxShadow = "0 4px 20px rgba(138,43,226,0.4)";
     };
 
-  const videoContainer = document.createElement("div");
+const videoContainer = document.createElement("div");
 videoContainer.style.cssText = "height:320px;overflow:hidden;position:relative;background:#000;cursor:pointer;";
 
 const videoEl = document.createElement("video");
 videoEl.muted = true;
 videoEl.loop = true;
 videoEl.preload = "metadata";
-videoEl.playsInline = true; // Critical: allows inline preview playback and better control on mobile
+videoEl.playsInline = true; // Allows inline preview + programmatic control on mobile
 videoEl.style.cssText = "width:100%;height:100%;object-fit:cover;";
 
 if (isUnlocked) {
   videoEl.src = video.previewClip || video.highlightVideo || video.videoUrl || "";
   videoEl.load();
 
-  // Hover / preview play (desktop)
+  // Hover preview play (desktop)
   videoContainer.onmouseenter = () => videoEl.play().catch(() => {});
   videoContainer.onmouseleave = () => {
     videoEl.pause();
     videoEl.currentTime = 0;
   };
 
-  // Click handling: tap for native fullscreen on mobile, double-click on desktop
+  // Click handling
   let lastTap = 0;
   const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 
-  const enterFullscreen = () => {
-    // Start playing first (helps on some Android browsers)
+  const enterNativeFullscreen = () => {
+    // Ensure playback starts first (required on many mobile browsers)
     videoEl.play().catch(() => {});
 
-    // Prioritize iOS native fullscreen
+    // Temporarily add native controls for reliable native fullscreen entry
+    // (especially critical on iOS Safari for webkitEnterFullscreen)
+    videoEl.controls = true;
+
     if (videoEl.webkitEnterFullscreen) {
-      videoEl.webkitEnterFullscreen(); // Native player on iOS Safari
+      videoEl.webkitEnterFullscreen(); // True native player on iOS
     } else if (videoEl.requestFullscreen) {
       videoEl.requestFullscreen();
     } else if (videoEl.webkitRequestFullscreen) {
@@ -4318,6 +4321,10 @@ if (isUnlocked) {
     } else if (videoEl.msRequestFullscreen) {
       videoEl.msRequestFullscreen();
     }
+
+    // Optional: Remove controls after a short delay if you don't want them visible
+    // (but keep them during fullscreen for exit button reliability)
+    // setTimeout(() => { videoEl.controls = false; }, 1000);
   };
 
   videoContainer.onclick = (e) => {
@@ -4325,20 +4332,20 @@ if (isUnlocked) {
 
     if (isTouch) {
       // Mobile: single tap → native fullscreen
-      enterFullscreen();
+      enterNativeFullscreen();
     } else {
-      // Desktop: double-click → fullscreen, single click → modal/full video
+      // Desktop: double-click → fullscreen, single click → modal
       const currentTime = new Date().getTime();
       if (currentTime - lastTap < 300) {
-        enterFullscreen();
+        enterNativeFullscreen();
       } else {
-        playFullVideo(video); // Your existing modal or in-page full video function
+        playFullVideo(video);
       }
       lastTap = currentTime;
     }
   };
 } else {
-  // Locked video overlay
+  // Locked overlay (unchanged)
   videoEl.src = "";
   const lockedOverlay = document.createElement("div");
   lockedOverlay.innerHTML = `
@@ -4357,10 +4364,10 @@ if (isUnlocked) {
   };
 }
 
-// Append video element after overlay (if present)
+// Append video after overlay
 videoContainer.appendChild(videoEl);
 
-// Info panel (unchanged)
+// Info panel (unchanged from previous)
 const infoPanel = document.createElement("div");
 infoPanel.style.cssText = "background: linear-gradient(180deg, #1a0b2e, #0f0519);padding:12px;display:flex;flex-direction:column;gap:6px;border-top: 1px solid #8a2be2;";
 

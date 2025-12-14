@@ -4710,34 +4710,6 @@ async function unlockVideo(video) {
   }
 }
 
-function playFullVideo(video) {
-  const src = video.highlightVideo || video.videoUrl || video.previewClip || "";
-  if (!src) return showGoldAlert("Video not found");
-
-  // Remove any existing custom player
-  document.querySelectorAll('.custom-video-player').forEach(el => el.remove());
-
-  // Create a hidden <video> that instantly opens native browser player
-  const videoEl = document.createElement("video");
-  videoEl.src = src;
-  videoEl.controls = true;
-  videoEl.autoplay = true;
-  videoEl.playsInline = true;
-  videoEl.style.display = "none"; // invisible — we don't want to show it
-
-  // Optional: mark it so we can clean it later
-  videoEl.classList.add("custom-video-player");
-
-  document.body.appendChild(videoEl);
-
-  // This triggers the native mobile/browser fullscreen player immediately
-  videoEl.play();
-
-  // Auto-remove after it ends or user closes (keeps DOM clean)
-  videoEl.addEventListener("ended", () => videoEl.remove());
-  videoEl.addEventListener("pause", () => setTimeout(() => videoEl.remove(), 1000));
-}
-
 async function loadMyClips() {
   const grid = document.getElementById("myClipsGrid");
   const noMsg = document.getElementById("noClipsMessage");

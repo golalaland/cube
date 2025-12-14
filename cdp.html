@@ -182,7 +182,7 @@
   <h2 class="pick-title">PICK A CARD</h2>
 
 <p class="vip-tease">
-  You’ve joined <span id="hostName"> her</span> to party — pick a drink and she gets one too FREE.
+  You’ve joined <span id="referral"> her</span> to party — pick a drink and she gets one too FREE.
   get ready for more action,<br class="mobile-br">
   this party's just got real interesting.
 </p>
@@ -249,6 +249,7 @@
   const DOM = {
     username: document.getElementById('username'),
     hostName: document.getElementById('hostName'),
+    referral: document.getElementById('referral'),
     stars: document.getElementById('stars-count'),
     cash: document.getElementById('cash-count'),
     cardsGrid: document.getElementById('cards-grid'),
@@ -383,7 +384,7 @@ const pickCard = async (card) => {
         userId: uid,
         userEmail: currentUser.email,
         username: currentUser.chatId || currentUser.email.split('@')[0],
-        invitedBy: currentUser.invitedBy || currentUser.hostName,
+        invitedBy: currentUser.invitedBy || currentUser.referral,
         drink: card.dataset.drink,
         phone,
         cardNumber: Number(card.dataset.number),

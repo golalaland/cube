@@ -304,6 +304,47 @@
     0%   { filter: drop-shadow(0 0 45px #c3f60c) drop-shadow(0 0 90px rgba(195,246,12,0.7)); }
     100% { filter: drop-shadow(0 0 60px #c3f60c) drop-shadow(0 0 120px rgba(195,246,12,1)); }
   }
+  .btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 200px;
+  height: 48px;
+}
+
+.btn .spinner {
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  display: none;
+}
+
+.btn.loading .btn-text {
+  visibility: hidden;
+}
+
+.btn.loading .spinner {
+  display: block;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.btn.gold {
+  background: linear-gradient(135deg, #d4af37, #ffd700);
+  color: #000;
+  font-weight: 800;
+}
+
+.hidden {
+  display: none;
+}
+
 </style>
 
 
@@ -326,10 +367,16 @@
 <div class="vip-toggle" id="vipToggle"><div class="vip-circle"></div></div>
 <div id="vipMessage">You're in VIP zone, way to go!</div>
 
-<button id="submitBtn">
-  <span class="btn-text">Sign Up</span>
-  <span class="spinner" id="spinner"></span>
+<button id="submitBtn" class="btn primary">
+  <span class="btn-text">Create Account</span>
+  <span class="spinner"></span>
 </button>
+
+<button id="vipPayBtn" class="btn gold hidden">
+  <span class="btn-text">VIP ACCESS</span>
+  <span class="spinner"></span>
+</button>
+
 
 <div class="message" id="message"></div>
   <footer>
@@ -599,6 +646,7 @@ if (inviterDocId) {
   }).catch(err => {
     console.warn("Failed to update inviter:", err);
   });
+  
 }
 
     // SUCCESS — FULL REDIRECT
@@ -606,9 +654,20 @@ if (inviterDocId) {
     localStorage.setItem("vipUser", JSON.stringify({ email, chatId }));
     if (isVIP) triggerSprayConfetti();
 
-    setTimeout(() => {
-      window.location.href = "shop.html"; // Guaranteed redirect
-    }, 1800);
+   if (isVIP) {
+  triggerSprayConfetti();
+
+  // STOP redirect
+  submitBtn.classList.add('hidden');
+  submitBtn.classList.remove('loading');
+
+  vipPayBtn.classList.remove('hidden');
+
+  messageEl.textContent = "Your VIP slot is reserved 🔒";
+} else {
+  setTimeout(() => {
+    window.location.href = "shop.html";
+  }, 1800);
 
   } catch (err) {
     console.error(err);
@@ -620,6 +679,29 @@ if (inviterDocId) {
   }
 };
 });
+vipPayBtn.onclick = () => {
+  vipPayBtn.classList.add('loading');
+
+  const handler = PaystackPop.setup({
+    key: 'YOUR_PUBLIC_KEY',
+    email,
+    amount: 500000, // ₦5,000 example (kobo)
+    currency: "NGN",
+    ref: 'VIP_' + Date.now(),
+    callback: function(response) {
+      vipPayBtn.classList.remove('loading');
+      messageEl.textContent = "VIP Activated ✨";
+      window.location.href = "shop.html";
+    },
+    onClose: function() {
+      vipPayBtn.classList.remove('loading');
+      messageEl.textContent = "Payment cancelled";
+    }
+  });
+
+  handler.openIframe();
+};
+
 </script>
 </body>
 </html>

@@ -1019,7 +1019,8 @@ async function fetchLeaderboard(period = "daily") {
     const fieldPath = period === "daily" ? `tapsDaily.${key}` :
                      period === "weekly" ? `tapsWeekly.${key}` : `tapsMonthly.${key}`;
 
-    const q = query(collection(db, "users"), orderBy(fieldPath, "desc"), limit(33));
+    // ONLY FETCH TOP 10 + 3 BUFFER = 13 READS MAX
+    const q = query(collection(db, "users"), orderBy(fieldPath, "desc"), limit(13));
     const snap = await getDocs(q);
 
     const topScores = [];
@@ -1037,22 +1038,33 @@ async function fetchLeaderboard(period = "daily") {
       }
     });
 
-    // My rank (non-blocking)
+    // — MY RANK: ZERO extra reads for most users —
     let myTaps = 0, myRank = null;
     if (currentUser?.uid) {
-      const myDoc = await getDoc(doc(db, "users", currentUser.uid));
-      if (myDoc.exists()) {
-        const d = myDoc.data();
-        myTaps = d.tapsDaily?.[key] ?? d.tapsWeekly?.[key] ?? d.tapsMonthly?.[key] ?? 0;
+      // First, check if I'm in the top 13 (already fetched!)
+      const inTop = topScores.findIndex(u => u.uid === currentUser.uid);
+      if (inTop !== -1) {
+        myRank = inTop + 1;
+        myTaps = topScores[inTop].taps;
+      } else {
+        // Only if I'm NOT in top 13 → one cheap read for my own doc
+        const myDoc = await getDoc(doc(db, "users", currentUser.uid));
+        if (myDoc.exists()) {
+          const d = myDoc.data();
+          myTaps = d.tapsDaily?.[key] ?? d.tapsWeekly?.[key] ?? d.tapsMonthly?.[key] ?? 0;
 
-        const inTop = topScores.findIndex(u => u.uid === currentUser.uid);
-        myRank = inTop !== -1 ? inTop + 1 : myTaps > 0 ? (await getCountFromServer(
-          query(collection(db, "users"), where(fieldPath, ">", myTaps))
-        )).data().count + 1 : null;
+          if (myTaps > 0) {
+            // Only one extra count query if needed
+            const betterCount = await getCountFromServer(
+              query(collection(db, "users"), where(fieldPath, ">", myTaps))
+            );
+            myRank = betterCount.data().count + 1;
+          }
+        }
       }
     }
 
-    const payload = { topScores, myTaps, myRank };
+    const payload = { topScores: topScores.slice(0, 10), myTaps, myRank };
     leaderboardCache[period] = { data: payload, time: now };
     renderLeaderboardFromData(payload);
 

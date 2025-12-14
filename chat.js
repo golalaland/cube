@@ -4246,7 +4246,7 @@ modal.addEventListener("scroll", () => {
         <stop stop-color="#00ffea"/><stop offset="1" stop-color="#ff00f2"/>
       </linearGradient></defs>
     </svg>
-    <input id="highlightSearchInput" type="text" placeholder="Search by creator..."
+    <input id="highlightSearchInput" type="text" placeholder="Search by ChatID..."
            style="flex:1;background:transparent;border:none;outline:none;color:#fff;font-size:13px;"/>
   `;
   searchWrap.appendChild(searchInputWrap);

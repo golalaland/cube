@@ -391,7 +391,6 @@ onAuthStateChanged(auth, async (firebaseUser) => {
   }
 });
 
-// NOTIFICATIONS LISTENER
 function setupNotificationsListener(userId) {
   if (!userId) return;
   const list = document.getElementById("notificationsList");
@@ -408,13 +407,25 @@ function setupNotificationsListener(userId) {
 
   notificationsUnsubscribe = onSnapshot(q, (snap) => {
     if (snap.empty) {
-    list.innerHTML = `<p style="opacity:0.6;text-align:center;padding:20px;">No notifications yet</p>`;
+      list.innerHTML = `<p style="opacity:0.6;text-align:center;padding:20px;">No notifications yet</p>`;
       return;
     }
+
     list.innerHTML = snap.docs.map(doc => {
       const n = doc.data();
       const time = n.timestamp?.toDate?.()?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) || "--:--";
-      return `<div class="notification-item ${n.read ? '' : 'unread'}"><div>${n.message}</div><small>${time}</small></div>`;
+
+      // Normalize line breaks in message
+      const formattedMessage = (n.message || "").replace(/\n/g, "<br>");
+
+      return `
+        <div class="notification-item ${n.read ? '' : 'unread'}" data-type="${n.type || ''}">
+          ${n.icon ? `<div class="notif-icon">${n.icon}</div>` : ''}
+          ${n.title ? `<div class="notif-title">${n.title}</div>` : ''}
+          <div class="notif-message">${formattedMessage}</div>
+          <small class="notif-time">${time}</small>
+        </div>
+      `;
     }).join("");
   });
 }

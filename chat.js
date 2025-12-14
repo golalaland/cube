@@ -4149,37 +4149,50 @@ function showHighlightsModal(videos) {
     fontFamily: "system-ui, sans-serif"
   });
 
-  // === STICKY INTRO ===
+// === STICKY INTRO ===
 const intro = document.createElement("div");
 intro.innerHTML = `
-  <div style="text-align:center;color:#e0b0ff;max-width:640px;margin:0 auto;line-height:1.6;font-size:14px;
+  <div style="
+    text-align:center;
+    color:#e0b0ff;
+    max-width:640px;
+    margin:0 auto;
+    line-height:1.6;
+    font-size:14px;
     background:linear-gradient(135deg,rgba(255,0,242,0.15),rgba(138,43,226,0.12));
-    padding:14px 48px 14px 20px;border:1px solid rgba(138,43,226,0.5);
-    box-shadow:0 0 16px rgba(255,0,242,0.25);border-radius:12px;position:relative;">
+    padding:14px 32px;
+    border:1px solid rgba(138,43,226,0.5);
+    box-shadow:0 0 16px rgba(255,0,242,0.25);
+    border-radius:12px;
+    position:relative;
+  ">
 
-    <!-- Small centered header -->
+    <!-- Header -->
     <div style="margin-bottom:6px;">
-     <span style="
-  background:linear-gradient(90deg,#00ffea,#ff00f2,#8a2be2);
-  -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent;
-  font-weight:700;
-  display:inline-block;
-  transform: translateX(5px); /* ← adjust this */
-">
-  Cuties💕
-</span>
+      <span style="
+        background:linear-gradient(90deg,#00ffea,#ff00f2,#8a2be2);
+        -webkit-background-clip:text;
+        -webkit-text-fill-color:transparent;
+        font-weight:700;
+        display:inline-block;
+        transform:translateX(2px);
+        letter-spacing:0.2px;
+      ">
+        Cuties💕
+      </span>
     </div>
 
-    <!-- Text lines with tight spacing -->
+    <!-- Body text -->
     <p style="margin:0 0 3px;">
-      Cam-worthy moments from girls on cube. 
+      Cam-worthy moments from girls on cube.
     </p>
     <p style="margin:0;">
       Unlock a cutie’s clip with STRZ and get closer.
     </p>
 
-  </div>`;
+  </div>
+`;
+
 Object.assign(intro.style, {
   position: "sticky",
   top: "10px",
@@ -4188,6 +4201,7 @@ Object.assign(intro.style, {
 });
 
 modal.appendChild(intro);
+
 modal.addEventListener("scroll", () => {
   intro.style.opacity = modal.scrollTop > 50 ? "0.7" : "1";
 });

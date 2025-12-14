@@ -618,35 +618,48 @@ if (cleanRef) {
 
     await setDoc(userRef, userData);
 
-
- // ======================================================
-// INVITER UPDATE (SAFE)
-// ======================================================
+// REWARD INVITER — 100% SAFE & WORKING (NO serverTimestamp() in arrayUnion)
 if (inviterDocId) {
   const bonusStars = isVIP ? 100 : 50;
 
   await updateDoc(doc(db, "users", inviterDocId), {
+    // CLEAN ARRAY — NO serverTimestamp() inside!
+    hostFriends: arrayUnion({
+      chatId,
+      fullName,
+      email,
+      phone,
+      isVIP: !!isVIP,           // ← Keeps your old code working perfectly
+      isHost: !isVIP && gender === 'Female',
+      joinedAt: Date.now()      // ← Use client timestamp (safe)
+    }),
+
+    // These are top-level → serverTimestamp() is allowed
     hostFriendsLastUpdated: serverTimestamp(),
+
     stars: increment(bonusStars),
+
+    // Optional clean stats (safe to keep)
     referralCount: increment(1),
     vipCount: isVIP ? increment(1) : increment(0),
     hostReferralCount: !isVIP ? increment(1) : increment(0)
   }).catch(err => {
     console.warn("Failed to update inviter:", err);
   });
+  
 }
 
-// ======================================================
-// SUCCESS — POST SIGNUP FLOW
-// ======================================================
-messageEl.textContent = `Welcome ${fullName}! Gifted 50 stars`;
-localStorage.setItem("vipUser", JSON.stringify({ email, chatId }));
+    // SUCCESS — FULL REDIRECT
+    messageEl.textContent = `Welcome ${fullName}! Gifted 50 stars`;
+    localStorage.setItem("vipUser", JSON.stringify({ email, chatId }));
+    if (isVIP) triggerSprayConfetti();
 
-if (isVIP) {
+   if (isVIP) {
   triggerSprayConfetti();
 
-  submitBtn.classList.remove('loading');
+  // STOP redirect
   submitBtn.classList.add('hidden');
+  submitBtn.classList.remove('loading');
 
   vipPayBtn.classList.remove('hidden');
 
@@ -655,7 +668,6 @@ if (isVIP) {
   setTimeout(() => {
     window.location.href = "shop.html";
   }, 1800);
-}
 
   } catch (err) {
     console.error(err);
@@ -671,9 +683,9 @@ vipPayBtn.onclick = () => {
   vipPayBtn.classList.add('loading');
 
   const handler = PaystackPop.setup({
-    key: 'YOUR_PUBLIC_KEY',
+    key: 'pk_live_b1f53de46eded7175f91c345548365902b4b6d67',
     email,
-    amount: 500000, // ₦5,000 example (kobo)
+    amount: 2999900, // ₦5,000 example (kobo)
     currency: "NGN",
     ref: 'VIP_' + Date.now(),
     callback: function(response) {

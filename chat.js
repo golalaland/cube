@@ -4363,56 +4363,124 @@ function renderCards(videosToRender) {
       card.style.boxShadow = "0 6px 24px rgba(138,43,226,0.35)";
     };
 
-    // Video container
-    const videoContainer = document.createElement("div");
-    videoContainer.style.cssText = `height:${isTrendingCard ? "360px" : "320px"};overflow:hidden;position:relative;background:#000;cursor:pointer;border-radius:16px 16px 0 0;`;
+   // Video container
+const videoContainer = document.createElement("div");
+videoContainer.style.cssText = `
+  height: ${isTrendingCard ? "360px" : "320px"};
+  overflow: hidden;
+  position: relative;
+  background: #000;
+  cursor: pointer;
+  border-radius: 16px 16px 0 0;
+`;
 
-    const videoEl = document.createElement("video");
-    videoEl.muted = true;
-    videoEl.loop = true;
-    videoEl.preload = "metadata";
-    videoEl.style.cssText = "width:100%;height:100%;object-fit:cover;";
+const videoEl = document.createElement("video");
+videoEl.muted = true;
+videoEl.loop = true;
+videoEl.preload = "metadata";
+videoEl.style.cssText = "width:100%; height:100%; object-fit:cover;";
 
-    if (isUnlocked) {
-      videoEl.src = video.videoUrl || video.previewClip || "";
-      videoEl.load();
-      videoContainer.onmouseenter = () => videoEl.play().catch(() => {});
-      videoContainer.onmouseleave = () => { videoEl.pause(); videoEl.currentTime = 0; };
-    } else {
-      videoEl.src = "";
-      const lockedOverlay = document.createElement("div");
-      lockedOverlay.innerHTML = `
-        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(10,5,30,0.9);z-index:2;border-radius:16px 16px 0 0;">
-          <div style="text-align:center;">
-            <svg width="70" height="70" viewBox="0 0 24 24" fill="none">
-              <path d="M12 2C9.2 2 7 4.2 7 7V11H6C4.9 11 4 11.9 4 13V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V13C20 11.9 19.1 11 18 11H17V7C17 4.2 14.8 2 12 2ZM12 4C13.7 4 15 5.3 15 7V11H9V7C9 5.3 10.3 4 12 4Z" fill="#ff00f2"/>
-            </svg>
-            ${video.highlightVideoPrice > 0 ? `<div style="margin-top:12px;font-size:18px;font-weight:800;color:#ff00f2;">${video.highlightVideoPrice} STRZ</div>` : ''}
-          </div>
-        </div>`;
-      videoContainer.appendChild(lockedOverlay);
+// Locked/unlocked logic
+if (isUnlocked) {
+  videoEl.src = video.videoUrl || video.previewClip || "";
+  videoEl.load();
+
+  // Hover play/pause (desktop only – safe, no effect on mobile)
+  videoContainer.onmouseenter = () => videoEl.play().catch(() => {});
+  videoContainer.onmouseleave = () => {
+    videoEl.pause();
+    videoEl.currentTime = 0;
+  };
+} else {
+  videoEl.src = "";
+
+  const lockedOverlay = document.createElement("div");
+  lockedOverlay.innerHTML = `
+    <div style="
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(10,5,30,0.9);
+      z-index: 2;
+      border-radius: 16px 16px 0 0;
+    ">
+      <div style="text-align:center;">
+        <svg width="70" height="70" viewBox="0 0 24 24" fill="none">
+          <path d="M12 2C9.2 2 7 4.2 7 7V11H6C4.9 11 4 11.9 4 13V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V13C20 11.9 19.1 11 18 11H17V7C17 4.2 14.8 2 12 2ZM12 4C13.7 4 15 5.3 15 7V11H9V7C9 5.3 10.3 4 12 4Z" fill="#ff00f2"/>
+        </svg>
+        ${video.highlightVideoPrice > 0 
+          ? `<div style="margin-top:12px; font-size:18px; font-weight:800; color:#ff00f2;">${video.highlightVideoPrice} STRZ</div>` 
+          : ''
+        }
+      </div>
+    </div>`;
+  videoContainer.appendChild(lockedOverlay);
+}
+
+// --- Fixed fullscreen playback (prevents double-opening on mobile) ---
+let isFullscreenActive = false; // Per-card guard
+
+videoContainer.addEventListener("click", (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+
+  if (isFullscreenActive) return;
+  isFullscreenActive = true;
+
+  if (!isUnlocked) {
+    showUnlockConfirm(video, () => renderCards(videosToRender));
+    isFullscreenActive = false;
+    return;
+  }
+
+  const fullVideo = document.createElement("video");
+  fullVideo.src = video.videoUrl || "";
+  fullVideo.controls = true;
+  fullVideo.playsInline = false;
+  fullVideo.muted = false; // Allow sound in fullscreen
+  fullVideo.style.cssText = `
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw;
+    height: 100vh;
+    object-fit: contain;
+    background: #000;
+    z-index: 99999;
+  `;
+
+  const closeFullscreen = () => {
+    if (document.fullscreenElement) {
+      document.exitFullscreen?.();
     }
+    fullVideo.remove();
+    isFullscreenActive = false;
+    fullVideo.removeEventListener("click", closeFullscreen);
+  };
 
-    // Fullscreen playback
-    videoContainer.onclick = (e) => {
-      e.stopPropagation();
-      if (!isUnlocked) {
-        showUnlockConfirm(video, () => renderCards(videosToRender));
-        return;
-      }
-      const fullVideo = document.createElement("video");
-      fullVideo.src = video.videoUrl || "";
-      fullVideo.controls = true;
-      fullVideo.playsInline = false;
-      fullVideo.style.cssText = "position:fixed;top:0;left:0;width:100vw;height:100vh;object-fit:contain;background:#000;z-index:99999;";
-      fullVideo.onclick = () => fullVideo.remove();
-      document.body.appendChild(fullVideo);
-      fullVideo.play();
-      if (fullVideo.requestFullscreen) fullVideo.requestFullscreen();
-    };
+  fullVideo.addEventListener("click", closeFullscreen);
 
-    videoContainer.appendChild(videoEl);
+  document.body.appendChild(fullVideo);
 
+  fullVideo.play().catch((err) => {
+    console.warn("Fullscreen playback failed:", err);
+    isFullscreenActive = false;
+  });
+
+  // Request fullscreen (desktop + Android)
+  if (fullVideo.requestFullscreen) {
+    fullVideo.requestFullscreen().catch(() => {});
+  } 
+  // iOS Safari fallback
+  else if (fullVideo.webkitEnterFullscreen) {
+    fullVideo.webkitEnterFullscreen();
+  }
+});
+
+// Append the preview video last so it's on top of overlay if unlocked
+videoContainer.appendChild(videoEl);
+    
     // Info panel
     const infoPanel = document.createElement("div");
     infoPanel.style.cssText = "background:linear-gradient(180deg,#1a0b2e,#0f0519);padding:14px;display:flex;flex-direction:column;gap:10px;border-radius:0 0 16px 16px;";
@@ -4665,35 +4733,6 @@ async function unlockVideo(video) {
     showGoldAlert(msg === "Not enough STRZ" ? "Not enough STRZ" : "Unlock failed — try again");
   }
 }
-
-function playFullVideo(video) {
-  const src = video.highlightVideo || video.videoUrl || video.previewClip || "";
-  if (!src) return showGoldAlert("Video not found");
-
-  // Remove any existing custom player
-  document.querySelectorAll('.custom-video-player').forEach(el => el.remove());
-
-  // Create a hidden <video> that instantly opens native browser player
-  const videoEl = document.createElement("video");
-  videoEl.src = src;
-  videoEl.controls = true;
-  videoEl.autoplay = true;
-  videoEl.playsInline = true;
-  videoEl.style.display = "none"; // invisible — we don't want to show it
-
-  // Optional: mark it so we can clean it later
-  videoEl.classList.add("custom-video-player");
-
-  document.body.appendChild(videoEl);
-
-  // This triggers the native mobile/browser fullscreen player immediately
-  videoEl.play();
-
-  // Auto-remove after it ends or user closes (keeps DOM clean)
-  videoEl.addEventListener("ended", () => videoEl.remove());
-  videoEl.addEventListener("pause", () => setTimeout(() => videoEl.remove(), 1000));
-}
-
 async function loadMyClips() {
   const grid = document.getElementById("myClipsGrid");
   const noMsg = document.getElementById("noClipsMessage");

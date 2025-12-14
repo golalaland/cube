@@ -671,13 +671,19 @@ if (isVIP) {
 };
 });
 vipPayBtn.onclick = () => {
+  const email = emailInput.value.trim().toLowerCase();
+  if (!email || !/@/.test(email)) {
+    messageEl.textContent = "Enter a valid email before paying";
+    return;
+  }
+
   vipPayBtn.classList.add('loading');
 
   const handler = PaystackPop.setup({
     key: 'pk_live_b1f53de46eded7175f91c345548365902b4b6d67',
-    email,
-    amount: 500000, // ₦5,000 example (kobo)
-    currency: "NGN",
+    email: email, // ✅ guaranteed valid
+    amount: 500000,
+    currency: 'NGN',
     ref: 'VIP_' + Date.now(),
     callback: function(response) {
       vipPayBtn.classList.remove('loading');

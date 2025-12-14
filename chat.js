@@ -4169,18 +4169,34 @@ intro.innerHTML = `
 
     <!-- Header -->
     <div style="margin-bottom:6px;">
-      <span style="
-        background:linear-gradient(90deg,#00ffea,#ff00f2,#8a2be2);
-        -webkit-background-clip:text;
-        -webkit-text-fill-color:transparent;
-        font-weight:700;
-        display:inline-block;
-        transform:translateX(2px);
-        letter-spacing:0.2px;
-      ">
-        Cuties💕
-      </span>
+     <span class="cutie-shimmer" style="
+  background:linear-gradient(90deg,#00ffea,#ff00f2,#8a2be2,#ff00f2,#00ffea);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  font-weight:700;
+  display:inline-block;
+  transform:translateX(2px);
+  letter-spacing:0.2px;
+">
+  Cuties💕
+</span>
     </div>
+    
+    const shimmerStyle = document.createElement("style");
+shimmerStyle.textContent = `
+  @keyframes cutieShimmer {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  .cutie-shimmer {
+    background-size: 300% 300%;
+    animation: cutieShimmer 6s ease-in-out infinite;
+  }
+`;
+document.head.appendChild(shimmerStyle);
+    
 
     <!-- Body text -->
     <p style="margin:0 0 3px;">

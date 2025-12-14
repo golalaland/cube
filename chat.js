@@ -4388,15 +4388,31 @@ function renderCards(videosToRender) {
               <path d="M12 2C9.2 2 7 4.2 7 7V11H6C4.9 11 4 11.9 4 13V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V13C20 11.9 19.1 11 18 11H17V7C17 4.2 14.8 2 12 2ZM12 4C13.7 4 15 5.3 15 7V11H9V7C9 5.3 10.3 4 12 4Z" fill="#ff00f2"/>
             </svg>
             ${video.highlightVideoPrice > 0 ? `<div style="margin-top:12px;font-size:18px;font-weight:800;color:#ff00f2;">${video.highlightVideoPrice} STRZ</div>` : ''}
-        
-        </div>`
+          </div>
+        </div>`;
+      videoContainer.appendChild(lockedOverlay);
+    }
 
-      videoContainer.appendChild(videoEl);
+    // Fullscreen playback
+    videoContainer.onclick = (e) => {
+      e.stopPropagation();
+      if (!isUnlocked) {
+        showUnlockConfirm(video, () => renderCards(videosToRender));
+        return;
+      }
+      const fullVideo = document.createElement("video");
+      fullVideo.src = video.videoUrl || "";
+      fullVideo.controls = true;
+      fullVideo.playsInline = false;
+      fullVideo.style.cssText = "position:fixed;top:0;left:0;width:100vw;height:100vh;object-fit:contain;background:#000;z-index:99999;";
+      fullVideo.onclick = () => fullVideo.remove();
+      document.body.appendChild(fullVideo);
+      fullVideo.play();
+      if (fullVideo.requestFullscreen) fullVideo.requestFullscreen();
+    };
 
-// Remove cursor pointer since the whole card now handles clicks
-videoContainer.style.cursor = "default";
- 
-    
+    videoContainer.appendChild(videoEl);
+
     // Info panel
     const infoPanel = document.createElement("div");
     infoPanel.style.cssText = "background:linear-gradient(180deg,#1a0b2e,#0f0519);padding:14px;display:flex;flex-direction:column;gap:10px;border-radius:0 0 16px 16px;";

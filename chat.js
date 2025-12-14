@@ -3473,7 +3473,7 @@ confirmBtn.onclick = async () => {
   }
 }
 // ================================
-// UPLOAD HIGHLIGHT — GOD MODE 2025 + TRENDING BOOST
+// UPLOAD HIGHLIGHT — FIXED TIMESTAMP ISSUE + TRENDING BOOST
 // ================================
 document.getElementById("uploadHighlightBtn")?.addEventListener("click", async () => {
   const btn = document.getElementById("uploadHighlightBtn");
@@ -3533,7 +3533,7 @@ document.getElementById("uploadHighlightBtn")?.addEventListener("click", async (
       finalVideoUrl = await getDownloadURL(snapshot.ref);
     }
 
-    // === SAVE WITH TRENDING FLAG ===
+    // === SAVE WITH TRENDING FLAG (FIXED: use firebase Timestamp) ===
     const clipRef = await addDoc(collection(db, "highlightVideos"), {
       uploaderId: currentUser.uid,
       uploaderName: currentUser.chatId || "Legend",
@@ -3545,8 +3545,11 @@ document.getElementById("uploadHighlightBtn")?.addEventListener("click", async (
       createdAt: serverTimestamp(),
       unlockedBy: [],
       views: 0,
-      isTrending: boostTrending || false,   // ← THIS IS THE KEY
-      trendingUntil: boostTrending ? Timestamp.fromDate(new Date(Date.now() + 24*60*60*1000)) : null
+      isTrending: boostTrending || false,
+      // 24-hour boost expires automatically
+      trendingUntil: boostTrending 
+        ? Timestamp.fromDate(new Date(Date.now() + 24 * 60 * 60 * 1000)) 
+        : null
     });
 
     // === NOTIFY FANS (unchanged) ===

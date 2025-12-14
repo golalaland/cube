@@ -2520,7 +2520,7 @@ function extractColorsFromGradient(gradient) {
 
 
 // URL of your custom star SVG hosted on Shopify
-const customStarURL = "https://cdn.shopify.com/s/files/1/0962/6648/6067/files/128_x_128_px.png?v=1765644826";
+const customStarURL = "https://cdn.shopify.com/s/files/1/0962/6648/6067/files/starssvg.svg?v=1761770774";
 
 // Replace stars in text nodes with SVG + floating stars (invisible)
 function replaceStarsWithSVG(root = document.body) {
@@ -4817,17 +4817,3 @@ window.revealChatAfterLogin = function() {
   const footer = document.getElementById('startupFooter');
   if (footer) footer.classList.add('hidden');
 };
-    const shimmerStyle = document.createElement("style");
-shimmerStyle.textContent = `
-  @keyframes cutieShimmer {
-    0%   { background-position: 0% 50%; }
-    50%  { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-  }
-
-  .cutie-shimmer {
-    background-size: 300% 300%;
-    animation: cutieShimmer 6s ease-in-out infinite;
-  }
-`;
-document.head.appendChild(shimmerStyle);

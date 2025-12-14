@@ -4175,19 +4175,19 @@ intro.innerHTML = `
 
     <!-- Header -->
     <div style="margin-bottom:6px;">
-     <span class="cutie-shimmer" style="
-  background:linear-gradient(90deg,#00ffea,#ff00f2,#8a2be2,#ff00f2,#00ffea);
-  -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent;
-  font-weight:700;
-  display:inline-block;
-  transform:translateX(2px);
-  letter-spacing:0.2px;
-">
-  Cuties💕
-</span>
+      <span style="
+        background:linear-gradient(90deg,#00ffea,#ff00f2,#8a2be2);
+        -webkit-background-clip:text;
+        -webkit-text-fill-color:transparent;
+        font-weight:700;
+        display:inline-block;
+        transform:translateX(2px);
+        letter-spacing:0.2px;
+      ">
+        Cuties💕
+      </span>
     </div>
-    
+
 
     <!-- Body text -->
     <p style="margin:0 0 3px;">

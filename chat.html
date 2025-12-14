@@ -1207,58 +1207,55 @@ could you have broken something?  i only asked for color change:
 
 .mark-read-btn {
   font-size: 11px;
-  background: rgba(195, 246, 12, 0.1); /* subtle Cube glow background */
-  color: #c3f60c;                        /* Cube theme text */
+  background: rgba(195, 246, 12, 0.1);  /* subtle Cube glow */
+  color: #c3f60c;
   border: none;
   border-radius: 20px;
-  padding: 5px 10px;
+  padding: 5px 12px;
   cursor: pointer;
   font-weight: 600;
-  transition: 0.2s ease, box-shadow 0.2s ease;
+  transition: 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
   box-shadow: 0 0 4px rgba(195, 246, 12, 0.3);
 }
 
 .mark-read-btn:hover {
-  background: rgba(195, 246, 12, 0.2);  /* slightly brighter on hover */
+  background: rgba(195, 246, 12, 0.2);
   box-shadow: 0 0 8px rgba(195, 246, 12, 0.5);
   transform: scale(1.05);
 }
 
 .mark-read-btn:active {
   background: rgba(195, 246, 12, 0.25);
-  transform: scale(0.97);
   box-shadow: 0 0 6px rgba(195, 246, 12, 0.4);
+  transform: scale(0.97);
 }
 
-
-/* ==== CUBE THEME NOTIFICATIONS ==== */
+/* ===== CUBE THEME NOTIFICATIONS ===== */
 .notifications-container {
   position: fixed;
-  bottom: 20px;          /* stays at the bottom of the screen */
-  right: 20px;           /* optional: offset from right */
+  bottom: 20px;
+  right: 20px;
   display: flex;
-  flex-direction: column-reverse; /* newest notification at bottom */
+  flex-direction: column-reverse; /* newest at bottom */
   gap: 8px;
   max-height: 60vh;
   overflow-y: auto;
   z-index: 9999;
 }
 
-/* Notification list */
 .notifications-list {
   display: flex;
-  flex-direction: column-reverse; /* newest at bottom */
+  flex-direction: column-reverse;
   gap: 8px;
 }
 
 /* Each notification */
 .notification-item {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 12px;
-  background: rgba(0, 0, 0, 0.6);          /* dark base for neon pop */
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 14px;
+  background: rgba(0, 0, 0, 0.6);
   border-radius: 8px;
   font-size: 13px;
   line-height: 1.4;
@@ -1266,40 +1263,53 @@ could you have broken something?  i only asked for color change:
   cursor: pointer;
   transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
   box-shadow: 0 0 6px rgba(195, 246, 12, 0.25);
+  overflow-wrap: break-word;
 }
 
-/* New / unread notifications */
+/* Unread / new notifications */
 .notification-item.unread,
 .notification-item.new {
-  background: linear-gradient(90deg, #c3f60c, #e8ff6a);  /* Cube theme gradient */
+  background: linear-gradient(90deg, #c3f60c, #e8ff6a);
   color: #000;
   font-weight: 600;
-  animation: fadePulse 0.8s ease-in-out;
-  box-shadow: 0 0 10px rgba(195, 246, 12, 0.6);
+  box-shadow: 0 0 12px rgba(195, 246, 12, 0.6);
+  animation: fadePulse 0.8s ease-in-out infinite alternate;
 }
 
-/* Hover effect */
+/* Hover effect for all notifications */
 .notification-item:hover {
-  background: rgba(195, 246, 12, 0.2);
-  transform: scale(1.01);
+  background: rgba(195, 246, 12, 0.15);
+  transform: scale(1.02);
   box-shadow: 0 0 12px rgba(195, 246, 12, 0.55);
 }
 
 /* Notification icon */
 .notification-icon {
   font-size: 18px;
-  flex-shrink: 0;
   color: #c3f60c;
+  flex-shrink: 0;
+}
+
+/* Notification title */
+.notif-title {
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+/* Notification message */
+.notif-message {
+  white-space: pre-wrap; /* preserves line breaks */
+  word-break: break-word;
 }
 
 /* Notification time */
-.notification-time {
+.notif-time {
   font-size: 10px;
   color: #bbb;
-  margin-left: 10px;
+  margin-top: 2px;
 }
 
-/* Mark as read button */
+/* Mark as read button inside notification */
 .mark-read {
   background: #c3f60c;
   color: #000;
@@ -1308,7 +1318,8 @@ could you have broken something?  i only asked for color change:
   font-size: 10px;
   padding: 4px 8px;
   cursor: pointer;
-  margin-left: 10px;
+  margin-top: 4px;
+  align-self: flex-end;
   transition: all 0.2s ease;
 }
 
@@ -1316,10 +1327,11 @@ could you have broken something?  i only asked for color change:
   opacity: 0.8;
 }
 
-/* ✨ Pulse animation for new notifications */
+/* ===== Animations ===== */
 @keyframes fadePulse {
-  0% { opacity: 0; transform: scale(0.95); }
-  100% { opacity: 1; transform: scale(1); }
+  0% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+  100% { transform: scale(1); }
 }
 
 /* ==== Upload Labels ==== */

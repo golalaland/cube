@@ -1,0 +1,995 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  onSnapshot,
+  collection,
+  getDocs,
+  runTransaction,
+  serverTimestamp,
+  updateDoc
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+/* ------------------ Firebase ------------------ */
+ const firebaseConfig = {
+      apiKey: "AIzaSyD_GjkTox5tum9o4AupO0LeWzjTocJg8RI",
+      authDomain: "dettyverse.firebaseapp.com",
+      projectId: "dettyverse",
+      storageBucket: "dettyverse.firebasestorage.app",
+      messagingSenderId: "1036459652488",
+      appId: "1:1036459652488:web:e8910172ed16e9cac9b63d",
+      measurementId: "G-NX2KWZW85V"
+    };
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+/* ---------------- Spinner Helpers (Code 1 style) ----------------
+   Uses the .shop-spinner element already present in your HTML.
+   Toggling the 'active' class will smoothly fade spinner in/out
+   because your CSS (.shop-spinner/.shop-spinner.active) controls
+   visibility & opacity transitions.
+------------------------------------------------------------------*/
+function showSpinner() {
+  const spinner = document.querySelector('.shop-spinner') || document.getElementById('shopSpinner');
+  if (spinner) spinner.classList.add('active');
+}
+
+function hideSpinner() {
+  const spinner = document.querySelector('.shop-spinner') || document.getElementById('shopSpinner');
+  if (spinner) spinner.classList.remove('active');
+}
+
+// Convert email → Firestore document ID (example@gmail.com → example_gmail_com)
+const emailToDocId = (email) => {
+  if (!email || !email.includes('@')) return null;
+  const [local, domain] = email.toLowerCase().split('@');
+  return `${local}_${domain.replace(/\./g, '_')}`;
+};
+
+/* ------------------ DOM references ------------------ */
+const DOM = {
+  username: document.getElementById('username'),
+  stars: document.getElementById('stars-count'),
+  cash: document.getElementById('cash-count'),
+  shopItems: document.getElementById('shop-items'),
+  hostTabs: document.getElementById('hostTabs'),
+  vipStat: document.getElementById('vip-stat'),
+  friendsStat: document.getElementById('friends-stat'),
+  badgesStat: document.getElementById('badges-stat'),
+  tabContent: document.getElementById('tab-content'),
+  ordersContent: document.getElementById('orders-content'),
+  ordersList: document.getElementById('orders-list'),
+  confirmModal: document.getElementById('confirmModal'),
+  confirmTitle: document.getElementById('confirmTitle'),
+  confirmText: document.getElementById('confirmText'),
+  confirmYes: document.getElementById('confirmYes'),
+  confirmNo: document.getElementById('confirmNo'),
+  imagePreview: document.getElementById('imagePreview'),
+  previewImg: document.getElementById('previewImg'),
+  rewardModal: document.getElementById('rewardModal'),
+  rewardTitle: document.getElementById('rewardTitle'),
+  rewardMessage: document.getElementById('rewardMessage')
+};
+
+/* ------------------ Utilities ------------------ */
+const formatNumber = n => n ? new Intl.NumberFormat('en-NG').format(Number(n)) : '0';
+const parseNumberFromText = text => Number((text || '').replace(/[^\d\-]/g, '')) || 0;
+
+const animateNumber = (el, from, to, duration = 600) => {
+  const start = performance.now();
+  const step = (ts) => {
+    const progress = Math.min((ts - start) / duration, 1);
+    const value = Math.floor(from + (to - from) * progress);
+    if (el === DOM.stars) el.textContent = `${formatNumber(value)} ⭐️`;
+    else if (el === DOM.cash) el.textContent = `₦${formatNumber(value)}`;
+    if (progress < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+};
+
+/* ------------------ Confetti (lazy load) ------------------ */
+const triggerConfetti = () => {
+  if (window.__confettiLoaded) return confetti({ particleCount: 90, spread: 65, origin: { y: 0.6 } });
+  const s = document.createElement('script');
+  s.src = "https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js";
+  s.onload = () => { window.__confettiLoaded = true; triggerConfetti(); };
+  document.body.appendChild(s);
+};
+
+/* ------------------ Product modal helper ------------------ */
+// Open modal with product info
+function openProductModal(product) {
+  const modal = document.getElementById("productModal");
+  const title = document.getElementById("productModalTitle");
+  const desc = document.getElementById("productModalDesc");
+
+  if (!modal || !title || !desc) return;
+
+  title.textContent = product?.name || 'Unnamed';
+  desc.textContent = product?.description || product?.desc || 'No description available.';
+
+  modal.classList.add('show');
+}
+
+// Close modal by clicking outside content
+document.getElementById('productModal').addEventListener('click', (e) => {
+  const content = e.currentTarget.querySelector('.product-modal-content');
+  if (!content.contains(e.target)) {
+    e.currentTarget.classList.remove('show');
+  }
+});
+
+// Example: attach click event to product names dynamically
+document.querySelectorAll('.product-card h3').forEach(nameEl => {
+  nameEl.addEventListener('click', () => {
+    const card = nameEl.closest('.product-card');
+    const product = {
+      name: card.querySelector('h3').textContent,
+      description: card.dataset.desc || 'No description available.'
+    };
+    openProductModal(product);
+  });
+});
+
+/* ------------------ Modal helpers ------------------ */
+let _themedTimeout = null;
+const closeModal = () => {
+  if (DOM.confirmModal) DOM.confirmModal.style.display = 'none';
+  if (DOM.confirmYes) DOM.confirmYes.onclick = null;
+  if (DOM.confirmNo) DOM.confirmNo.onclick = null;
+  if (DOM.confirmYes) DOM.confirmYes.style.display = '';
+  if (DOM.confirmNo) DOM.confirmNo.style.display = '';
+  if (_themedTimeout) { clearTimeout(_themedTimeout); _themedTimeout = null; }
+};
+
+const showConfirmModal = (title, text, onYes) => {
+  if (!DOM.confirmModal) return;
+  if (_themedTimeout) { clearTimeout(_themedTimeout); _themedTimeout = null; }
+  DOM.confirmTitle.textContent = title;
+  DOM.confirmText.textContent = text;
+  DOM.confirmYes.style.display = '';
+  DOM.confirmNo.style.display = '';
+  DOM.confirmModal.style.display = 'flex';
+  const cleanup = () => closeModal();
+  DOM.confirmYes.onclick = async () => { cleanup(); if (onYes) await onYes(); };
+  DOM.confirmNo.onclick = cleanup;
+};
+
+const showThemedMessage = (title, message, duration = 2000) => {
+  if (!DOM.confirmModal) return;
+  DOM.confirmTitle.textContent = title;
+  DOM.confirmText.textContent = message;
+  DOM.confirmYes.style.display = 'none';
+  DOM.confirmNo.style.display = 'none';
+  DOM.confirmModal.style.display = 'flex';
+  if (_themedTimeout) clearTimeout(_themedTimeout);
+  _themedTimeout = setTimeout(() => closeModal(), duration);
+};
+
+/* ------------------ Reward modal (invitee + inviter) ------------------ */
+function showReward(message, title = "🎉 Reward Unlocked!") {
+  if (!DOM.rewardModal) return;
+  DOM.rewardTitle.textContent = title;
+  DOM.rewardMessage.innerHTML = message; // ✅ allow bold tags to render
+  DOM.rewardModal.classList.remove('hidden');
+  // Auto-hide after 4.5s
+  setTimeout(() => {
+    DOM.rewardModal.classList.add('hidden');
+  }, 4500);
+}
+
+/* ------------------ Image preview ------------------ */
+const previewImage = (src) => {
+  if (!DOM.imagePreview) return;
+  DOM.previewImg.src = src;
+  DOM.imagePreview.style.display = 'flex';
+};
+document.getElementById('closePreview')?.addEventListener('click', () => {
+  DOM.previewImg.src = '';
+  DOM.imagePreview.style.display = 'none';
+});
+
+/* ------------------ Host stats updater — 2025 FIXED FOR UNDERSCORE IDs ------------------ */
+const updateHostStats = async (newUser) => {
+  // Safety first
+  if (!newUser?.email || !newUser?.invitedBy) return;
+
+  // Convert referrer email → correct document ID (example@gmail.com → example_gmail_com)
+  const emailToDocId = (email) => {
+    if (!email || !email.includes('@')) return null;
+    const [local, domain] = email.toLowerCase().split('@');
+    return `${local}_${domain.replace(/\./g, '_')}`;
+  };
+
+  const hostUid = emailToDocId(newUser.invitedBy);
+  if (!hostUid) {
+    console.warn("Invalid referrer email:", newUser.invitedBy);
+    return;
+  }
+
+  const hostRef = doc(db, 'users', hostUid);
+
+  try {
+    await runTransaction(db, async (t) => {
+      const hostSnap = await t.get(hostRef);
+      if (!hostSnap.exists()) {
+        console.log("Host not found in DB (yet):", hostUid);
+        return;
+      }
+
+      const hostData = hostSnap.data() || {};
+      const friends = Array.isArray(hostData.hostFriends) ? hostData.hostFriends.slice() : [];
+
+      // Prevent duplicate entries
+      const existing = friends.find(f => 
+        f.email?.toLowerCase() === newUser.email?.toLowerCase()
+      );
+
+      if (!existing) {
+        friends.push({
+          email: newUser.email,
+          chatId: newUser.chatId || '',
+          chatIdLower: (newUser.chatId || '').toLowerCase(),
+          isVIP: !!newUser.isVIP,
+          isHost: !!newUser.isHost,
+          giftShown: false,
+          joinedAt: serverTimestamp()
+        });
+      }
+
+      // Count VIPs correctly
+      let hostVIP = Number(hostData.hostVIP || 0);
+      if (newUser.isVIP && !existing) {
+        hostVIP += 1;
+      }
+
+      t.update(hostRef, {
+        hostFriends: friends,
+        hostVIP
+      });
+    });
+
+    console.log("Host stats updated for:", hostUid);
+  } catch (err) {
+    console.error('Failed to update host stats:', err);
+  }
+};
+
+/* ------------------ Current user state ------------------ */
+let currentUser = null;
+/* ------------------ Load current user — FINAL 2025 VERSION (NO BUGS) ------------------ */
+const loadCurrentUser = async () => {
+  showSpinner();
+  try {
+    // Load from localStorage
+    const vipRaw = localStorage.getItem('vipUser');
+    const hostRaw = localStorage.getItem('hostUser');
+    const storedUser = vipRaw ? JSON.parse(vipRaw) : hostRaw ? JSON.parse(hostRaw) : null;
+
+    // Reset UI
+    if (DOM.username) DOM.username.textContent = 'Guest';
+    if (DOM.stars) DOM.stars.textContent = '0 Stars';
+    if (DOM.cash) DOM.cash.textContent = '₦0';
+    if (DOM.hostTabs) DOM.hostTabs.style.display = 'none';
+
+    await renderShop();
+
+    if (!storedUser?.email) {
+      currentUser = null;
+      hideSpinner();
+      return;
+    }
+
+    // NEW: Convert email → correct document ID (example@gmail.com → example_gmail_com)
+    const emailToDocId = (email) => {
+      if (!email || !email.includes('@')) return null;
+      const [local, domain] = email.toLowerCase().split('@');
+      return `${local}_${domain.replace(/\./g, '_')}`;
+    };
+
+    const uid = emailToDocId(storedUser.email);
+    if (!uid) {
+      console.error("Invalid email format");
+      hideSpinner();
+      return;
+    }
+
+    const userRef = doc(db, 'users', uid);
+    const snap = await getDoc(userRef);
+
+    // User not in DB yet
+    if (!snap.exists()) {
+      currentUser = {
+        uid,
+        email: storedUser.email,
+        stars: 0,
+        cash: 0,
+        isHost: false,
+        isVIP: false,
+        chatId: storedUser.displayName || storedUser.email.split('@')[0]
+      };
+      if (DOM.username) DOM.username.textContent = currentUser.chatId;
+      hideSpinner();
+      return;
+    }
+
+    currentUser = { uid, ...snap.data(), email: storedUser.email };
+
+    // Update UI
+    if (DOM.username) {
+      DOM.username.textContent = currentUser.chatId || storedUser.displayName || storedUser.email.split('@')[0] || 'Guest';
+    }
+    if (DOM.stars) DOM.stars.textContent = `${formatNumber(currentUser.stars)} Stars`;
+    if (DOM.cash) DOM.cash.textContent = `₦${formatNumber(currentUser.cash)}`;
+    if (DOM.hostTabs) DOM.hostTabs.style.display = currentUser.isHost ? '' : 'none';
+
+    updateHostPanels();
+
+    // First-time host stats
+    if (currentUser?.invitedBy && currentUser._firstLoad === undefined) {
+      currentUser._firstLoad = true;
+      await updateHostStats({
+        email: currentUser.email,
+        chatId: currentUser.chatId || '',
+        isVIP: !!currentUser.isVIP,
+        isHost: !!currentUser.isHost,
+        invitedBy: currentUser.invitedBy
+      });
+    }
+
+    // VIP/Host setup
+    try {
+      if (currentUser.isVIP) setupVIPButton();
+      else if (currentUser.isHost) setupHostGiftListener();
+    } catch (e) {
+      console.error('VIP/Host setup failed:', e);
+    }
+
+    // REALTIME LISTENER — FULLY RESTORED REWARDS
+    onSnapshot(userRef, async (docSnap) => {
+      if (!docSnap.exists()) return;
+      const data = docSnap.data();
+      currentUser = { uid, ...data, email: storedUser.email };
+
+      // Update UI
+      if (DOM.username) {
+        DOM.username.textContent = currentUser.chatId || storedUser.displayName || storedUser.email.split('@')[0] || 'Guest';
+      }
+      if (DOM.stars) DOM.stars.textContent = `${formatNumber(currentUser.stars)} Stars`;
+      if (DOM.cash) DOM.cash.textContent = `₦${formatNumber(currentUser.cash)}`;
+      if (DOM.hostTabs) DOM.hostTabs.style.display = currentUser.isHost ? '' : 'none';
+      updateHostPanels();
+      renderShop();
+
+    // INVITEE REWARD — NO @, CLEAN & PERFECT
+if (!data.inviteeGiftShown) {
+  // Use referral field — strip @ if exists
+  let inviterName = data.referral || 'a friend';
+  if (inviterName.startsWith('@')) {
+    inviterName = inviterName.slice(1);  // Remove the @
+  }
+
+  const stars = data.inviteeGiftStars || 50;
+
+  showReward(
+    `You've been gifted <b>+${stars} Stars</b> for joining <b>${inviterName}</b>'s Tab!`,
+    'Welcome to the Empire!'
+  );
+
+  await updateDoc(userRef, {
+    inviteeGiftShown: true
+  });
+}
+      // INVITER REWARD (when someone joins YOUR link)
+// INVITER REWARD — NO BS, NO FAKE 200, NO CONFUSION
+const friends = Array.isArray(data.hostFriends) ? data.hostFriends : [];
+
+// Find anyone who joined and hasn't been celebrated yet
+const pending = friends.find(f => f.email && !f.giftShown);
+
+if (pending) {
+  const name = pending.chatId || pending.fullName || pending.email.split('@')[0];
+  const stars = pending.isVIP ? 100 : 50;  // Real amount you actually give
+
+  showReward(
+    `+${stars} Stars — <b>${name}</b> just joined your Hive!`,
+    'Empire Growing!'
+  );
+
+  // Just mark as shown — nothing else
+  const updated = friends.map(f =>
+    f.email === pending.email ? { ...f, giftShown: true } : f
+  );
+
+  await updateDoc(userRef, { hostFriends: updated });
+}
+    });
+
+  } catch (e) {
+    console.error('loadCurrentUser error:', e);
+  } finally {
+    hideSpinner();
+  }
+};
+/* ------------------ Host panels ------------------ */
+const updateHostPanels = () => {
+  if (!currentUser?.isHost) {
+    if (DOM.hostTabs) DOM.hostTabs.style.display = 'none';
+    if (DOM.tabContent) DOM.tabContent.style.display = 'none';
+    return;
+  }
+  if (DOM.hostTabs) DOM.hostTabs.style.display = '';
+  if (DOM.tabContent) DOM.tabContent.style.display = '';
+  renderTabContent('vip');
+};
+
+const renderTabContent = (type) => {
+  if (!DOM.tabContent) return;
+  DOM.tabContent.innerHTML = '';
+  if (!currentUser?.isHost) return;
+
+  if (type === 'vip') {
+    const vipCount = currentUser.hostVIP || 0;
+    DOM.tabContent.innerHTML = `
+      <div class="stat-block" style="margin-bottom:12px;">
+        <div class="stat-value" id="vip-stat">${formatNumber(vipCount)}</div>
+        <div class="stat-label">VIPs Signed Up</div>
+      </div>
+    `;
+  } else if (type === 'friends') {
+    renderFriendsList(DOM.tabContent, currentUser.hostFriends || []);
+
+    const btn = document.createElement('button');
+    btn.id = 'inviteFriendsBtn';
+    btn.className = 'themed-btn';
+    btn.textContent = 'Invite Friends';
+    DOM.tabContent.appendChild(btn);
+
+  btn.addEventListener('click', () => {
+  const chatId = currentUser?.chatId || 'friend';
+  const prettyHandle = chatId.startsWith('@') ? chatId : `@${chatId}`;
+
+  const message = `Hey! I'm hosting on xixi live, join my tab and let’s win together! Sign up using my link: `;
+  const link = `https://cube.xixi.live/signup?ref=${encodeURIComponent(prettyHandle)}`;
+
+  const fullText = message + link;
+
+  navigator.clipboard.writeText(fullText)
+    .then(() => showThemedMessage('Copied!', 'Your invite link is ready!', 2000))
+    .catch(() => showThemedMessage('Error', 'Could not copy link', 2000));
+});
+  } else if (type === 'badges') {
+    const badgeImg = currentUser.hostBadgeImg || 'https://www.svgrepo.com/show/492657/crown.svg';
+    DOM.tabContent.innerHTML = `
+      <div class="stat-block">
+        <img src="${badgeImg}" style="width:100px;height:100px;">
+        <div class="stat-value">${currentUser.hostBadge || 'Gold'}</div>
+        <div class="stat-label">Badge Status</div>
+      </div>
+    `;
+  }
+};
+/* ------------------ Friends rendering ------------------ */
+function renderFriendsList(container, friends) {
+  container.innerHTML = '';
+  if (!friends || friends.length === 0) {
+    container.innerHTML = `<div class="muted">No friends yet 😔</div>`;
+    return;
+  }
+
+  const sorted = friends.slice().sort((a, b) => {
+    if (a.isVIP && !b.isVIP) return -1;
+    if (!a.isVIP && b.isVIP) return 1;
+    if (a.isHost && !b.isHost) return -1;
+    if (!a.isHost && b.isHost) return 1;
+    return 0;
+  });
+
+  const list = document.createElement('div');
+  list.className = 'friends-list';
+  sorted.forEach(f => {
+    const name = f.chatId || (f.email ? f.email.split('@')[0] : 'Guest');
+    const handle = '@' + (f.chatIdLower || (name.toLowerCase().replace(/\s+/g, '')));
+    let iconSVG = `<svg width="18" height="18" viewBox="0 0 24 24" fill="#999"><path d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-3.3 0-10 1.7-10 5v3h20v-3c0-3.3-6.7-5-10-5z"/></svg>`;
+    let color = '#444';
+    if (f.isVIP) { iconSVG = `<svg width="18" height="18" viewBox="0 0 24 24" fill="#c9a033"><path d="M12 .587l3.668 7.431 8.2 1.193-5.934 5.782 1.4 8.172L12 18.896l-7.334 3.85 1.4-8.172L.132 9.211l8.2-1.193L12 .587z"/></svg>`; color = '#c9a033'; }
+    else if (f.isHost) { iconSVG = `<svg width="18" height="18" viewBox="0 0 24 24" fill="#ff66cc"><path d="M12 2v4l3 2-3 2v4l8-6-8-6zm-2 8l-8 6 8 6v-4l-3-2 3-2v-4z"/></svg>`; color = '#ff66cc'; }
+
+    const card = document.createElement('div');
+    card.className = 'friend-card';
+    card.innerHTML = `
+      <div style="display:flex;align-items:center;gap:8px;">
+        ${iconSVG}
+        <div>
+          <div style="font-weight:600;color:${color};">${name}</div>
+          <div style="font-size:0.85rem;color:#888;">${handle}</div>
+        </div>
+      </div>
+    `;
+    list.appendChild(card);
+  });
+
+  container.appendChild(list);
+}
+
+/* ------------------ Host tabs click ------------------ */
+DOM.hostTabs?.addEventListener('click', e => {
+  const btn = e.target.closest('.tab-btn');
+  if (!btn) return;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const type = btn.dataset.tab;
+  renderTabContent(type);
+});
+
+/* ------------------ User tabs (Shop/Orders) ------------------ */
+const userTabs = document.getElementById('userTabs');
+userTabs?.addEventListener('click', e => {
+  const btn = e.target.closest('.tab-btn');
+  if (!btn) return;
+  userTabs.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  if (btn.dataset.tab === 'shop') {
+    DOM.shopItems.style.display = 'grid';
+    DOM.ordersContent.style.display = 'none';
+  } else {
+    DOM.shopItems.style.display = 'none';
+    DOM.ordersContent.style.display = 'block';
+    renderMyOrders();
+  }
+});
+
+/* ------------------ Orders rendering ------------------ */
+const renderMyOrders = async () => {
+  const ordersList = DOM.ordersList;
+  if (!ordersList) return;
+  showSpinner();
+  ordersList.innerHTML = '<div style="text-align:center;color:#555;">Loading orders...</div>';
+  if (!currentUser) { ordersList.innerHTML = '<div style="text-align:center;color:#555;">Not logged in.</div>'; hideSpinner(); return; }
+
+  try {
+    const purchasesRef = collection(db, 'purchases');
+    const snap = await getDocs(purchasesRef);
+    const orders = snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(o => o.userId === currentUser.uid);
+    if (orders.length === 0) { ordersList.innerHTML = '<div style="text-align:center;color:#555;">No orders yet..hmmmmm! 🤔</div>'; return; }
+    orders.sort((a, b) => {
+      const ta = a.timestamp?.toDate ? a.timestamp.toDate().getTime() : 0;
+      const tb = b.timestamp?.toDate ? b.timestamp.toDate().getTime() : 0;
+      return tb - ta;
+    });
+    ordersList.innerHTML = '';
+    orders.forEach(order => {
+      const block = document.createElement('div'); block.className = 'stat-block';
+      const dateText = order.timestamp?.toDate ? order.timestamp.toDate().toLocaleString() : '';
+      block.innerHTML = `
+        <div class="stat-value">${order.productName || 'Unnamed'}</div>
+        <div class="stat-label">${order.cost || 0} ⭐${order.cashReward ? ' - ₦' + Number(order.cashReward).toLocaleString() : ''}</div>
+        ${dateText ? `<div class="muted">${dateText}</div>` : ''}
+      `;
+      ordersList.appendChild(block);
+    });
+  } catch (e) {
+    console.error(e);
+    ordersList.innerHTML = '<div style="text-align:center;color:#ccc;">Failed to load orders.</div>';
+  } finally {
+    hideSpinner();
+  }
+};
+
+/* ------------------ CREATE PRODUCT CARD (Updated for Hosted Paystack) ------------------ */
+const createProductCard = (product) => {
+  // Skip invisible cards for host/vip restrictions
+  if ((product.hostOnly && currentUser?.isVIP) || (product.vipOnly && currentUser?.isHost)) return null;
+
+  const card = document.createElement('div');
+  card.className = 'product-card';
+
+  // Image
+  const img = document.createElement('img');
+  img.src = product.img || 'https://via.placeholder.com/300';
+  img.alt = product.name || 'Item';
+  img.addEventListener('click', () => previewImage(img.src));
+
+  // Availability badge
+  const badge = document.createElement('span');
+  badge.className = 'availability-badge';
+  const avail = Number(product.available) || 0;
+  badge.textContent = avail > 0 ? `${avail} Left` : 'Sold Out';
+  if (avail <= 0) badge.style.background = '#666';
+
+  // Title
+  const title = document.createElement('h3');
+  title.textContent = product.name || 'Unnamed';
+  title.style.cursor = 'pointer';
+  title.addEventListener('click', () => openProductModal(product));
+
+  // Price (for redeemable products)
+  const price = document.createElement('div');
+  price.className = 'price';
+  price.textContent = `${Number(product.cost) || 0} ⭐`;
+
+  // Button
+  let btn = document.createElement('button');
+
+  if (product.subscriberProduct) {
+    // Gold gradient "Join" button
+    btn.className = 'subscriber-btn';
+    btn.textContent = 'Join';
+    btn.style.background = 'linear-gradient(90deg, #FFD700, #FFA500)';
+    btn.style.color = '#fff';
+    btn.style.fontWeight = 'bold';
+    btn.style.border = 'none';
+    btn.style.borderRadius = '8px';
+    btn.style.padding = '0.6rem 1.2rem';
+    btn.style.fontSize = '1rem';
+    btn.style.cursor = 'pointer';
+    btn.style.boxShadow = '0 4px 10px rgba(255, 215, 0, 0.5)';
+    btn.style.transition = 'transform 0.2s, box-shadow 0.2s';
+
+    btn.addEventListener('mouseenter', () => {
+      btn.style.transform = 'translateY(-2px)';
+      btn.style.boxShadow = '0 6px 15px rgba(255, 215, 0, 0.7)';
+    });
+    btn.addEventListener('mouseleave', () => {
+      btn.style.transform = 'translateY(0)';
+      btn.style.boxShadow = '0 4px 10px rgba(255, 215, 0, 0.5)';
+    });
+
+    if (avail <= 0) btn.disabled = true;
+
+    // 🟨 Open Paystack hosted page with prefilled details
+    btn.addEventListener('click', () => {
+      if (!currentUser) return alert('Please log in first.');
+      const email = encodeURIComponent(currentUser.email || '');
+      const phone = encodeURIComponent(currentUser.phone || '');
+      const planId = product.paystackPlanId?.startsWith('PLN_') ? product.paystackPlanId.slice(4) : product.paystackPlanId;
+      const link = `https://paystack.com/pay/${planId}?email=${email}&phone=${phone}`;
+      window.open(link, '_blank');
+    });
+
+  } else {
+    // Regular redeemable product
+    btn.className = 'buy-btn';
+    btn.textContent = 'Redeem';
+    if (
+      avail <= 0 ||
+      (product.name?.toLowerCase() === 'redeem cash balance' &&
+        currentUser &&
+        Number(currentUser.cash) <= 0)
+    ) {
+      btn.disabled = true;
+    }
+    btn.addEventListener('click', () => redeemProduct(product));
+  }
+
+  // Assemble
+  card.append(badge, img, title);
+  if (!product.subscriberProduct) card.append(price);
+  card.append(btn);
+
+  return card;
+};
+
+/* ------------------ Redeem product — FINAL FIXED (NO SYNTAX ERRORS) ------------------ */
+const redeemProduct = async (product) => {
+  if (!currentUser) return showThemedMessage('Not Logged In', 'Please sign in to redeem items.');
+  if (currentUser.stars < product.cost) return showThemedMessage('Not Enough Stars', 'You do not have enough stars.');
+  if (product.available <= 0) return showThemedMessage('Sold Out', 'This item is no longer available.');
+  if (product.name?.toLowerCase() === 'redeem cash balance' && Number(currentUser.cash) <= 0) {
+    return showThemedMessage('No Cash', 'You have no cash to redeem');
+  }
+
+  showConfirmModal('Confirm Redemption', `Redeem "${product.name}" for ${product.cost} Stars?`, async () => {
+    showSpinner();
+    try {
+      // CORRECT UID FROM EMAIL
+      const correctUid = emailToDocId(currentUser.email);
+      if (!correctUid) throw new Error("Invalid user ID");
+
+      const userRef = doc(db, 'users', correctUid);
+      const productRef = doc(db, 'shopItems', String(product.id));
+
+      let newStars = 0;
+      let newCash = 0;
+      let redeemedCash = 0;
+
+      await runTransaction(db, async (t) => {
+        const [uSnap, pSnap] = await Promise.all([
+          t.get(userRef),
+          t.get(productRef)
+        ]);
+
+        if (!uSnap.exists()) throw new Error('User not found in database');
+        if (!pSnap.exists()) throw new Error('Product not found');
+
+        const uData = uSnap.data();
+        const pData = pSnap.data();
+
+        const cost = Number(pData.cost) || 0;
+        const available = Number(pData.available || 0);
+
+        if (Number(uData.stars) < cost) throw new Error('Not enough stars');
+        if (available <= 0) throw new Error('Out of stock');
+
+        newStars = Number(uData.stars) - cost;
+
+        if (pData.name?.toLowerCase() === 'redeem cash balance') {
+          redeemedCash = Number(uData.cash || 0);
+          newCash = 0;
+        } else {
+          newCash = Number(uData.cash || 0) + Number(pData.cashReward || 0);
+        }
+
+        // UPDATE USER
+        t.update(userRef, {
+          stars: newStars,
+          cash: newCash
+        });
+
+        // UPDATE PRODUCT
+        t.update(productRef, {
+          available: available - 1
+        });
+
+        // RECORD PURCHASE
+        const purchaseRef = doc(collection(db, 'purchases'));
+        t.set(purchaseRef, {
+          userId: correctUid,
+          email: uData.email || currentUser.email,
+          productId: String(pData.id),
+          productName: pData.name,
+          cost,
+          cashReward: Number(pData.cashReward || 0),
+          redeemedCash,
+          timestamp: serverTimestamp()
+        });
+      });
+
+      // UPDATE LOCAL STATE
+      currentUser.stars = newStars;
+      currentUser.cash = newCash;
+
+      // ANIMATE BALANCES
+      const prevStars = parseNumberFromText(DOM.stars.textContent);
+      const prevCash = parseNumberFromText(DOM.cash.textContent);
+      animateNumber(DOM.stars, prevStars, newStars);
+      animateNumber(DOM.cash, prevCash, newCash);
+
+      await renderShop();
+      triggerConfetti();
+
+      if (redeemedCash > 0) {
+        showThemedMessage('Cash Redeemed', `₦${redeemedCash.toLocaleString()} withdrawn!`, 3000);
+      } else if (Number(product.cashReward) > 0) {
+        showThemedMessage('Success', `+₦${Number(product.cashReward).toLocaleString()} added!`, 2500);
+      } else {
+        showThemedMessage('Redeemed!', `"${product.name}" unlocked!`, 2000);
+      }
+
+    } catch (e) {
+      console.error("Redeem failed:", e);
+      showThemedMessage('Failed', e.message || 'Try again later', 3000);
+    } finally {
+      hideSpinner();
+    }
+  });
+};
+
+/* ------------------ PAYSTACK WRAPPER FOR JOIN BUTTON ------------------ */
+
+// Import your launchSubscription function if using modules
+// import { launchSubscription } from './paystack.js';
+
+// Called from subscriber product button
+function openPaystackPayment(planId) {
+  if (!currentUser) {
+    alert('Please log in first to join.');
+    return;
+  }
+
+  // Optional: you can check planId if you have multiple subscriber products
+  // Currently we only have one VIP plan
+  launchSubscription(currentUser);
+}
+
+/* ------------------ RENDER SHOP ------------------ */
+// Render the shop items dynamically
+const renderShop = async () => {
+  if (!DOM.shopItems) return;
+  showSpinner();
+  DOM.shopItems.innerHTML = '';
+
+  try {
+    const shopSnap = await getDocs(collection(db, 'shopItems'));
+    if (shopSnap.empty) {
+      DOM.shopItems.innerHTML = '<div style="text-align:center;color:#555;">No items found</div>';
+      return;
+    }
+
+    let delay = 0;
+
+    shopSnap.forEach(docSnap => {
+      const data = docSnap.data() || {};
+      const product = {
+        id: docSnap.id,
+        name: data.name || '',
+        img: data.img || '',
+        cost: data.cost || 0,
+        available: data.available || 0,
+        hostOnly: data.hostOnly || false,
+        vipOnly: data.vipOnly || false,
+        subscriberProduct: data.subscriberProduct || false,
+        cashReward: data.cashReward || 0,
+        description: data.description || data.desc || '',
+        paystackPlanId: data.paystackPlanId || ''
+      };
+
+      const card = createProductCard(product);
+      if (!card) return; // skip invisible cards
+
+      // Fade-in animation
+      card.style.opacity = '0';
+      card.style.animation = `fadeInUp 0.35s forwards`;
+      card.style.animationDelay = `${delay}s`;
+      delay += 0.05;
+
+      DOM.shopItems.appendChild(card);
+    });
+  } catch (e) {
+    console.error(e);
+    DOM.shopItems.innerHTML = '<div style="text-align:center;color:#ccc;">Failed to load shop</div>';
+  } finally {
+    hideSpinner();
+  }
+};
+
+/* -------------------------------
+   🌗 Theme Toggle Script
+--------------------------------- */
+(function () {
+  const btn = document.getElementById('themeToggle');
+  if (!btn) return;
+
+  // Load saved theme
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme === 'dark') {
+    document.body.classList.add('dark');
+  } else if (savedTheme === 'light') {
+    document.body.classList.add('light-mode-forced');
+  } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    document.body.classList.add('dark');
+  }
+
+  // Set correct icon
+  btn.textContent = document.body.classList.contains('dark') ? '🌙' : '☀️';
+
+  // Toggle on click
+  btn.addEventListener('click', () => {
+    const isDark = document.body.classList.toggle('dark');
+    document.body.classList.toggle('light-mode-forced', !isDark);
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    btn.textContent = isDark ? '🌙' : '☀️';
+  });
+})();
+
+document.addEventListener("DOMContentLoaded", () => {
+  const modal = document.getElementById("productModal");
+  const modalClose = document.getElementById("closeProductModal");
+
+  // Close button
+  modalClose?.addEventListener("click", () => {
+    modal?.classList.add("hidden");
+  });
+
+  // Close when clicking outside content (modal overlay)
+  modal?.addEventListener("click", (e) => {
+    if (e.target === modal) modal.classList.add("hidden");
+  });
+
+  // Optional: ESC key to close modal
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') modal?.classList.add('hidden');
+  });
+});
+/* ------------------ SAFE INIT ------------------ */
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    await loadCurrentUser(); // 👈🏽 ensures user & listeners are initialized safely
+    console.log('✅ User data + listeners initialized');
+  } catch (err) {
+    console.error('Init error:', err);
+  }
+});
+
+  // URL of your custom star SVG hosted on Shopify
+  const customStarURL = "https://cdn.shopify.com/s/files/1/0962/6648/6067/files/starssvg.svg?v=1761770774";
+
+  // Replace stars in text nodes with SVG + floating stars (invisible)
+  function replaceStarsWithSVG(root = document.body) {
+    if (!root) return;
+
+    const walker = document.createTreeWalker(
+      root,
+      NodeFilter.SHOW_TEXT,
+      {
+        acceptNode: node => {
+          if (node.nodeValue.includes("⭐") || node.nodeValue.includes("⭐️")) {
+            return NodeFilter.FILTER_ACCEPT;
+          }
+          return NodeFilter.FILTER_REJECT;
+        }
+      }
+    );
+
+    const nodesToReplace = [];
+    while (walker.nextNode()) nodesToReplace.push(walker.currentNode);
+
+    nodesToReplace.forEach(textNode => {
+      const parent = textNode.parentNode;
+      if (!parent) return;
+
+      const fragments = textNode.nodeValue.split(/⭐️?|⭐/);
+
+      fragments.forEach((frag, i) => {
+        if (frag) parent.insertBefore(document.createTextNode(frag), textNode);
+
+        if (i < fragments.length - 1) {
+          // Inline star
+          const span = document.createElement("span");
+          span.style.display = "inline-flex";
+          span.style.alignItems = "center";
+          span.style.position = "relative";
+
+          const inlineStar = document.createElement("img");
+          inlineStar.src = customStarURL;
+          inlineStar.alt = "⭐";
+          inlineStar.style.width = "1.2em";
+          inlineStar.style.height = "1.2em";
+          inlineStar.style.display = "inline-block";
+          inlineStar.style.verticalAlign = "text-bottom";
+          inlineStar.style.transform = "translateY(0.15em) scale(1.2)";
+
+          span.appendChild(inlineStar);
+          parent.insertBefore(span, textNode);
+
+          // Floating star (fully invisible)
+          const floatingStar = document.createElement("img");
+          floatingStar.src = customStarURL;
+          floatingStar.alt = "⭐";
+          floatingStar.style.width = "40px";
+          floatingStar.style.height = "40px";
+          floatingStar.style.position = "absolute";
+          floatingStar.style.pointerEvents = "none";
+          floatingStar.style.zIndex = "9999";
+          floatingStar.style.opacity = "0";
+          floatingStar.style.transform = "translate(-50%, -50%)";
+
+          const rect = inlineStar.getBoundingClientRect();
+          floatingStar.style.top = `${rect.top + rect.height / 2 + window.scrollY}px`;
+          floatingStar.style.left = `${rect.left + rect.width / 2 + window.scrollX}px`;
+
+          document.body.appendChild(floatingStar);
+
+          setTimeout(() => floatingStar.remove(), 1);
+        }
+      });
+
+      parent.removeChild(textNode);
+    });
+  }
+
+  // Observe dynamic content
+  const observer = new MutationObserver(mutations => {
+    mutations.forEach(m => {
+      m.addedNodes.forEach(node => {
+        if (node.nodeType === Node.TEXT_NODE) replaceStarsWithSVG(node.parentNode);
+        else if (node.nodeType === Node.ELEMENT_NODE) replaceStarsWithSVG(node);
+      });
+    });
+  });
+
+  observer.observe(document.body, { childList: true, subtree: true });
+
+  // Initial run
+  replaceStarsWithSVG();

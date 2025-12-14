@@ -670,6 +670,13 @@ if (isVIP) {
   }
 };
 });
+// DOM references first
+const vipPayBtn = document.getElementById('vipPayBtn');
+const messageEl = document.getElementById('message');
+const emailInput = document.getElementById('email');
+// ... all other DOM elements ...
+
+// THEN define the Paystack button click
 vipPayBtn.onclick = () => {
   const email = emailInput.value.trim().toLowerCase();
   if (!email || !/@/.test(email)) {
@@ -681,7 +688,7 @@ vipPayBtn.onclick = () => {
 
   const handler = PaystackPop.setup({
     key: 'pk_live_b1f53de46eded7175f91c345548365902b4b6d67',
-    email: email, // ✅ guaranteed valid
+    email: email,
     amount: 500000,
     currency: 'NGN',
     ref: 'VIP_' + Date.now(),
@@ -698,6 +705,7 @@ vipPayBtn.onclick = () => {
 
   handler.openIframe();
 };
+
 
 </script>
 </body>

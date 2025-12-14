@@ -4165,15 +4165,15 @@ intro.innerHTML = `
   -webkit-text-fill-color:transparent;
   font-weight:700;
   display:inline-block;
-  transform: translateX(5.6px); /* ← adjust this */
+  transform: translateX(5px); /* ← adjust this */
 ">
-  Cuties 💕
+  Cuties💕
 </span>
     </div>
 
     <!-- Text lines with tight spacing -->
     <p style="margin:0 0 4px;">
-      Cam-worthy moments from beautiful girls
+      Cam-worthy exclusives from cute girls on cube. 
     </p>
     <p style="margin:0;">
       Unlock a cutie’s clip with STRZ and get closer.

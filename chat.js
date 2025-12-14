@@ -4302,26 +4302,32 @@ function renderCards(videosToRender) {
   });
 
   // ———————————————————————
-  // TRENDING MODE: GLOBAL GALLERY STYLE (CUTE, GRID-LIKE, LOTS OF GIRLS)
+  // TRENDING MODE: GLOBAL GALLERY GRID – VERTICAL SCROLL, MOBILE-FRIENDLY ZOOMED OUT
   // ———————————————————————
   if (filterMode === "trending") {
-    // Grid layout for trending – 2–3 columns depending on screen, lots visible
+    // Vertical scroll + responsive grid (2 columns on mobile, more on larger screens)
+    // You can adjust the minmax value below to control "zoom out" level
+    // Lower minmax = more items visible = more "zoomed out"
+    const minItemWidth = 170; // ← CHANGE THIS VALUE IN BACKEND TO ADJUST ZOOM (150-200 recommended for mobile)
+
     Object.assign(content.style, {
       display: "grid",
-      gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))",
-      gap: "20px",
-      padding: "20px",
-      paddingBottom: "60px",
-      overflowY: "auto",
+      gridTemplateColumns: `repeat(auto-fill, minmax(${minItemWidth}px, 1fr))`,
+      gap: "16px",
+      padding: "16px",
+      paddingBottom: "80px",
+      overflowY: "auto", // vertical scroll
+      overflowX: "hidden",
       width: "100%",
+      height: "100%",
       boxSizing: "border-box",
-      justifyItems: "center"
+      justifyItems: "center",
+      background: "transparent"
     });
 
     filtered.forEach(async (video) => {
       const isUnlocked = unlockedVideos.includes(video.id);
 
-      // Fetch bio if available
       let bio = "No bio yet~";
       if (video.uploaderId) {
         try {
@@ -4333,58 +4339,60 @@ function renderCards(videosToRender) {
       const galleryItem = document.createElement("div");
       galleryItem.style.cssText = `
         width: 100%;
-        max-width: 220px;
-        background: rgba(15,8,30,0.6);
-        border-radius: 20px;
+        background: rgba(15,8,30,0.65);
+        border-radius: 18px;
         overflow: hidden;
         display: flex;
         flex-direction: column;
-        box-shadow: 0 8px 32px rgba(138,43,226,0.3);
-        border: 1px solid rgba(138,43,226,0.4);
+        box-shadow: 0 6px 24px rgba(138,43,226,0.25);
+        border: 1px solid rgba(138,43,226,0.35);
         transition: transform 0.3s ease;
       `;
-      galleryItem.onmouseenter = () => galleryItem.style.transform = "translateY(-10px)";
+      galleryItem.onmouseenter = () => galleryItem.style.transform = "translateY(-6px)";
       galleryItem.onmouseleave = () => galleryItem.style.transform = "translateY(0)";
 
-      // Video preview
+      // Video preview – full width, proper aspect for mobile
       const videoContainer = document.createElement("div");
-      videoContainer.style.cssText = "position:relative; height:280px; background:#000; cursor:pointer;";
+      videoContainer.style.cssText = "position:relative; padding-bottom:133.33%; background:#000;"; // 9:16 aspect ratio
       
       const videoEl = document.createElement("video");
       videoEl.muted = true;
       videoEl.loop = true;
       videoEl.preload = "metadata";
       videoEl.playsInline = true;
-      videoEl.style.cssText = "width:100%; height:100%; object-fit:cover;";
+      videoEl.style.cssText = `
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        object-fit: cover;
+      `;
 
       if (isUnlocked) {
         videoEl.src = video.videoUrl || "";
         videoEl.load();
         videoEl.play().catch(() => {});
-        videoContainer.onmouseenter = () => videoEl.play().catch(() => {});
-        videoContainer.onmouseleave = () => videoEl.pause();
       }
 
-      // Locked overlay
+      // Locked overlay (only if priced)
       if (!isUnlocked && video.highlightVideoPrice > 0) {
         const overlay = document.createElement("div");
         overlay.style.cssText = `
-          position:absolute; inset:0; background:rgba(0,0,0,0.7);
+          position:absolute; inset:0; background:rgba(0,0,0,0.75);
           display:flex; flex-direction:column; align-items:center; justify-content:center;
           z-index:2;
         `;
         overlay.innerHTML = `
-          <svg width="60" height="60" viewBox="0 0 24 24" fill="none">
+          <svg width="50" height="50" viewBox="0 0 24 24" fill="none">
             <path d="M12 2C9.2 2 7 4.2 7 7V11H6C4.9 11 4 11.9 4 13V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V13C20 11.9 19.1 11 18 11H17V7C17 4.2 14.8 2 12 2ZM12 4C13.7 4 15 5.3 15 7V11H9V7C9 5.3 10.3 4 12 4Z" fill="#ff00f2"/>
           </svg>
-          <div style="margin-top:12px; font-size:16px; font-weight:800; color:#ff00f2;">
+          <div style="margin-top:10px; font-size:15px; font-weight:800; color:#ff00f2;">
             ${video.highlightVideoPrice} STRZ
           </div>
         `;
         videoContainer.appendChild(overlay);
       }
 
-      // Fullscreen on tap
+      // Fullscreen playback
       videoContainer.onclick = (e) => {
         e.stopPropagation();
         if (!isUnlocked) {
@@ -4404,45 +4412,45 @@ function renderCards(videosToRender) {
 
       videoContainer.appendChild(videoEl);
 
-      // Bottom section: name, bio, buttons
+      // Bottom info
       const bottom = document.createElement("div");
-      bottom.style.cssText = "padding:16px; display:flex; flex-direction:column; gap:10px;";
+      bottom.style.cssText = "padding:14px; display:flex; flex-direction:column; gap:8px;";
 
       const name = document.createElement("div");
       name.textContent = `@${video.uploaderName || "Anonymous"}`;
-      name.style.cssText = "font-weight:800; font-size:16px; color:#00ffea;";
+      name.style.cssText = "font-weight:800; font-size:15px; color:#00ffea;";
 
       const bioEl = document.createElement("div");
       bioEl.textContent = bio;
-      bioEl.style.cssText = "font-size:13px; color:#ccc; line-height:1.4; opacity:0.9;";
+      bioEl.style.cssText = "font-size:12.5px; color:#ccc; line-height:1.3; opacity:0.85;";
 
       const btns = document.createElement("div");
-      btns.style.cssText = "display:flex; gap:10px; margin-top:8px;";
+      btns.style.cssText = "display:flex; gap:8px; margin-top:10px;";
 
-      // Meet button — always visible in trending gallery
+      // Meet button – always there
       const meetBtn = document.createElement("button");
       meetBtn.textContent = "Meet";
       meetBtn.style.cssText = `
-        flex:1; padding:10px; background:rgba(0,255,234,0.15);
-        border:1px solid rgba(0,255,234,0.4); border-radius:12px;
-        color:#00ffea; font-weight:700; font-size:14px; cursor:pointer;
-        transition:all 0.3s;
+        flex:1; padding:9px; background:rgba(0,255,234,0.15);
+        border:1px solid rgba(0,255,234,0.4); border-radius:10px;
+        color:#00ffea; font-weight:700; font-size:13.5px; cursor:pointer;
+        transition:background 0.3s;
       `;
       meetBtn.onmouseenter = () => meetBtn.style.background = "rgba(0,255,234,0.3)";
       meetBtn.onmouseleave = () => meetBtn.style.background = "rgba(0,255,234,0.15)";
       meetBtn.onclick = (e) => {
         e.stopPropagation();
-        alert(`Opening meet with @${video.uploaderName} 💕`); // replace with real meet/DM
+        alert(`Meet @${video.uploaderName} 💕`);
       };
 
-      // Unlock button — only if price > 0
+      // Unlock button – only if price > 0
       if (video.highlightVideoPrice > 0) {
         const unlockBtn = document.createElement("button");
         unlockBtn.textContent = isUnlocked ? "Unlocked ♡" : `Unlock ${video.highlightVideoPrice} STRZ`;
         unlockBtn.style.cssText = `
-          flex:1; padding:10px; background:linear-gradient(135deg,#ff00f2,#8a2be2);
-          border:none; border-radius:12px; color:#fff; font-weight:800;
-          font-size:14px; cursor:pointer; box-shadow:0 4px 16px rgba(255,0,242,0.3);
+          flex:1; padding:9px; background:linear-gradient(135deg,#ff00f2,#8a2be2);
+          border:none; border-radius:10px; color:#fff; font-weight:800;
+          font-size:13.5px; cursor:pointer; box-shadow:0 3px 12px rgba(255,0,242,0.25);
         `;
         if (!isUnlocked) {
           unlockBtn.onclick = (e) => {
@@ -4452,7 +4460,6 @@ function renderCards(videosToRender) {
         }
         btns.append(unlockBtn, meetBtn);
       } else {
-        // Free clip — only Meet button
         btns.appendChild(meetBtn);
       }
 
@@ -4461,17 +4468,17 @@ function renderCards(videosToRender) {
       content.appendChild(galleryItem);
     });
 
-    return; // stop normal rendering
+    return; // stop normal cards
   }
 
   // ———————————————————————
-  // NORMAL / ALL / UNLOCKED: YOUR PERFECT ORIGINAL HORIZONTAL CARDS (100% UNTOUCHED)
+  // NORMAL / ALL / UNLOCKED: YOUR ORIGINAL HORIZONTAL CARDS – 100% UNCHANGED
   // ———————————————————————
   Object.assign(content.style, {
     display: "flex", gap: "16px", flexWrap: "nowrap", overflowX: "auto",
     paddingBottom: "40px", scrollBehavior: "smooth", width: "100%", justifyContent: "flex-start"
   });
-
+  
   filtered.forEach(video => {
     const isUnlocked = unlockedVideos.includes(video.id);
 

@@ -4363,207 +4363,39 @@ function renderCards(videosToRender) {
       card.style.boxShadow = "0 6px 24px rgba(138,43,226,0.35)";
     };
 
-// Video container
-const videoContainer = document.createElement("div");
-videoContainer.style.cssText = `
-  height: ${isTrendingCard ? "360px" : "320px"};
-  overflow: hidden;
-  position: relative;
-  background: #000;
-  border-radius: 16px 16px 0 0;
-`;
+    // Video container
+    const videoContainer = document.createElement("div");
+    videoContainer.style.cssText = `height:${isTrendingCard ? "360px" : "320px"};overflow:hidden;position:relative;background:#000;cursor:pointer;border-radius:16px 16px 0 0;`;
 
-const videoEl = document.createElement("video");
-videoEl.muted = true;
-videoEl.loop = true;
-videoEl.preload = "metadata";
-videoEl.style.cssText = "width:100%; height:100%; object-fit:cover;";
+    const videoEl = document.createElement("video");
+    videoEl.muted = true;
+    videoEl.loop = true;
+    videoEl.preload = "metadata";
+    videoEl.style.cssText = "width:100%;height:100%;object-fit:cover;";
 
-// Locked/unlocked preview logic
-if (isUnlocked) {
-  videoEl.src = video.videoUrl || video.previewClip || "";
-  videoEl.load();
+    if (isUnlocked) {
+      videoEl.src = video.videoUrl || video.previewClip || "";
+      videoEl.load();
+      videoContainer.onmouseenter = () => videoEl.play().catch(() => {});
+      videoContainer.onmouseleave = () => { videoEl.pause(); videoEl.currentTime = 0; };
+    } else {
+      videoEl.src = "";
+      const lockedOverlay = document.createElement("div");
+      lockedOverlay.innerHTML = `
+        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(10,5,30,0.9);z-index:2;border-radius:16px 16px 0 0;">
+          <div style="text-align:center;">
+            <svg width="70" height="70" viewBox="0 0 24 24" fill="none">
+              <path d="M12 2C9.2 2 7 4.2 7 7V11H6C4.9 11 4 11.9 4 13V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V13C20 11.9 19.1 11 18 11H17V7C17 4.2 14.8 2 12 2ZM12 4C13.7 4 15 5.3 15 7V11H9V7C9 5.3 10.3 4 12 4Z" fill="#ff00f2"/>
+            </svg>
+            ${video.highlightVideoPrice > 0 ? `<div style="margin-top:12px;font-size:18px;font-weight:800;color:#ff00f2;">${video.highlightVideoPrice} STRZ</div>` : ''}
+        
+        </div>`
 
-  // Desktop hover play/pause only
-  videoContainer.onmouseenter = () => videoEl.play().catch(() => {});
-  videoContainer.onmouseleave = () => {
-    videoEl.pause();
-    videoEl.currentTime = 0;
-  };
-} else {
-  videoEl.src = "";
+      videoContainer.appendChild(videoEl);
 
-  const lockedOverlay = document.createElement("div");
-  lockedOverlay.innerHTML = `
-    <div style="
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: rgba(10,5,30,0.9);
-      z-index: 2;
-      border-radius: 16px 16px 0 0;
-    ">
-      <div style="text-align:center;">
-        <svg width="70" height="70" viewBox="0 0 24 24" fill="none">
-          <path d="M12 2C9.2 2 7 4.2 7 7V11H6C4.9 11 4 11.9 4 13V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V13C20 11.9 19.1 11 18 11H17V7C17 4.2 14.8 2 12 2ZM12 4C13.7 4 15 5.3 15 7V11H9V7C9 5.3 10.3 4 12 4Z" fill="#ff00f2"/>
-        </svg>
-        ${video.highlightVideoPrice > 0
-          ? `<div style="margin-top:12px; font-size:18px; font-weight:800; color:#ff00f2;">${video.highlightVideoPrice} STRZ</div>`
-          : ''
-        }
-      </div>
-    </div>`;
-  videoContainer.appendChild(lockedOverlay);
-}
-
-videoContainer.appendChild(videoEl); // Preview video on top
-
-// Info panel
-const infoPanel = document.createElement("div");
-infoPanel.style.cssText = "background:linear-gradient(180deg,#1a0b2e,#0f0519);padding:14px;display:flex;flex-direction:column;gap:10px;border-radius:0 0 16px 16px;";
-
-if (isTrendingCard) {
-  const chatIdEl = document.createElement("div");
-  chatIdEl.textContent = `@${video.uploaderName || "Anonymous"}`;
-  chatIdEl.style.cssText = "font-weight:800;color:#e0b0ff;font-size:15px;text-align:center;";
-
-  const detailsEl = document.createElement("p");
-  detailsEl.textContent = detailsText || "Hey~";
-  detailsEl.style.cssText = "margin:0 0 10px; font-size:14px; line-height:1.4; color:#ccc; text-align:center; opacity:0.9;";
-
-  const meetBtn = document.createElement("div");
-  meetBtn.classList.add("meet-btn"); // For detection
-  meetBtn.style.cssText = `
-    width:40px;height:40px;border-radius:50%;
-    background:rgba(255,0,242,0.15);
-    display:flex;align-items:center;justify-content:center;
-    margin:0 auto 12px;
-    cursor:pointer;
-    border:1px solid rgba(255,0,242,0.5);
-    transition:all 0.3s ease;
-    box-shadow:0 0 12px rgba(255,0,242,0.3);
-  `;
-  meetBtn.innerHTML = `<img src="https://cdn.shopify.com/s/files/1/0962/6648/6067/files/hearts__128_x_128_px.svg?v=1761809626" style="width:24px;height:24px;filter:drop-shadow(0 0 6px #00ffea);"/>`;
-
-  meetBtn.onclick = (e) => {
-    e.stopPropagation(); // Prevent card click
-    showMeetModal({
-      chatId: video.uploaderName || "this creator",
-      whatsapp: video.whatsapp || "",
-      country: video.country || "Nigeria"
-    });
-  };
-
-  meetBtn.onmouseenter = () => meetBtn.style.transform = "scale(1.15)";
-  meetBtn.onmouseleave = () => meetBtn.style.transform = "scale(1)";
-
-  infoPanel.append(chatIdEl, detailsEl, meetBtn);
-} else {
-  const title = document.createElement("div");
-  title.textContent = video.title || "Untitled";
-  title.style.cssText = "font-weight:800;color:#e0b0ff;font-size:15px;text-shadow: 0 0 8px #ff00f2;";
-
-  const uploader = document.createElement("div");
-  uploader.textContent = `By: ${video.uploaderName || "Anonymous"}`;
-  uploader.style.cssText = "font-size:12px;color:#00ffea;opacity:0.9;";
-
-  infoPanel.append(title, uploader);
-}
-
-// Unlock button (if needed)
-if (video.highlightVideoPrice > 0 || !isTrendingCard) {
-  const unlockBtn = document.createElement("button");
-  unlockBtn.textContent = isUnlocked ? "Unlocked ♡" : `Unlock ${video.highlightVideoPrice || 100} STRZ`;
-  Object.assign(unlockBtn.style, {
-    width: "100%",
-    padding: "10px",
-    background: isUnlocked ? "rgba(138,43,226,0.3)" : "linear-gradient(135deg,#ff00f2,#8a2be2,#00ffea)",
-    border: "1px solid #ff00f2",
-    borderRadius: "10px",
-    color: "#fff",
-    fontWeight: "700",
-    fontSize: "13px",
-    cursor: isUnlocked ? "default" : "pointer",
-    boxShadow: "0 3px 12px rgba(255,0,242,0.3)"
-  });
-
-  if (!isUnlocked) {
-    unlockBtn.onclick = (e) => {
-      e.stopPropagation(); // Prevent card click
-      showUnlockConfirm(video, () => renderCards(videosToRender));
-    };
-  }
-
-  infoPanel.appendChild(unlockBtn);
-}
-
-// Assemble card
-card.append(videoContainer, infoPanel);
-content.appendChild(card);
-
-// === SINGLE CLICK HANDLER ON THE ENTIRE CARD (fixes double video bug) ===
-let isFullscreenActive = false; // Per-card guard (safe since only one fullscreen at a time)
-
-card.addEventListener("click", (e) => {
-  // Ignore clicks on interactive elements
-  if (e.target.closest("button") || e.target.closest(".meet-btn")) {
-    return;
-  }
-
-  e.preventDefault();
-  e.stopPropagation();
-
-  if (isFullscreenActive) return;
-  isFullscreenActive = true;
-
-  if (!isUnlocked) {
-    showUnlockConfirm(video, () => renderCards(videosToRender));
-    isFullscreenActive = false;
-    return;
-  }
-
-  // Open fullscreen video
-  const fullVideo = document.createElement("video");
-  fullVideo.src = video.videoUrl || "";
-  fullVideo.controls = true;
-  fullVideo.playsInline = false;
-  fullVideo.muted = false;
-  fullVideo.style.cssText = `
-    position: fixed;
-    top: 0; left: 0;
-    width: 100vw;
-    height: 100vh;
-    object-fit: contain;
-    background: #000;
-    z-index: 99999;
-  `;
-
-  const closeFullscreen = () => {
-    if (document.fullscreenElement) document.exitFullscreen?.();
-    fullVideo.remove();
-    isFullscreenActive = false;
-    fullVideo.removeEventListener("click", closeFullscreen);
-  };
-
-  fullVideo.addEventListener("click", closeFullscreen);
-  document.body.appendChild(fullVideo);
-
-  fullVideo.play().catch((err) => {
-    console.warn("Playback failed:", err);
-    isFullscreenActive = false;
-  });
-
-  if (fullVideo.requestFullscreen) {
-    fullVideo.requestFullscreen().catch(() => {});
-  } else if (fullVideo.webkitEnterFullscreen) {
-    fullVideo.webkitEnterFullscreen();
-  }
-});
-
-// Append the preview video last so it's on top of overlay if unlocked
-videoContainer.appendChild(videoEl);
+// Remove cursor pointer since the whole card now handles clicks
+videoContainer.style.cursor = "default";
+ 
     
     // Info panel
     const infoPanel = document.createElement("div");
@@ -4817,6 +4649,35 @@ async function unlockVideo(video) {
     showGoldAlert(msg === "Not enough STRZ" ? "Not enough STRZ" : "Unlock failed — try again");
   }
 }
+
+function playFullVideo(video) {
+  const src = video.highlightVideo || video.videoUrl || video.previewClip || "";
+  if (!src) return showGoldAlert("Video not found");
+
+  // Remove any existing custom player
+  document.querySelectorAll('.custom-video-player').forEach(el => el.remove());
+
+  // Create a hidden <video> that instantly opens native browser player
+  const videoEl = document.createElement("video");
+  videoEl.src = src;
+  videoEl.controls = true;
+  videoEl.autoplay = true;
+  videoEl.playsInline = true;
+  videoEl.style.display = "none"; // invisible — we don't want to show it
+
+  // Optional: mark it so we can clean it later
+  videoEl.classList.add("custom-video-player");
+
+  document.body.appendChild(videoEl);
+
+  // This triggers the native mobile/browser fullscreen player immediately
+  videoEl.play();
+
+  // Auto-remove after it ends or user closes (keeps DOM clean)
+  videoEl.addEventListener("ended", () => videoEl.remove());
+  videoEl.addEventListener("pause", () => setTimeout(() => videoEl.remove(), 1000));
+}
+
 async function loadMyClips() {
   const grid = document.getElementById("myClipsGrid");
   const noMsg = document.getElementById("noClipsMessage");

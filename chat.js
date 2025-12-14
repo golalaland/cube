@@ -4097,14 +4097,14 @@ checkScroll(); // initial check
 highlightsBtn.onclick = async () => {
   try {
     if (!currentUser?.uid) {
-      showGoldAlert("Please log in to view highlights");
+      showGoldAlert("Please log in to view cuties");
       return;
     }
     const highlightsRef = collection(db, "highlightVideos");
     const q = query(highlightsRef, orderBy("createdAt", "desc"));
     const snapshot = await getDocs(q);
     if (snapshot.empty) {
-      showGoldAlert("No highlights uploaded yet");
+      showGoldAlert("No clips uploaded yet");
       return;
     }
     const videos = snapshot.docs.map(docSnap => {
@@ -4129,8 +4129,8 @@ highlightsBtn.onclick = async () => {
     });
     showHighlightsModal(videos);
   } catch (err) {
-    console.error("Error fetching highlights:", err);
-    showGoldAlert("Error fetching highlights — please try again.");
+    console.error("Error fetching clips:", err);
+    showGoldAlert("Error fetching clips — please try again.");
   }
 };
 
@@ -4159,15 +4159,16 @@ intro.innerHTML = `
 
     <!-- Small centered header -->
     <div style="margin-bottom:6px;">
-      <span style="
-        background:linear-gradient(90deg,#00ffea,#ff00f2,#8a2be2);
-        -webkit-background-clip:text;
-        -webkit-text-fill-color:transparent;
-        font-weight:700;
-        display:inline-block;
-      ">
-        Cuties 💕
-      </span>
+     <span style="
+  background:linear-gradient(90deg,#00ffea,#ff00f2,#8a2be2);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  font-weight:700;
+  display:inline-block;
+  transform: translateX(5px); /* ← adjust this */
+">
+  Cuties 💕
+</span>
     </div>
 
     <!-- Text lines with tight spacing -->
@@ -4523,7 +4524,7 @@ async function unlockVideo(video) {
       const buyerData = buyerDoc.data();
 
       if ((buyerData?.stars || 0) < cost) {
-        throw new Error("Not enough STRZ");
+        throw new Error("Not enough STRZ to unlock this clip");
       }
 
       // Deduct from buyer, add to uploader
@@ -4572,7 +4573,7 @@ async function unlockVideo(video) {
     }
 
     // — SUCCESS —
-    showGoldAlert(`Unlocked "${video.title}"!`);
+    showGoldAlert(`You Unlocked "${video.title}"!`);
     
     // Close modal & refresh highlights
     document.getElementById("highlightsModal")?.remove();

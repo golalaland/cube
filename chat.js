@@ -4301,7 +4301,7 @@ function renderCards(videosToRender) {
     return true;
   });
 
-  // Always horizontal scroll — same for normal and trending
+  // Always horizontal scroll
   Object.assign(content.style, {
     display: "flex", gap: "16px", flexWrap: "nowrap", overflowX: "auto",
     paddingBottom: "40px", scrollBehavior: "smooth", width: "100%", justifyContent: "flex-start"
@@ -4311,16 +4311,16 @@ function renderCards(videosToRender) {
     const isUnlocked = unlockedVideos.includes(video.id);
     const isTrendingCard = filterMode === "trending";
 
-    // Fetch bio only for trending cards
-    let bio = "";
+    // Fetch bioPick only for trending
+    let bioPick = "";
     if (isTrendingCard && video.uploaderId) {
       try {
         const userSnap = await getDoc(doc(db, "users", video.uploaderId));
         if (userSnap.exists()) {
-          bio = userSnap.data().bio || "No bio yet~";
+          bioPick = userSnap.data().bioPick || "No vibe yet~";
         }
       } catch (e) {
-        bio = "Mystery creator";
+        bioPick = "Mystery vibe";
       }
     }
 
@@ -4329,7 +4329,6 @@ function renderCards(videosToRender) {
     card.setAttribute("data-uploader", video.uploaderName || "Anonymous");
     card.setAttribute("data-title", video.title || "");
 
-    // Slightly larger for trending to fit bio + frames + meet button
     const cardWidth = isTrendingCard ? "260px" : "230px";
     Object.assign(card.style, {
       minWidth: cardWidth, maxWidth: cardWidth, background: "#0f0a1a", borderRadius: "16px",
@@ -4367,7 +4366,9 @@ function renderCards(videosToRender) {
       videoEl.src = "";
       const lockedOverlay = document.createElement("div");
       lockedOverlay.innerHTML = `
-        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(10,5,30,0.9);z-index:2;border-radius:16px 16px 0 0;">
+        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content
+
+:center;background:rgba(10,5,30,0.9);z-index:2;border-radius:16px 16px 0 0;">
           <div style="text-align:center;">
             <svg width="70" height="70" viewBox="0 0 24 24" fill="none">
               <path d="M12 2C9.2 2 7 4.2 7 7V11H6C4.9 11 4 11.9 4 13V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V13C20 11.9 19.1 11 18 11H17V7C17 4.2 14.8 2 12 2ZM12 4C13.7 4 15 5.3 15 7V11H9V7C9 5.3 10.3 4 12 4Z" fill="#ff00f2"/>
@@ -4378,7 +4379,7 @@ function renderCards(videosToRender) {
       videoContainer.appendChild(lockedOverlay);
     }
 
-    // Fullscreen on tap
+    // Fullscreen playback
     videoContainer.onclick = (e) => {
       e.stopPropagation();
       if (!isUnlocked) {
@@ -4411,7 +4412,7 @@ function renderCards(videosToRender) {
     if (isTrendingCard) {
       uploaderLine.innerHTML = `
         <div style="font-size:13px;color:#00ffea;font-weight:600;">@${video.uploaderName || "Anonymous"}</div>
-        <div style="font-size:12px;color:#bbb;margin-top:4px;line-height:1.3;">${bio}</div>
+        <div style="font-size:12px;color:#bbb;margin-top:4px;line-height:1.3;">${bioPick}</div>
       `;
     } else {
       uploaderLine.textContent = `By: ${video.uploaderName || "Anonymous"}`;
@@ -4422,7 +4423,7 @@ function renderCards(videosToRender) {
     const buttonsRow = document.createElement("div");
     buttonsRow.style.cssText = "display:flex;gap:10px;align-items:center;margin-top:8px;";
 
-    // Unlock button (only if price > 0 or not trending free)
+    // Unlock button (only if price > 0 or not free trending)
     if (video.highlightVideoPrice > 0 || !isTrendingCard) {
       const unlockBtn = document.createElement("button");
       unlockBtn.textContent = isUnlocked ? "Unlocked ♡" : `Unlock ${video.highlightVideoPrice || 100} STRZ`;
@@ -4447,23 +4448,21 @@ function renderCards(videosToRender) {
       buttonsRow.appendChild(unlockBtn);
     }
 
-    // Meet button — only in trending
+    // Meet button — only in trending, cute SVG heart icon
     if (isTrendingCard) {
       const meetBtn = document.createElement("div");
-      meetBtn.innerHTML = "Chat";
       meetBtn.style.cssText = `
         width:44px;height:44px;border-radius:50%;background:rgba(0,255,234,0.15);
-        display:flex;align-items:center;justify-content:center;font-size:22px;
+        display:flex;align-items:center;justify-content:center;
         cursor:pointer;border:1px solid rgba(0,255,234,0.4);transition:all 0.3s;
       `;
+      meetBtn.innerHTML = `<img src="https://cdn.shopify.com/s/files/1/0962/6648/6067/files/hearts__128_x_128_px.svg?v=1761809626" style="width:26px;height:26px;filter:drop-shadow(0 0 6px #00ffea);"/>`;
       meetBtn.onclick = (e) => {
         e.stopPropagation();
-        // Call your existing meet modal — pass uploader as host
         showMeetModal({
           chatId: video.uploaderName || "this creator",
-          whatsapp: video.whatsapp || "", // if you have it in video doc
+          whatsapp: video.whatsapp || "",
           country: video.country || "Nigeria"
-          // add any other fields your showMeetModal expects
         });
       };
       meetBtn.onmouseenter = () => meetBtn.style.transform = "scale(1.15)";
@@ -4471,25 +4470,7 @@ function renderCards(videosToRender) {
       buttonsRow.appendChild(meetBtn);
     }
 
-    // 3-frame preview — only in trending
-    if (isTrendingCard) {
-      const frames = document.createElement("div");
-      frames.style.cssText = "display:flex;gap:6px;margin-top:10px;justify-content:center;";
-      for (let i = 0; i < 3; i++) {
-        const frame = document.createElement("div");
-        frame.style.cssText = `
-          width:70px;height:100px;background:#111;border-radius:8px;
-          background-image:url(${isUnlocked && video.videoUrl ? video.videoUrl : ''});
-          background-size:cover;background-position:center;
-          border:1px solid rgba(255,0,242,0.2);
-        `;
-        frames.appendChild(frame);
-      }
-      infoPanel.append(title, uploaderLine, frames, buttonsRow);
-    } else {
-      infoPanel.append(title, uploaderLine, buttonsRow);
-    }
-
+    infoPanel.append(title, uploaderLine, buttonsRow);
     card.append(videoContainer, infoPanel);
     content.appendChild(card);
   });

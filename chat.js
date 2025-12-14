@@ -3473,7 +3473,7 @@ confirmBtn.onclick = async () => {
   }
 }
 // ================================
-// UPLOAD HIGHLIGHT — TRENDING = FREE & SIMPLE (NO TITLE/PRICE REQUIRED)
+// UPLOAD HIGHLIGHT — FINAL FIX: NO TIMESTAMP ERROR
 // ================================
 document.getElementById("uploadHighlightBtn")?.addEventListener("click", async () => {
   const btn = document.getElementById("uploadHighlightBtn");
@@ -3490,22 +3490,13 @@ document.getElementById("uploadHighlightBtn")?.addEventListener("click", async (
   const videoUrlInput = document.getElementById("highlightVideoInput");
   const title = document.getElementById("highlightTitleInput").value.trim();
   const desc = document.getElementById("highlightDescInput").value.trim();
-  const priceInput = document.getElementById("highlightPriceInput").value;
-  const price = parseInt(priceInput) || 0;
+  const price = parseInt(document.getElementById("highlightPriceInput").value) || 0;
   const boostTrending = document.getElementById("boostTrendingCheckbox")?.checked || false;
 
-  // VALIDATION RULES:
-  // - Always need a video (file or URL)
-  if (!fileInput.files[0] && !videoUrlInput.value.trim()) {
+  if (!title) return showStarPopup("Title required", "error");
+  if (price < 10) return showStarPopup("Minimum 10 STRZ", "error");
+  if (!fileInput.files[0] && !videoUrlInput.value.trim())
     return showStarPopup("Add file or URL", "error");
-  }
-
-  // - Only require title & price if NOT trending
-  if (!boostTrending) {
-    if (!title) return showStarPopup("Title required", "error");
-    if (price < 10) return showStarPopup("Minimum 10 STRZ", "error");
-  }
-  // - If trending → force price = 0 (free), title/desc optional
 
   // === TRENDING BOOST COST CHECK ===
   if (boostTrending) {
@@ -3541,13 +3532,13 @@ document.getElementById("uploadHighlightBtn")?.addEventListener("click", async (
       finalVideoUrl = await getDownloadURL(snapshot.ref);
     }
 
-    // Final data to save
+    // === SAVE TO FIRESTORE — SAFE trendingUntil WITHOUT Timestamp ===
     const clipData = {
       uploaderId: currentUser.uid,
       uploaderName: currentUser.chatId || "Legend",
       videoUrl: finalVideoUrl,
-      highlightVideoPrice: boostTrending ? 0 : price, // Trending = always free
-      title: boostTrending ? "@" + (currentUser.chatId || "Legend") : title, // Optional title → fallback to @chatId
+      highlightVideoPrice: price,
+      title,
       description: desc || "",
       uploadedAt: serverTimestamp(),
       createdAt: serverTimestamp(),
@@ -3556,13 +3547,15 @@ document.getElementById("uploadHighlightBtn")?.addEventListener("click", async (
       isTrending: boostTrending || false
     };
 
+    // Only add trendingUntil if boosted — using plain JS Date converted safely
     if (boostTrending) {
-      clipData.trendingUntil = new Date(Date.now() + 24 * 60 * 60 * 1000);
+      clipData.trendingUntil = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours from now
+      // Firestore automatically converts JS Date to Timestamp
     }
 
     const clipRef = await addDoc(collection(db, "highlightVideos"), clipData);
 
-    // === NOTIFY FANS ===
+    // === NOTIFY FANS (unchanged) ===
     try {
       const pastClips = await getDocs(
         query(collection(db, "highlightVideos"), where("uploaderId", "==", currentUser.uid))
@@ -3599,8 +3592,8 @@ document.getElementById("uploadHighlightBtn")?.addEventListener("click", async (
 
     showStarPopup("CLIP LIVE — FANS NOTIFIED!", "success");
     btn.textContent = boostTrending ? "TRENDING LIVE!" : "DROPPED!";
-    btn.style.background = boostTrending
-      ? "linear-gradient(90deg,#00ffea,#8a2be2,#ff00f2)"
+    btn.style.background = boostTrending 
+      ? "linear-gradient(90deg,#00ffea,#8a2be2,#ff00f2)" 
       : "linear-gradient(90deg,#00ff9d,#00cc66)";
 
     // Reset form
@@ -4314,256 +4307,65 @@ function renderCards(videosToRender) {
     paddingBottom: "40px", scrollBehavior: "smooth", width: "100%", justifyContent: "flex-start"
   });
 
-  if (filterMode === "trending") {
-    // Group trending videos by uploader
-    const videosByUploader = {};
-    filtered.forEach(video => {
-      const uid = video.uploaderId || "anonymous";
-      if (!videosByUploader[uid]) videosByUploader[uid] = [];
-      videosByUploader[uid].push(video);
-    });
-
-    // Create ONE card per uploader
-    Object.keys(videosByUploader).forEach(async uid => {
-      const creatorVideos = videosByUploader[uid];
-      if (creatorVideos.length === 0) return;
-
-      const sampleVideo = creatorVideos[0];
-      let detailsText = "Hey~";
-      let chatId = sampleVideo.uploaderName || "Anonymous";
-
-      // Fetch legendary details once
-      if (uid && uid !== "anonymous") {
-        try {
-          const userSnap = await getDoc(doc(db, "users", uid));
-          if (userSnap.exists()) {
-            const user = userSnap.data();
-            chatId = user.chatId || sampleVideo.uploaderName || "Anonymous";
-
-            const gender = (user.gender || "person").toLowerCase();
-            const pronoun = gender === "male" ? "his" : "her";
-            const ageGroup = !user.age ? "20s" : user.age >= 30 ? "30s" : "20s";
-            const flair = gender === "male" ? "😎" : "💋";
-            const fruit = user.fruitPick || "🍇";
-            const nature = user.naturePick || "cool";
-            const city = user.location || user.city || "Lagos";
-            const country = user.country || "Nigeria";
-
-            if (user.isHost) {
-              detailsText = `A ${fruit} ${nature} ${gender} in ${pronoun} ${ageGroup}, currently in ${city}, ${country}. ${flair}`;
-            } else if (user.isVIP) {
-              detailsText = `A ${gender} in ${pronoun} ${ageGroup}, currently in ${city}, ${country}. ${flair}`;
-            } else {
-              detailsText = `A ${gender} from ${city}, ${country}. ${flair}`;
-            }
-          }
-        } catch (e) {
-          console.warn("Failed to fetch user details for trending card", e);
-        }
-      }
-
-      // Single card for this creator
-      const card = document.createElement("div");
-      card.style.cssText = `
-        min-width:220px; max-width:220px; background:#0f0a1a; border-radius:16px;
-        overflow:hidden; display:flex; flex-direction:column; cursor:pointer;
-        flex-shrink:0; box-shadow:0 6px 24px rgba(138,43,226,0.35);
-        border:1px solid rgba(138,43,226,0.5); position:relative;
-      `;
-
-      // Swipeable video container
-      const videoContainer = document.createElement("div");
-      videoContainer.style.cssText = "position:relative; height:360px; overflow:hidden; border-radius:16px 16px 0 0;";
-
-      let currentIndex = 0;
-      const totalVideos = creatorVideos.length;
-
-      // Multiple video elements (Instagram Stories style)
-      const videos = [];
-      creatorVideos.forEach((vid, i) => {
-        const v = document.createElement("video");
-        v.muted = true;
-        v.loop = true;
-        v.preload = "metadata";
-        v.style.cssText = `
-          width:100%; height:100%; object-fit:cover;
-          position:absolute; top:0; left:0;
-          opacity:${i === 0 ? 1 : 0};
-          transition:opacity 0.5s ease;
-          pointer-events:none;
-        `;
-        v.src = vid.videoUrl || "";
-        v.load();
-        if (i === 0) v.play().catch(() => {});
-        videoContainer.appendChild(v);
-        videos.push(v);
-      });
-
-      // Auto-play next like Instagram Stories on hover/end
-      const playNext = () => {
-        if (totalVideos <= 1) return;
-        videos[currentIndex].style.opacity = "0";
-        currentIndex = (currentIndex + 1) % totalVideos;
-        videos[currentIndex].style.opacity = "1";
-        videos[currentIndex].play().catch(() => {});
-      };
-
-      // Hover = start auto-cycle
-      videoContainer.onmouseenter = () => {
-        if (totalVideos > 1) {
-          videos[currentIndex].onended = playNext;
-          videos[currentIndex].play().catch(() => {});
-        }
-      };
-
-      // Leave = pause current
-      videoContainer.onmouseleave = () => {
-        videos[currentIndex].pause();
-        videos[currentIndex].onended = null;
-      };
-
-      // Swipe support (manual override)
-      let touchStartX = 0;
-      videoContainer.ontouchstart = e => touchStartX = e.touches[0].clientX;
-      videoContainer.ontouchend = e => {
-        const deltaX = touchStartX - e.changedTouches[0].clientX;
-        if (Math.abs(deltaX) < 50) return;
-        videos[currentIndex].style.opacity = "0";
-        if (deltaX > 0 && currentIndex < totalVideos - 1) currentIndex++;
-        else if (deltaX < 0 && currentIndex > 0) currentIndex--;
-        else currentIndex = (currentIndex + 1) % totalVideos; // wrap around
-        videos[currentIndex].style.opacity = "1";
-        videos[currentIndex].play().catch(() => {});
-      };
-
-      // Progress bar like Instagram Stories
-      if (totalVideos > 1) {
-        const progressBar = document.createElement("div");
-        progressBar.style.cssText = "position:absolute; top:8px; left:8px; right:8px; display:flex; gap:4px; z-index:3;";
-        for (let i = 0; i < totalVideos; i++) {
-          const segment = document.createElement("div");
-          segment.style.cssText = `
-            flex:1; height:3px; background:rgba(255,255,255,0.3); border-radius:2px;
-            overflow:hidden;
-          `;
-          const fill = document.createElement("div");
-          fill.style.cssText = `
-            height:100%; width:${i === 0 ? '100%' : '0%'}; background:#ff00f2;
-            transition:width 0.3s linear; border-radius:2px;
-          `;
-          segment.appendChild(fill);
-          progressBar.appendChild(segment);
-        }
-        videoContainer.appendChild(progressBar);
-
-        // Update progress on change
-        const updateProgress = () => {
-          progressBar.querySelectorAll("div > div").forEach((fill, i) => {
-            fill.style.width = i === currentIndex ? "100%" : i < currentIndex ? "100%" : "0%";
-          });
-        };
-        const oldPlayNext = playNext;
-        playNext = () => {
-          oldPlayNext();
-          updateProgress();
-        };
-        updateProgress();
-      }
-
-      // Fullscreen on tap (current video)
-      videoContainer.onclick = () => {
-        const fullVideo = document.createElement("video");
-        fullVideo.src = creatorVideos[currentIndex].videoUrl || "";
-        fullVideo.controls = true;
-        fullVideo.playsInline = false;
-        fullVideo.style.cssText = "position:fixed;top:0;left:0;width:100vw;height:100vh;object-fit:contain;background:#000;z-index:99999;";
-        fullVideo.onclick = () => fullVideo.remove();
-        document.body.appendChild(fullVideo);
-        fullVideo.play();
-        if (fullVideo.requestFullscreen) fullVideo.requestFullscreen();
-      };
-
-      // Info panel
-      const infoPanel = document.createElement("div");
-      infoPanel.style.cssText = "background:linear-gradient(180deg,#1a0b2e,#0f0519);padding:14px;display:flex;flex-direction:column;gap:10px;border-radius:0 0 16px 16px;";
-
-      const chatIdEl = document.createElement("div");
-      chatIdEl.textContent = `@${chatId}`;
-      chatIdEl.style.cssText = "font-weight:800;color:#e0b0ff;font-size:15px;text-align:center;";
-
-      const detailsEl = document.createElement("p");
-      detailsEl.textContent = detailsText;
-      detailsEl.style.cssText = "margin:0 0 10px; font-size:14px; line-height:1.4; color:#ccc; text-align:center; opacity:0.9;";
-
-      // Meet button
-      const meetBtn = document.createElement("div");
-      meetBtn.style.cssText = `
-        width:40px;height:40px;border-radius:50%;
-        background:rgba(255,0,242,0.15);
-        display:flex;align-items:center;justify-content:center;
-        margin:0 auto;
-        cursor:pointer;
-        border:1px solid rgba(255,0,242,0.5);
-        transition:all 0.3s ease;
-        box-shadow:0 0 12px rgba(255,0,242,0.3);
-      `;
-      meetBtn.innerHTML = `<img src="https://cdn.shopify.com/s/files/1/0962/6648/6067/files/hearts__128_x_128_px.svg?v=1761809626" style="width:24px;height:24px;filter:drop-shadow(0 0 8px #ff00f2);"/>`;
-      meetBtn.onclick = (e) => {
-        e.stopPropagation();
-        showMeetModal({
-          chatId: chatId,
-          whatsapp: sampleVideo.whatsapp || "",
-          country: sampleVideo.country || "Nigeria"
-        });
-      };
-      meetBtn.onmouseenter = () => {
-        meetBtn.style.transform = "scale(1.15)";
-        meetBtn.style.background = "rgba(255,0,242,0.3)";
-        meetBtn.style.boxShadow = "0 0 20px rgba(255,0,242,0.6)";
-      };
-      meetBtn.onmouseleave = () => {
-        meetBtn.style.transform = "scale(1)";
-        meetBtn.style.background = "rgba(255,0,242,0.15)";
-        meetBtn.style.boxShadow = "0 0 12px rgba(255,0,242,0.3)";
-      };
-
-      infoPanel.append(chatIdEl, detailsEl, meetBtn);
-      card.append(videoContainer, infoPanel);
-      content.appendChild(card);
-    });
-
-    return;
-  }
-
-  // ———————————————————————
-  // NORMAL MODE: ORIGINAL CARDS — 100% UNCHANGED
-  // ———————————————————————
-  filtered.forEach(video => {
+  filtered.forEach(async (video) => {
     const isUnlocked = unlockedVideos.includes(video.id);
+    const isTrendingCard = filterMode === "trending";
+
+    // Fetch user data for legendary details (only trending)
+    let detailsText = "";
+    if (isTrendingCard && video.uploaderId) {
+      try {
+        const userSnap = await getDoc(doc(db, "users", video.uploaderId));
+        if (userSnap.exists()) {
+          const user = userSnap.data();
+          const gender = (user.gender || "person").toLowerCase();
+          const pronoun = gender === "male" ? "his" : "her";
+          const ageGroup = !user.age ? "20s" : user.age >= 30 ? "30s" : "20s";
+          const flair = gender === "male" ? "😎" : "💋";
+          const fruit = user.fruitPick || "🍇";
+          const nature = user.naturePick || "cool";
+          const city = user.location || user.city || "Lagos";
+          const country = user.country || "Nigeria";
+
+          if (user.isHost) {
+            detailsText = `A ${fruit} ${nature} ${gender} in ${pronoun} ${ageGroup}, currently in ${city}, ${country}. ${flair}`;
+          } else if (user.isVIP) {
+            detailsText = `A ${gender} in ${pronoun} ${ageGroup}, currently in ${city}, ${country}. ${flair}`;
+          } else {
+            detailsText = `A ${gender} from ${city}, ${country}. ${flair}`;
+          }
+        }
+      } catch (e) {
+        detailsText = "Mystery vibe~";
+      }
+    }
 
     const card = document.createElement("div");
     card.className = "videoCard";
     card.setAttribute("data-uploader", video.uploaderName || "Anonymous");
     card.setAttribute("data-title", video.title || "");
+
+    const cardWidth = isTrendingCard ? "220px" : "230px"; // slightly smaller for trending
     Object.assign(card.style, {
-      minWidth: "230px", maxWidth: "230px", background: "#0f0a1a", borderRadius: "12px",
+      minWidth: cardWidth, maxWidth: cardWidth, background: "#0f0a1a", borderRadius: "16px",
       overflow: "hidden", display: "flex", flexDirection: "column", cursor: "pointer",
-      flexShrink: 0, boxShadow: "0 4px 20px rgba(138,43,226,0.4)",
+      flexShrink: 0, boxShadow: "0 6px 24px rgba(138,43,226,0.35)",
       transition: "transform 0.3s ease, box-shadow 0.3s ease",
       border: "1px solid rgba(138,43,226,0.5)"
     });
 
     card.onmouseenter = () => {
-      card.style.transform = "scale(1.03)";
-      card.style.boxShadow = "0 12px 32px rgba(255,0,242,0.6)";
+      card.style.transform = "translateY(-8px)";
+      card.style.boxShadow = "0 16px 40px rgba(255,0,242,0.4)";
     };
     card.onmouseleave = () => {
-      card.style.transform = "scale(1)";
-      card.style.boxShadow = "0 4px 20px rgba(138,43,226,0.4)";
+      card.style.transform = "translateY(0)";
+      card.style.boxShadow = "0 6px 24px rgba(138,43,226,0.35)";
     };
 
+    // Video container
     const videoContainer = document.createElement("div");
-    videoContainer.style.cssText = "height:320px;overflow:hidden;position:relative;background:#000;cursor:pointer;";
+    videoContainer.style.cssText = `height:${isTrendingCard ? "360px" : "320px"};overflow:hidden;position:relative;background:#000;cursor:pointer;border-radius:16px 16px 0 0;`;
 
     const videoEl = document.createElement("video");
     videoEl.muted = true;
@@ -4572,7 +4374,7 @@ function renderCards(videosToRender) {
     videoEl.style.cssText = "width:100%;height:100%;object-fit:cover;";
 
     if (isUnlocked) {
-      videoEl.src = video.previewClip || video.highlightVideo || video.videoUrl || "";
+      videoEl.src = video.videoUrl || video.previewClip || "";
       videoEl.load();
       videoContainer.onmouseenter = () => videoEl.play().catch(() => {});
       videoContainer.onmouseleave = () => { videoEl.pause(); videoEl.currentTime = 0; };
@@ -4580,16 +4382,18 @@ function renderCards(videosToRender) {
       videoEl.src = "";
       const lockedOverlay = document.createElement("div");
       lockedOverlay.innerHTML = `
-        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(10,5,30,0.85);z-index:2;">
+        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(10,5,30,0.9);z-index:2;border-radius:16px 16px 0 0;">
           <div style="text-align:center;">
-            <svg width="80" height="80" viewBox="0 0 24 24" fill="none">
+            <svg width="70" height="70" viewBox="0 0 24 24" fill="none">
               <path d="M12 2C9.2 2 7 4.2 7 7V11H6C4.9 11 4 11.9 4 13V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V13C20 11.9 19.1 11 18 11H17V7C17 4.2 14.8 2 12 2ZM12 4C13.7 4 15 5.3 15 7V11H9V7C9 5.3 10.3 4 12 4Z" fill="#ff00f2"/>
             </svg>
+            ${video.highlightVideoPrice > 0 ? `<div style="margin-top:12px;font-size:18px;font-weight:800;color:#ff00f2;">${video.highlightVideoPrice} STRZ</div>` : ''}
           </div>
         </div>`;
       videoContainer.appendChild(lockedOverlay);
     }
 
+    // Fullscreen playback
     videoContainer.onclick = (e) => {
       e.stopPropagation();
       if (!isUnlocked) {
@@ -4597,71 +4401,96 @@ function renderCards(videosToRender) {
         return;
       }
       const fullVideo = document.createElement("video");
-      fullVideo.src = video.videoUrl || video.highlightVideo || video.previewClip || "";
-      fullVideo.muted = false;
-      fullVideo.playsInline = false;
+      fullVideo.src = video.videoUrl || "";
       fullVideo.controls = true;
-      fullVideo.style.cssText = `
-        position: fixed;
-        top: 0; left: 0;
-        width: 100vw;
-        height: 100vh;
-        object-fit: contain;
-        background: #000;
-        z-index: 99999;
-      `;
+      fullVideo.playsInline = false;
+      fullVideo.style.cssText = "position:fixed;top:0;left:0;width:100vw;height:100vh;object-fit:contain;background:#000;z-index:99999;";
       fullVideo.onclick = () => fullVideo.remove();
-      fullVideo.onended = () => fullVideo.remove();
       document.body.appendChild(fullVideo);
       fullVideo.play();
       if (fullVideo.requestFullscreen) fullVideo.requestFullscreen();
-      else if (fullVideo.webkitRequestFullscreen) fullVideo.webkitRequestFullscreen();
-      else if (fullVideo.msRequestFullscreen) fullVideo.msRequestFullscreen();
     };
 
     videoContainer.appendChild(videoEl);
 
+    // Info panel
     const infoPanel = document.createElement("div");
-    infoPanel.style.cssText = "background: linear-gradient(180deg, #1a0b2e, #0f0519);padding:12px;display:flex;flex-direction:column;gap:6px;border-top: 1px solid #8a2be2;";
+    infoPanel.style.cssText = "background:linear-gradient(180deg,#1a0b2e,#0f0519);padding:14px;display:flex;flex-direction:column;gap:10px;border-radius:0 0 16px 16px;";
 
-    const title = document.createElement("div");
-    title.textContent = video.title || "Untitled";
-    title.style.cssText = "font-weight:800;color:#e0b0ff;font-size:15px;text-shadow: 0 0 8px #ff00f2;";
+    if (isTrendingCard) {
+      // Centered @chatId (same style as title)
+      const chatIdEl = document.createElement("div");
+      chatIdEl.textContent = `@${video.uploaderName || "Anonymous"}`;
+      chatIdEl.style.cssText = "font-weight:800;color:#e0b0ff;font-size:15px;text-align:center;";
 
-    const uploader = document.createElement("div");
-    uploader.textContent = `By: ${video.uploaderName || "Anonymous"}`;
-    uploader.style.cssText = "font-size:12px;color:#00ffea;opacity:0.9;";
+      // Legendary details (small & cute)
+      const detailsEl = document.createElement("p");
+      detailsEl.textContent = detailsText || "Hey~";
+      detailsEl.style.cssText = "margin:0 0 10px; font-size:14px; line-height:1.4; color:#ccc; text-align:center; opacity:0.9;";
 
-    const unlockBtn = document.createElement("button");
-    unlockBtn.textContent = isUnlocked ? "Unlocked" : `Unlock ${video.highlightVideoPrice || 100} ⭐️`;
-    Object.assign(unlockBtn.style, {
-      background: isUnlocked ? "rgba(138,43,226,0.3)" : "linear-gradient(135deg, #ff00f2, #8a2be2, #00ffea)",
-      border: "1px solid #ff00f2", borderRadius: "6px", padding: "8px 0", fontWeight: "800",
-      color: "#fff", cursor: isUnlocked ? "default" : "pointer",
-      transition: "all 0.3s ease", fontSize: "13px", textShadow: "0 0 10px rgba(255,0,242,0.8)",
-      boxShadow: isUnlocked ? "inset 0 2px 10px rgba(0,0,0,0.5)" : "0 0 20px rgba(255,0,242,0.6)"
-    });
-
-    if (!isUnlocked) {
-      unlockBtn.onmouseenter = () => {
-        unlockBtn.style.background = "linear-gradient(135deg, #00ffea, #ff00f2, #8a2be2)";
-        unlockBtn.style.transform = "translateY(-2px)";
-        unlockBtn.style.boxShadow = "0 0 30px rgba(0,255,234,0.8)";
-      };
-      unlockBtn.onmouseleave = () => {
-        unlockBtn.style.background = "linear-gradient(135deg, #ff00f2, #8a2be2, #00ffea)";
-        unlockBtn.style.transform = "translateY(0)";
-        unlockBtn.style.boxShadow = "0 0 20px rgba(255,0,242,0.6)";
-      };
-      unlockBtn.onclick = (e) => {
+      // Meet button — small cute heart, centered
+      const meetBtn = document.createElement("div");
+    meetBtn.style.cssText = `
+  width:40px;height:40px;border-radius:50%;
+  background:rgba(255,0,242,0.15);
+  display:flex;align-items:center;justify-content:center;
+  margin:0 auto 12px;
+  cursor:pointer;
+  border:1px solid rgba(255,0,242,0.5);
+  transition:all 0.3s ease;
+  box-shadow:0 0 12px rgba(255,0,242,0.3);
+`;
+      meetBtn.innerHTML = `<img src="https://cdn.shopify.com/s/files/1/0962/6648/6067/files/hearts__128_x_128_px.svg?v=1761809626" style="width:24px;height:24px;filter:drop-shadow(0 0 6px #00ffea);"/>`;
+      meetBtn.onclick = (e) => {
         e.stopPropagation();
-        showUnlockConfirm(video, () => renderCards(videosToRender));
+        showMeetModal({
+          chatId: video.uploaderName || "this creator",
+          whatsapp: video.whatsapp || "",
+          country: video.country || "Nigeria"
+        });
       };
+      meetBtn.onmouseenter = () => meetBtn.style.transform = "scale(1.15)";
+      meetBtn.onmouseleave = () => meetBtn.style.transform = "scale(1)";
+
+      infoPanel.append(chatIdEl, detailsEl, meetBtn);
     } else {
-      unlockBtn.disabled = true;
+      // Normal title
+      const title = document.createElement("div");
+      title.textContent = video.title || "Untitled";
+      title.style.cssText = "font-weight:800;color:#e0b0ff;font-size:15px;text-shadow: 0 0 8px #ff00f2;";
+
+      const uploader = document.createElement("div");
+      uploader.textContent = `By: ${video.uploaderName || "Anonymous"}`;
+      uploader.style.cssText = "font-size:12px;color:#00ffea;opacity:0.9;";
+
+      infoPanel.append(title, uploader);
     }
 
-    infoPanel.append(title, uploader, unlockBtn);
+    // Unlock button — full width, below meet (only if priced or not trending)
+    if (video.highlightVideoPrice > 0 || !isTrendingCard) {
+      const unlockBtn = document.createElement("button");
+      unlockBtn.textContent = isUnlocked ? "Unlocked ♡" : `Unlock ${video.highlightVideoPrice || 100} STRZ`;
+      Object.assign(unlockBtn.style, {
+        width: "100%",
+        padding: "10px",
+        background: isUnlocked ? "rgba(138,43,226,0.3)" : "linear-gradient(135deg,#ff00f2,#8a2be2,#00ffea)",
+        border: "1px solid #ff00f2",
+        borderRadius: "10px",
+        color: "#fff",
+        fontWeight: "700",
+        fontSize: "13px",
+        cursor: isUnlocked ? "default" : "pointer",
+        boxShadow: "0 3px 12px rgba(255,0,242,0.3)"
+      });
+      if (!isUnlocked) {
+        unlockBtn.onclick = (e) => {
+          e.stopPropagation();
+          showUnlockConfirm(video, () => renderCards(videosToRender));
+        };
+      }
+      infoPanel.appendChild(unlockBtn);
+    }
+
     card.append(videoContainer, infoPanel);
     content.appendChild(card);
   });
@@ -4836,6 +4665,35 @@ async function unlockVideo(video) {
     showGoldAlert(msg === "Not enough STRZ" ? "Not enough STRZ" : "Unlock failed — try again");
   }
 }
+
+function playFullVideo(video) {
+  const src = video.highlightVideo || video.videoUrl || video.previewClip || "";
+  if (!src) return showGoldAlert("Video not found");
+
+  // Remove any existing custom player
+  document.querySelectorAll('.custom-video-player').forEach(el => el.remove());
+
+  // Create a hidden <video> that instantly opens native browser player
+  const videoEl = document.createElement("video");
+  videoEl.src = src;
+  videoEl.controls = true;
+  videoEl.autoplay = true;
+  videoEl.playsInline = true;
+  videoEl.style.display = "none"; // invisible — we don't want to show it
+
+  // Optional: mark it so we can clean it later
+  videoEl.classList.add("custom-video-player");
+
+  document.body.appendChild(videoEl);
+
+  // This triggers the native mobile/browser fullscreen player immediately
+  videoEl.play();
+
+  // Auto-remove after it ends or user closes (keeps DOM clean)
+  videoEl.addEventListener("ended", () => videoEl.remove());
+  videoEl.addEventListener("pause", () => setTimeout(() => videoEl.remove(), 1000));
+}
+
 async function loadMyClips() {
   const grid = document.getElementById("myClipsGrid");
   const noMsg = document.getElementById("noClipsMessage");

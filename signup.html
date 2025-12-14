@@ -618,48 +618,35 @@ if (cleanRef) {
 
     await setDoc(userRef, userData);
 
-// REWARD INVITER — 100% SAFE & WORKING (NO serverTimestamp() in arrayUnion)
+
+ // ======================================================
+// INVITER UPDATE (SAFE)
+// ======================================================
 if (inviterDocId) {
   const bonusStars = isVIP ? 100 : 50;
 
   await updateDoc(doc(db, "users", inviterDocId), {
-    // CLEAN ARRAY — NO serverTimestamp() inside!
-    hostFriends: arrayUnion({
-      chatId,
-      fullName,
-      email,
-      phone,
-      isVIP: !!isVIP,           // ← Keeps your old code working perfectly
-      isHost: !isVIP && gender === 'Female',
-      joinedAt: Date.now()      // ← Use client timestamp (safe)
-    }),
-
-    // These are top-level → serverTimestamp() is allowed
     hostFriendsLastUpdated: serverTimestamp(),
-
     stars: increment(bonusStars),
-
-    // Optional clean stats (safe to keep)
     referralCount: increment(1),
     vipCount: isVIP ? increment(1) : increment(0),
     hostReferralCount: !isVIP ? increment(1) : increment(0)
   }).catch(err => {
     console.warn("Failed to update inviter:", err);
   });
-  
 }
 
-    // SUCCESS — FULL REDIRECT
-    messageEl.textContent = `Welcome ${fullName}! Gifted 50 stars`;
-    localStorage.setItem("vipUser", JSON.stringify({ email, chatId }));
-    if (isVIP) triggerSprayConfetti();
+// ======================================================
+// SUCCESS — POST SIGNUP FLOW
+// ======================================================
+messageEl.textContent = `Welcome ${fullName}! Gifted 50 stars`;
+localStorage.setItem("vipUser", JSON.stringify({ email, chatId }));
 
-   if (isVIP) {
+if (isVIP) {
   triggerSprayConfetti();
 
-  // STOP redirect
-  submitBtn.classList.add('hidden');
   submitBtn.classList.remove('loading');
+  submitBtn.classList.add('hidden');
 
   vipPayBtn.classList.remove('hidden');
 
@@ -668,6 +655,7 @@ if (inviterDocId) {
   setTimeout(() => {
     window.location.href = "shop.html";
   }, 1800);
+}
 
   } catch (err) {
     console.error(err);

@@ -4165,7 +4165,7 @@ intro.innerHTML = `
   -webkit-text-fill-color:transparent;
   font-weight:700;
   display:inline-block;
-  transform: translateX(6px); /* ← adjust this */
+  transform: translateX(5.6px); /* ← adjust this */
 ">
   Cuties 💕
 </span>
@@ -4173,7 +4173,7 @@ intro.innerHTML = `
 
     <!-- Text lines with tight spacing -->
     <p style="margin:0 0 4px;">
-      Cam-worthy moments from girlies
+      Cam-worthy moments from beautiful girls
     </p>
     <p style="margin:0;">
       Unlock a cutie’s clip with STRZ and get closer.

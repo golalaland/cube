@@ -4311,16 +4311,32 @@ function renderCards(videosToRender) {
     const isUnlocked = unlockedVideos.includes(video.id);
     const isTrendingCard = filterMode === "trending";
 
-    // Fetch bioPick only for trending
-    let bioPick = "";
+    // Fetch user data for legendary details (only trending)
+    let detailsText = "";
     if (isTrendingCard && video.uploaderId) {
       try {
         const userSnap = await getDoc(doc(db, "users", video.uploaderId));
         if (userSnap.exists()) {
-          bioPick = userSnap.data().bioPick || "No vibe yet~";
+          const user = userSnap.data();
+          const gender = (user.gender || "person").toLowerCase();
+          const pronoun = gender === "male" ? "his" : "her";
+          const ageGroup = !user.age ? "20s" : user.age >= 30 ? "30s" : "20s";
+          const flair = gender === "male" ? "Cool" : "Kiss";
+          const fruit = user.fruitPick || "Grape";
+          const nature = user.naturePick || "cool";
+          const city = user.location || user.city || "Lagos";
+          const country = user.country || "Nigeria";
+
+          if (user.isHost) {
+            detailsText = `A ${fruit} ${nature} ${gender} in ${pronoun} ${ageGroup}, currently in ${city}, ${country}. ${flair}`;
+          } else if (user.isVIP) {
+            detailsText = `A ${gender} in ${pronoun} ${ageGroup}, currently in ${city}, ${country}. ${flair}`;
+          } else {
+            detailsText = `A ${gender} from ${city}, ${country}. ${flair}`;
+          }
         }
       } catch (e) {
-        bioPick = "Mystery vibe";
+        detailsText = "Mystery vibe~";
       }
     }
 
@@ -4329,7 +4345,7 @@ function renderCards(videosToRender) {
     card.setAttribute("data-uploader", video.uploaderName || "Anonymous");
     card.setAttribute("data-title", video.title || "");
 
-    const cardWidth = isTrendingCard ? "260px" : "230px";
+    const cardWidth = isTrendingCard ? "240px" : "230px"; // slightly smaller for trending
     Object.assign(card.style, {
       minWidth: cardWidth, maxWidth: cardWidth, background: "#0f0a1a", borderRadius: "16px",
       overflow: "hidden", display: "flex", flexDirection: "column", cursor: "pointer",
@@ -4366,9 +4382,7 @@ function renderCards(videosToRender) {
       videoEl.src = "";
       const lockedOverlay = document.createElement("div");
       lockedOverlay.innerHTML = `
-        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content
-
-:center;background:rgba(10,5,30,0.9);z-index:2;border-radius:16px 16px 0 0;">
+        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(10,5,30,0.9);z-index:2;border-radius:16px 16px 0 0;">
           <div style="text-align:center;">
             <svg width="70" height="70" viewBox="0 0 24 24" fill="none">
               <path d="M12 2C9.2 2 7 4.2 7 7V11H6C4.9 11 4 11.9 4 13V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V13C20 11.9 19.1 11 18 11H17V7C17 4.2 14.8 2 12 2ZM12 4C13.7 4 15 5.3 15 7V11H9V7C9 5.3 10.3 4 12 4Z" fill="#ff00f2"/>
@@ -4401,34 +4415,58 @@ function renderCards(videosToRender) {
 
     // Info panel
     const infoPanel = document.createElement("div");
-    infoPanel.style.cssText = "background:linear-gradient(180deg,#1a0b2e,#0f0519);padding:14px;display:flex;flex-direction:column;gap:8px;border-radius:0 0 16px 16px;";
-
-    const title = document.createElement("div");
-    title.textContent = video.title || "Untitled";
-    title.style.cssText = "font-weight:800;color:#e0b0ff;font-size:15px;";
-
-    const uploaderLine = document.createElement("div");
+    infoPanel.style.cssText = "background:linear-gradient(180deg,#1a0b2e,#0f0519);padding:14px;display:flex;flex-direction:column;gap:10px;border-radius:0 0 16px 16px;";
 
     if (isTrendingCard) {
-      uploaderLine.innerHTML = `
-        <div style="font-size:13px;color:#00ffea;font-weight:600;">@${video.uploaderName || "Anonymous"}</div>
-        <div style="font-size:12px;color:#bbb;margin-top:4px;line-height:1.3;">${bioPick}</div>
+      // Centered @chatId (same style as title)
+      const chatIdEl = document.createElement("div");
+      chatIdEl.textContent = `@${video.uploaderName || "Anonymous"}`;
+      chatIdEl.style.cssText = "font-weight:800;color:#e0b0ff;font-size:15px;text-align:center;";
+
+      // Legendary details (small & cute)
+      const detailsEl = document.createElement("p");
+      detailsEl.textContent = detailsText || "Hey~";
+      detailsEl.style.cssText = "margin:0 0 10px; font-size:14px; line-height:1.4; color:#ccc; text-align:center; opacity:0.9;";
+
+      // Meet button — small cute heart, centered
+      const meetBtn = document.createElement("div");
+      meetBtn.style.cssText = `
+        width:40px;height:40px;border-radius:50%;background:rgba(0,255,234,0.15);
+        display:flex;align-items:center;justify-content:center;margin:0 auto 12px;
+        cursor:pointer;border:1px solid rgba(0,255,234,0.4);transition:all 0.3s;
       `;
+      meetBtn.innerHTML = `<img src="https://cdn.shopify.com/s/files/1/0962/6648/6067/files/hearts__128_x_128_px.svg?v=1761809626" style="width:24px;height:24px;filter:drop-shadow(0 0 6px #00ffea);"/>`;
+      meetBtn.onclick = (e) => {
+        e.stopPropagation();
+        showMeetModal({
+          chatId: video.uploaderName || "this creator",
+          whatsapp: video.whatsapp || "",
+          country: video.country || "Nigeria"
+        });
+      };
+      meetBtn.onmouseenter = () => meetBtn.style.transform = "scale(1.15)";
+      meetBtn.onmouseleave = () => meetBtn.style.transform = "scale(1)";
+
+      infoPanel.append(chatIdEl, detailsEl, meetBtn);
     } else {
-      uploaderLine.textContent = `By: ${video.uploaderName || "Anonymous"}`;
-      uploaderLine.style.cssText = "font-size:12px;color:#00ffea;opacity:0.9;";
+      // Normal title
+      const title = document.createElement("div");
+      title.textContent = video.title || "Untitled";
+      title.style.cssText = "font-weight:800;color:#e0b0ff;font-size:15px;text-shadow: 0 0 8px #ff00f2;";
+
+      const uploader = document.createElement("div");
+      uploader.textContent = `By: ${video.uploaderName || "Anonymous"}`;
+      uploader.style.cssText = "font-size:12px;color:#00ffea;opacity:0.9;";
+
+      infoPanel.append(title, uploader);
     }
 
-    // Buttons row
-    const buttonsRow = document.createElement("div");
-    buttonsRow.style.cssText = "display:flex;gap:10px;align-items:center;margin-top:8px;";
-
-    // Unlock button (only if price > 0 or not free trending)
+    // Unlock button — full width, below meet (only if priced or not trending)
     if (video.highlightVideoPrice > 0 || !isTrendingCard) {
       const unlockBtn = document.createElement("button");
       unlockBtn.textContent = isUnlocked ? "Unlocked ♡" : `Unlock ${video.highlightVideoPrice || 100} STRZ`;
       Object.assign(unlockBtn.style, {
-        flex: 1,
+        width: "100%",
         padding: "10px",
         background: isUnlocked ? "rgba(138,43,226,0.3)" : "linear-gradient(135deg,#ff00f2,#8a2be2,#00ffea)",
         border: "1px solid #ff00f2",
@@ -4445,32 +4483,9 @@ function renderCards(videosToRender) {
           showUnlockConfirm(video, () => renderCards(videosToRender));
         };
       }
-      buttonsRow.appendChild(unlockBtn);
+      infoPanel.appendChild(unlockBtn);
     }
 
-    // Meet button — only in trending, cute SVG heart icon
-    if (isTrendingCard) {
-      const meetBtn = document.createElement("div");
-      meetBtn.style.cssText = `
-        width:44px;height:44px;border-radius:50%;background:rgba(0,255,234,0.15);
-        display:flex;align-items:center;justify-content:center;
-        cursor:pointer;border:1px solid rgba(0,255,234,0.4);transition:all 0.3s;
-      `;
-      meetBtn.innerHTML = `<img src="https://cdn.shopify.com/s/files/1/0962/6648/6067/files/hearts__128_x_128_px.svg?v=1761809626" style="width:26px;height:26px;filter:drop-shadow(0 0 6px #00ffea);"/>`;
-      meetBtn.onclick = (e) => {
-        e.stopPropagation();
-        showMeetModal({
-          chatId: video.uploaderName || "this creator",
-          whatsapp: video.whatsapp || "",
-          country: video.country || "Nigeria"
-        });
-      };
-      meetBtn.onmouseenter = () => meetBtn.style.transform = "scale(1.15)";
-      meetBtn.onmouseleave = () => meetBtn.style.transform = "scale(1)";
-      buttonsRow.appendChild(meetBtn);
-    }
-
-    infoPanel.append(title, uploaderLine, buttonsRow);
     card.append(videoContainer, infoPanel);
     content.appendChild(card);
   });

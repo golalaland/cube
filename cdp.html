@@ -394,20 +394,20 @@ const pickCard = async (card) => {
       });
 
       // SEND NOTIFICATION TO USER — THIS IS THE KEY
-      await addDoc(collection(db, "notifications"), {
-        userId: uid,
-        type: "drink_unlock",
-        title: "Drink Unlocked!",
-        message: `You just unlocked a ${card.dataset.drink}!\nWe'll deliver it to ${phone} soon.\nThank you for playing!`,
-        read: false,
-        timestamp: serverTimestamp(),
-        icon: "drink",
-        data: {
-          drink: card.dataset.drink,
-          phone: phone,
-          cardNumber: card.dataset.number
-        }
-      });
+     await addDoc(collection(db, "notifications"), {
+  recipientId: uid,            // must match loadNotifications() query
+  type: "drink_unlock",
+  title: "Drink Unlocked!",
+  message: `You just unlocked a ${card.dataset.drink}!\nWe'll deliver it to ${phone} soon.\nThank you for playing!`,
+  read: false,
+  icon: "drink",
+  createdAt: serverTimestamp(), // used for timeAgo() and ordering
+  data: {
+    drink: card.dataset.drink,
+    phone: phone,
+    cardNumber: card.dataset.number
+  }
+});
 
       card.classList.add('locked');
       DOM.finalMessage.innerHTML = `

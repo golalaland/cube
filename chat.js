@@ -4345,7 +4345,7 @@ function renderCards(videosToRender) {
     card.setAttribute("data-uploader", video.uploaderName || "Anonymous");
     card.setAttribute("data-title", video.title || "");
 
-    const cardWidth = isTrendingCard ? "200px" : "230px"; // slightly smaller for trending
+    const cardWidth = isTrendingCard ? "220px" : "230px"; // slightly smaller for trending
     Object.assign(card.style, {
       minWidth: cardWidth, maxWidth: cardWidth, background: "#0f0a1a", borderRadius: "16px",
       overflow: "hidden", display: "flex", flexDirection: "column", cursor: "pointer",
@@ -4365,7 +4365,7 @@ function renderCards(videosToRender) {
 
     // Video container
     const videoContainer = document.createElement("div");
-    videoContainer.style.cssText = `height:${isTrendingCard ? "300px" : "320px"};overflow:hidden;position:relative;background:#000;cursor:pointer;border-radius:16px 16px 0 0;`;
+    videoContainer.style.cssText = `height:${isTrendingCard ? "360px" : "320px"};overflow:hidden;position:relative;background:#000;cursor:pointer;border-radius:16px 16px 0 0;`;
 
     const videoEl = document.createElement("video");
     videoEl.muted = true;

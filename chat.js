@@ -4378,54 +4378,96 @@ function renderCards(videosToRender) {
       let currentIndex = 0;
       const totalVideos = creatorVideos.length;
 
-      const videoEl = document.createElement("video");
-      videoEl.muted = true;
-      videoEl.loop = true;
-      videoEl.preload = "metadata";
-      videoEl.style.cssText = "width:100%; height:100%; object-fit:cover; position:absolute; top:0; left:0; opacity:0; transition:opacity 0.4s ease;";
+      // Multiple video elements (Instagram Stories style)
+      const videos = [];
+      creatorVideos.forEach((vid, i) => {
+        const v = document.createElement("video");
+        v.muted = true;
+        v.loop = true;
+        v.preload = "metadata";
+        v.style.cssText = `
+          width:100%; height:100%; object-fit:cover;
+          position:absolute; top:0; left:0;
+          opacity:${i === 0 ? 1 : 0};
+          transition:opacity 0.5s ease;
+          pointer-events:none;
+        `;
+        v.src = vid.videoUrl || "";
+        v.load();
+        if (i === 0) v.play().catch(() => {});
+        videoContainer.appendChild(v);
+        videos.push(v);
+      });
 
-      const loadVideo = (index) => {
-        const vid = creatorVideos[index];
-        videoEl.src = vid.videoUrl || "";
-        videoEl.load();
-        videoEl.play().catch(() => {});
-        videoEl.style.opacity = "1";
+      // Auto-play next like Instagram Stories on hover/end
+      const playNext = () => {
+        if (totalVideos <= 1) return;
+        videos[currentIndex].style.opacity = "0";
+        currentIndex = (currentIndex + 1) % totalVideos;
+        videos[currentIndex].style.opacity = "1";
+        videos[currentIndex].play().catch(() => {});
       };
-      loadVideo(0);
 
-      // Swipe left/right inside card
+      // Hover = start auto-cycle
+      videoContainer.onmouseenter = () => {
+        if (totalVideos > 1) {
+          videos[currentIndex].onended = playNext;
+          videos[currentIndex].play().catch(() => {});
+        }
+      };
+
+      // Leave = pause current
+      videoContainer.onmouseleave = () => {
+        videos[currentIndex].pause();
+        videos[currentIndex].onended = null;
+      };
+
+      // Swipe support (manual override)
       let touchStartX = 0;
       videoContainer.ontouchstart = e => touchStartX = e.touches[0].clientX;
       videoContainer.ontouchend = e => {
         const deltaX = touchStartX - e.changedTouches[0].clientX;
         if (Math.abs(deltaX) < 50) return;
+        videos[currentIndex].style.opacity = "0";
         if (deltaX > 0 && currentIndex < totalVideos - 1) currentIndex++;
         else if (deltaX < 0 && currentIndex > 0) currentIndex--;
-        loadVideo(currentIndex);
+        else currentIndex = (currentIndex + 1) % totalVideos; // wrap around
+        videos[currentIndex].style.opacity = "1";
+        videos[currentIndex].play().catch(() => {});
       };
 
-      // Dots indicator
+      // Progress bar like Instagram Stories
       if (totalVideos > 1) {
-        const dotsContainer = document.createElement("div");
-        dotsContainer.style.cssText = "position:absolute; bottom:12px; left:50%; transform:translateX(-50%); display:flex; gap:6px; z-index:3;";
+        const progressBar = document.createElement("div");
+        progressBar.style.cssText = "position:absolute; top:8px; left:8px; right:8px; display:flex; gap:4px; z-index:3;";
         for (let i = 0; i < totalVideos; i++) {
-          const dot = document.createElement("div");
-          dot.style.cssText = `width:8px; height:8px; border-radius:50%; background:${i === 0 ? "#ff00f2" : "rgba(255,255,255,0.4)"}; transition:background 0.3s;`;
-          dotsContainer.appendChild(dot);
+          const segment = document.createElement("div");
+          segment.style.cssText = `
+            flex:1; height:3px; background:rgba(255,255,255,0.3); border-radius:2px;
+            overflow:hidden;
+          `;
+          const fill = document.createElement("div");
+          fill.style.cssText = `
+            height:100%; width:${i === 0 ? '100%' : '0%'}; background:#ff00f2;
+            transition:width 0.3s linear; border-radius:2px;
+          `;
+          segment.appendChild(fill);
+          progressBar.appendChild(segment);
         }
-        videoContainer.appendChild(dotsContainer);
+        videoContainer.appendChild(progressBar);
 
-        const updateDots = () => {
-          dotsContainer.querySelectorAll("div").forEach((dot, i) => {
-            dot.style.background = i === currentIndex ? "#ff00f2" : "rgba(255,255,255,0.4)";
+        // Update progress on change
+        const updateProgress = () => {
+          progressBar.querySelectorAll("div > div").forEach((fill, i) => {
+            fill.style.width = i === currentIndex ? "100%" : i < currentIndex ? "100%" : "0%";
           });
         };
-        const oldLoad = loadVideo;
-        loadVideo = idx => {
-          oldLoad(idx);
-          updateDots();
+        const oldPlayNext = playNext;
+        playNext = () => {
+          oldPlayNext();
+          updateProgress();
         };
-        loadVideo(0);
+        updateProgress();
       }
 
       // Fullscreen on tap (current video)
@@ -4441,9 +4483,7 @@ function renderCards(videosToRender) {
         if (fullVideo.requestFullscreen) fullVideo.requestFullscreen();
       };
 
-      videoContainer.appendChild(videoEl);
-
-      // Info panel (same for all videos of this creator)
+      // Info panel
       const infoPanel = document.createElement("div");
       infoPanel.style.cssText = "background:linear-gradient(180deg,#1a0b2e,#0f0519);padding:14px;display:flex;flex-direction:column;gap:10px;border-radius:0 0 16px 16px;";
 
@@ -4455,7 +4495,7 @@ function renderCards(videosToRender) {
       detailsEl.textContent = detailsText;
       detailsEl.style.cssText = "margin:0 0 10px; font-size:14px; line-height:1.4; color:#ccc; text-align:center; opacity:0.9;";
 
-      // Meet button (only one per creator card)
+      // Meet button
       const meetBtn = document.createElement("div");
       meetBtn.style.cssText = `
         width:40px;height:40px;border-radius:50%;
@@ -4492,7 +4532,7 @@ function renderCards(videosToRender) {
       content.appendChild(card);
     });
 
-    return; // Exit early — trending handled
+    return;
   }
 
   // ———————————————————————
@@ -4796,35 +4836,6 @@ async function unlockVideo(video) {
     showGoldAlert(msg === "Not enough STRZ" ? "Not enough STRZ" : "Unlock failed — try again");
   }
 }
-
-function playFullVideo(video) {
-  const src = video.highlightVideo || video.videoUrl || video.previewClip || "";
-  if (!src) return showGoldAlert("Video not found");
-
-  // Remove any existing custom player
-  document.querySelectorAll('.custom-video-player').forEach(el => el.remove());
-
-  // Create a hidden <video> that instantly opens native browser player
-  const videoEl = document.createElement("video");
-  videoEl.src = src;
-  videoEl.controls = true;
-  videoEl.autoplay = true;
-  videoEl.playsInline = true;
-  videoEl.style.display = "none"; // invisible — we don't want to show it
-
-  // Optional: mark it so we can clean it later
-  videoEl.classList.add("custom-video-player");
-
-  document.body.appendChild(videoEl);
-
-  // This triggers the native mobile/browser fullscreen player immediately
-  videoEl.play();
-
-  // Auto-remove after it ends or user closes (keeps DOM clean)
-  videoEl.addEventListener("ended", () => videoEl.remove());
-  videoEl.addEventListener("pause", () => setTimeout(() => videoEl.remove(), 1000));
-}
-
 async function loadMyClips() {
   const grid = document.getElementById("myClipsGrid");
   const noMsg = document.getElementById("noClipsMessage");

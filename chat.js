@@ -3473,7 +3473,7 @@ confirmBtn.onclick = async () => {
   }
 }
 // ================================
-// UPLOAD HIGHLIGHT — FINAL FIX: NO TIMESTAMP ERROR
+// UPLOAD HIGHLIGHT — TRENDING = FREE & SIMPLE (NO TITLE/PRICE REQUIRED)
 // ================================
 document.getElementById("uploadHighlightBtn")?.addEventListener("click", async () => {
   const btn = document.getElementById("uploadHighlightBtn");
@@ -3490,13 +3490,22 @@ document.getElementById("uploadHighlightBtn")?.addEventListener("click", async (
   const videoUrlInput = document.getElementById("highlightVideoInput");
   const title = document.getElementById("highlightTitleInput").value.trim();
   const desc = document.getElementById("highlightDescInput").value.trim();
-  const price = parseInt(document.getElementById("highlightPriceInput").value) || 0;
+  const priceInput = document.getElementById("highlightPriceInput").value;
+  const price = parseInt(priceInput) || 0;
   const boostTrending = document.getElementById("boostTrendingCheckbox")?.checked || false;
 
-  if (!title) return showStarPopup("Title required", "error");
-  if (price < 10) return showStarPopup("Minimum 10 STRZ", "error");
-  if (!fileInput.files[0] && !videoUrlInput.value.trim())
+  // VALIDATION RULES:
+  // - Always need a video (file or URL)
+  if (!fileInput.files[0] && !videoUrlInput.value.trim()) {
     return showStarPopup("Add file or URL", "error");
+  }
+
+  // - Only require title & price if NOT trending
+  if (!boostTrending) {
+    if (!title) return showStarPopup("Title required", "error");
+    if (price < 10) return showStarPopup("Minimum 10 STRZ", "error");
+  }
+  // - If trending → force price = 0 (free), title/desc optional
 
   // === TRENDING BOOST COST CHECK ===
   if (boostTrending) {
@@ -3532,13 +3541,13 @@ document.getElementById("uploadHighlightBtn")?.addEventListener("click", async (
       finalVideoUrl = await getDownloadURL(snapshot.ref);
     }
 
-    // === SAVE TO FIRESTORE — SAFE trendingUntil WITHOUT Timestamp ===
+    // Final data to save
     const clipData = {
       uploaderId: currentUser.uid,
       uploaderName: currentUser.chatId || "Legend",
       videoUrl: finalVideoUrl,
-      highlightVideoPrice: price,
-      title,
+      highlightVideoPrice: boostTrending ? 0 : price, // Trending = always free
+      title: boostTrending ? "@" + (currentUser.chatId || "Legend") : title, // Optional title → fallback to @chatId
       description: desc || "",
       uploadedAt: serverTimestamp(),
       createdAt: serverTimestamp(),
@@ -3547,15 +3556,13 @@ document.getElementById("uploadHighlightBtn")?.addEventListener("click", async (
       isTrending: boostTrending || false
     };
 
-    // Only add trendingUntil if boosted — using plain JS Date converted safely
     if (boostTrending) {
-      clipData.trendingUntil = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours from now
-      // Firestore automatically converts JS Date to Timestamp
+      clipData.trendingUntil = new Date(Date.now() + 24 * 60 * 60 * 1000);
     }
 
     const clipRef = await addDoc(collection(db, "highlightVideos"), clipData);
 
-    // === NOTIFY FANS (unchanged) ===
+    // === NOTIFY FANS ===
     try {
       const pastClips = await getDocs(
         query(collection(db, "highlightVideos"), where("uploaderId", "==", currentUser.uid))
@@ -3592,8 +3599,8 @@ document.getElementById("uploadHighlightBtn")?.addEventListener("click", async (
 
     showStarPopup("CLIP LIVE — FANS NOTIFIED!", "success");
     btn.textContent = boostTrending ? "TRENDING LIVE!" : "DROPPED!";
-    btn.style.background = boostTrending 
-      ? "linear-gradient(90deg,#00ffea,#8a2be2,#ff00f2)" 
+    btn.style.background = boostTrending
+      ? "linear-gradient(90deg,#00ffea,#8a2be2,#ff00f2)"
       : "linear-gradient(90deg,#00ff9d,#00cc66)";
 
     // Reset form

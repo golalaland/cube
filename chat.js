@@ -4363,7 +4363,6 @@ function renderCards(videosToRender) {
       card.style.boxShadow = "0 6px 24px rgba(138,43,226,0.35)";
     };
 
-  // Video container
 const videoContainer = document.createElement("div");
 videoContainer.style.cssText = `
   height: ${isTrendingCard ? "360px" : "320px"};
@@ -4381,11 +4380,10 @@ videoEl.preload = "metadata";
 videoEl.style.cssText = "width:100%; height:100%; object-fit:cover;";
 
 if (isUnlocked) {
-  // Prefer full videoUrl for preview if unlocked, fallback to previewClip
-  videoEl.src = video.videoUrl || video.previewClip || "";
+  // Same priority as your old code, just updated property names to match current data
+  videoEl.src = video.previewClip || video.highlightVideo || video.videoUrl || "";
   videoEl.load();
 
-  // Desktop hover play/pause
   videoContainer.onmouseenter = () => videoEl.play().catch(() => {});
   videoContainer.onmouseleave = () => {
     videoEl.pause();
@@ -4419,49 +4417,45 @@ if (isUnlocked) {
   videoContainer.appendChild(lockedOverlay);
 }
 
-// Click handler — simple and reliable like your old working code
+// Exact same click behaviour as your old working code
 videoContainer.onclick = (e) => {
   e.stopPropagation();
-
-  if (!isUnlocked) {
-    showUnlockConfirm(video, () => renderCards(videosToRender));
-    return;
-  }
-
-  // Open fullscreen video (improved version: sound allowed, better close, iOS support)
-  const fullVideo = document.createElement("video");
-  fullVideo.src = video.videoUrl || "";
-  fullVideo.controls = true;
-  fullVideo.playsInline = false;
-  fullVideo.muted = false; // Sound works in user-initiated fullscreen
-  fullVideo.style.cssText = `
-    position: fixed;
-    top: 0; left: 0;
-    width: 100vw;
-    height: 100vh;
-    object-fit: contain;
-    background: #000;
-    z-index: 99999;
-  `;
-
-  const closeVideo = () => {
-    if (document.fullscreenElement) document.exitFullscreen?.();
-    fullVideo.remove();
-  };
-
-  fullVideo.onclick = closeVideo;
-  document.body.appendChild(fullVideo);
-  fullVideo.play().catch(() => {});
-
-  // Request fullscreen
-  if (fullVideo.requestFullscreen) {
-    fullVideo.requestFullscreen();
-  } else if (fullVideo.webkitEnterFullscreen) { // iOS Safari
-    fullVideo.webkitEnterFullscreen();
+  if (isUnlocked) {
+    playFullVideo(video);
+  } else {
+    showUnlockConfirm(video, () => renderCards(videosToRender)); // kept your current callback
   }
 };
 
 videoContainer.appendChild(videoEl);
+
+    function playFullVideo(video) {
+  const src = video.highlightVideo || video.videoUrl || video.previewClip || "";
+  if (!src) return showGoldAlert("Video not found");
+
+  // Remove any existing custom player
+  document.querySelectorAll('.custom-video-player').forEach(el => el.remove());
+
+  // Create a hidden <video> that instantly opens native browser player
+  const videoEl = document.createElement("video");
+  videoEl.src = src;
+  videoEl.controls = true;
+  videoEl.autoplay = true;
+  videoEl.playsInline = true;
+  videoEl.style.display = "none"; // invisible — we don't want to show it
+
+  // Optional: mark it so we can clean it later
+  videoEl.classList.add("custom-video-player");
+
+  document.body.appendChild(videoEl);
+
+  // This triggers the native mobile/browser fullscreen player immediately
+  videoEl.play();
+
+  // Auto-remove after it ends or user closes (keeps DOM clean)
+  videoEl.addEventListener("ended", () => videoEl.remove());
+  videoEl.addEventListener("pause", () => setTimeout(() => videoEl.remove(), 1000));
+}
 
     // Info panel
     const infoPanel = document.createElement("div");

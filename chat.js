@@ -4326,7 +4326,6 @@ function renderCards(videosToRender) {
           const nature = user.naturePick || "cool";
           const city = user.location || user.city || "Lagos";
           const country = user.country || "Nigeria";
-
           if (user.isHost) {
             detailsText = `A ${fruit} ${nature} ${gender} in ${pronoun} ${ageGroup}, currently in ${city}, ${country}. ${flair}`;
           } else if (user.isVIP) {
@@ -4345,7 +4344,7 @@ function renderCards(videosToRender) {
     card.setAttribute("data-uploader", video.uploaderName || "Anonymous");
     card.setAttribute("data-title", video.title || "");
 
-    const cardWidth = isTrendingCard ? "220px" : "230px"; // slightly smaller for trending
+    const cardWidth = isTrendingCard ? "220px" : "230px";
     Object.assign(card.style, {
       minWidth: cardWidth, maxWidth: cardWidth, background: "#0f0a1a", borderRadius: "16px",
       overflow: "hidden", display: "flex", flexDirection: "column", cursor: "pointer",
@@ -4373,7 +4372,8 @@ function renderCards(videosToRender) {
     videoEl.preload = "metadata";
     videoEl.style.cssText = "width:100%;height:100%;object-fit:cover;";
 
-    if (isUnlocked) {
+    // For trending: always treat as unlocked (play video, no lock overlay)
+    if (isTrendingCard || isUnlocked) {
       videoEl.src = video.videoUrl || video.previewClip || "";
       videoEl.load();
       videoContainer.onmouseenter = () => videoEl.play().catch(() => {});
@@ -4393,13 +4393,9 @@ function renderCards(videosToRender) {
       videoContainer.appendChild(lockedOverlay);
     }
 
-    // Fullscreen playback
+    // Fullscreen playback (always allow for trending since it's free/unlocked)
     videoContainer.onclick = (e) => {
       e.stopPropagation();
-      if (!isUnlocked) {
-        showUnlockConfirm(video, () => renderCards(videosToRender));
-        return;
-      }
       const fullVideo = document.createElement("video");
       fullVideo.src = video.videoUrl || "";
       fullVideo.controls = true;
@@ -4418,29 +4414,29 @@ function renderCards(videosToRender) {
     infoPanel.style.cssText = "background:linear-gradient(180deg,#1a0b2e,#0f0519);padding:14px;display:flex;flex-direction:column;gap:10px;border-radius:0 0 16px 16px;";
 
     if (isTrendingCard) {
-      // Centered @chatId (same style as title)
+      // Centered @chatId
       const chatIdEl = document.createElement("div");
       chatIdEl.textContent = `@${video.uploaderName || "Anonymous"}`;
       chatIdEl.style.cssText = "font-weight:800;color:#e0b0ff;font-size:15px;text-align:center;";
 
-      // Legendary details (small & cute)
+      // Legendary details
       const detailsEl = document.createElement("p");
       detailsEl.textContent = detailsText || "Hey~";
       detailsEl.style.cssText = "margin:0 0 10px; font-size:14px; line-height:1.4; color:#ccc; text-align:center; opacity:0.9;";
 
-      // Meet button — small cute heart, centered
+      // Meet button — only thing in trending
       const meetBtn = document.createElement("div");
-    meetBtn.style.cssText = `
-  width:40px;height:40px;border-radius:50%;
-  background:rgba(255,0,242,0.15);
-  display:flex;align-items:center;justify-content:center;
-  margin:0 auto 12px;
-  cursor:pointer;
-  border:1px solid rgba(255,0,242,0.5);
-  transition:all 0.3s ease;
-  box-shadow:0 0 12px rgba(255,0,242,0.3);
-`;
-      meetBtn.innerHTML = `<img src="https://cdn.shopify.com/s/files/1/0962/6648/6067/files/hearts__128_x_128_px.svg?v=1761809626" style="width:24px;height:24px;filter:drop-shadow(0 0 6px #00ffea);"/>`;
+      meetBtn.style.cssText = `
+        width:40px;height:40px;border-radius:50%;
+        background:rgba(255,0,242,0.15);
+        display:flex;align-items:center;justify-content:center;
+        margin:0 auto;
+        cursor:pointer;
+        border:1px solid rgba(255,0,242,0.5);
+        transition:all 0.3s ease;
+        box-shadow:0 0 12px rgba(255,0,242,0.3);
+      `;
+      meetBtn.innerHTML = `<img src="https://cdn.shopify.com/s/files/1/0962/6648/6067/files/hearts__128_x_128_px.svg?v=1761809626" style="width:24px;height:24px;filter:drop-shadow(0 0 8px #ff00f2);"/>`;
       meetBtn.onclick = (e) => {
         e.stopPropagation();
         showMeetModal({
@@ -4449,12 +4445,20 @@ function renderCards(videosToRender) {
           country: video.country || "Nigeria"
         });
       };
-      meetBtn.onmouseenter = () => meetBtn.style.transform = "scale(1.15)";
-      meetBtn.onmouseleave = () => meetBtn.style.transform = "scale(1)";
+      meetBtn.onmouseenter = () => {
+        meetBtn.style.transform = "scale(1.15)";
+        meetBtn.style.background = "rgba(255,0,242,0.3)";
+        meetBtn.style.boxShadow = "0 0 20px rgba(255,0,242,0.6)";
+      };
+      meetBtn.onmouseleave = () => {
+        meetBtn.style.transform = "scale(1)";
+        meetBtn.style.background = "rgba(255,0,242,0.15)";
+        meetBtn.style.boxShadow = "0 0 12px rgba(255,0,242,0.3)";
+      };
 
       infoPanel.append(chatIdEl, detailsEl, meetBtn);
     } else {
-      // Normal title
+      // Normal card content (unchanged)
       const title = document.createElement("div");
       title.textContent = video.title || "Untitled";
       title.style.cssText = "font-weight:800;color:#e0b0ff;font-size:15px;text-shadow: 0 0 8px #ff00f2;";
@@ -4464,31 +4468,31 @@ function renderCards(videosToRender) {
       uploader.style.cssText = "font-size:12px;color:#00ffea;opacity:0.9;";
 
       infoPanel.append(title, uploader);
-    }
 
-    // Unlock button — full width, below meet (only if priced or not trending)
-    if (video.highlightVideoPrice > 0 || !isTrendingCard) {
-      const unlockBtn = document.createElement("button");
-      unlockBtn.textContent = isUnlocked ? "Unlocked ♡" : `Unlock ${video.highlightVideoPrice || 100} STRZ`;
-      Object.assign(unlockBtn.style, {
-        width: "100%",
-        padding: "10px",
-        background: isUnlocked ? "rgba(138,43,226,0.3)" : "linear-gradient(135deg,#ff00f2,#8a2be2,#00ffea)",
-        border: "1px solid #ff00f2",
-        borderRadius: "10px",
-        color: "#fff",
-        fontWeight: "700",
-        fontSize: "13px",
-        cursor: isUnlocked ? "default" : "pointer",
-        boxShadow: "0 3px 12px rgba(255,0,242,0.3)"
-      });
-      if (!isUnlocked) {
-        unlockBtn.onclick = (e) => {
-          e.stopPropagation();
-          showUnlockConfirm(video, () => renderCards(videosToRender));
-        };
+      // Unlock button for normal cards (if needed)
+      if (video.highlightVideoPrice > 0 || !isTrendingCard) {
+        const unlockBtn = document.createElement("button");
+        unlockBtn.textContent = isUnlocked ? "Unlocked ♡" : `Unlock ${video.highlightVideoPrice || 100} STRZ`;
+        Object.assign(unlockBtn.style, {
+          width: "100%",
+          padding: "10px",
+          background: isUnlocked ? "rgba(138,43,226,0.3)" : "linear-gradient(135deg,#ff00f2,#8a2be2,#00ffea)",
+          border: "1px solid #ff00f2",
+          borderRadius: "10px",
+          color: "#fff",
+          fontWeight: "700",
+          fontSize: "13px",
+          cursor: isUnlocked ? "default" : "pointer",
+          boxShadow: "0 3px 12px rgba(255,0,242,0.3)"
+        });
+        if (!isUnlocked) {
+          unlockBtn.onclick = (e) => {
+            e.stopPropagation();
+            showUnlockConfirm(video, () => renderCards(videosToRender));
+          };
+        }
+        infoPanel.appendChild(unlockBtn);
       }
-      infoPanel.appendChild(unlockBtn);
     }
 
     card.append(videoContainer, infoPanel);

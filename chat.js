@@ -4154,12 +4154,12 @@ const intro = document.createElement("div");
 intro.innerHTML = `
   <div style="text-align:center;color:#e0b0ff;max-width:640px;margin:0 auto;line-height:1.6;font-size:14px;
     background:linear-gradient(135deg,rgba(255,0,242,0.15),rgba(138,43,226,0.12));
-    padding:20px 48px 20px 20px;border:1px solid rgba(138,43,226,0.5);
+    padding:20px 33px 15px 15px;border:1px solid rgba(138,43,226,0.5);
     box-shadow:0 0 16px rgba(255,0,242,0.25);border-radius:12px;position:relative;">
     <p style="margin:0;">
       <span style="background:linear-gradient(90deg,#00ffea,#ff00f2,#8a2be2);
         -webkit-background-clip:text;-webkit-text-fill-color:transparent;
-        font-weight:700;font-size:28px;display:block;margin-bottom:16px;">
+        font-weight:700;font-size:15px;display:block;margin-bottom:9px;">
         Cuties 💕
       </span>
       Cam-worthy moments from girls on cube.<br><br>

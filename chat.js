@@ -3473,7 +3473,7 @@ confirmBtn.onclick = async () => {
   }
 }
 // ================================
-// UPLOAD HIGHLIGHT — FIXED TIMESTAMP ISSUE + TRENDING BOOST
+// UPLOAD HIGHLIGHT — FINAL FIX: NO TIMESTAMP ERROR
 // ================================
 document.getElementById("uploadHighlightBtn")?.addEventListener("click", async () => {
   const btn = document.getElementById("uploadHighlightBtn");
@@ -3506,7 +3506,6 @@ document.getElementById("uploadHighlightBtn")?.addEventListener("click", async (
       showStarPopup("Not enough STRZ for trending boost (need 500)", "error");
       return;
     }
-    // Deduct 500 STRZ
     await updateDoc(doc(db, "users", currentUser.uid), {
       stars: increment(-500)
     });
@@ -3533,8 +3532,8 @@ document.getElementById("uploadHighlightBtn")?.addEventListener("click", async (
       finalVideoUrl = await getDownloadURL(snapshot.ref);
     }
 
-    // === SAVE WITH TRENDING FLAG (FIXED: use firebase Timestamp) ===
-    const clipRef = await addDoc(collection(db, "highlightVideos"), {
+    // === SAVE TO FIRESTORE — SAFE trendingUntil WITHOUT Timestamp ===
+    const clipData = {
       uploaderId: currentUser.uid,
       uploaderName: currentUser.chatId || "Legend",
       videoUrl: finalVideoUrl,
@@ -3545,12 +3544,16 @@ document.getElementById("uploadHighlightBtn")?.addEventListener("click", async (
       createdAt: serverTimestamp(),
       unlockedBy: [],
       views: 0,
-      isTrending: boostTrending || false,
-      // 24-hour boost expires automatically
-      trendingUntil: boostTrending 
-        ? Timestamp.fromDate(new Date(Date.now() + 24 * 60 * 60 * 1000)) 
-        : null
-    });
+      isTrending: boostTrending || false
+    };
+
+    // Only add trendingUntil if boosted — using plain JS Date converted safely
+    if (boostTrending) {
+      clipData.trendingUntil = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours from now
+      // Firestore automatically converts JS Date to Timestamp
+    }
+
+    const clipRef = await addDoc(collection(db, "highlightVideos"), clipData);
 
     // === NOTIFY FANS (unchanged) ===
     try {

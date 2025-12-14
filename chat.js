@@ -1514,8 +1514,8 @@ function sanitizeKey(email) {
     const gender = (user.gender || "person").toLowerCase();
     const pronoun = gender === "male" ? "his" : "her";
     const ageGroup = !user.age ? "20s" : user.age >= 30 ? "30s" : "20s";
-    const flair = gender === "male" ? "Cool" : "Kiss";
-    const fruit = user.fruitPick || "Grape";
+    const flair = gender === "male" ? "😎" : "💋";
+    const fruit = user.fruitPick || "🍇";
     const nature = user.naturePick || "cool";
     const city = user.location || user.city || "Lagos";
     const country = user.country || "Nigeria";
@@ -4321,8 +4321,8 @@ function renderCards(videosToRender) {
           const gender = (user.gender || "person").toLowerCase();
           const pronoun = gender === "male" ? "his" : "her";
           const ageGroup = !user.age ? "20s" : user.age >= 30 ? "30s" : "20s";
-          const flair = gender === "male" ? "Cool" : "Kiss";
-          const fruit = user.fruitPick || "Grape";
+          const flair = gender === "male" ? "😎" : "💋";
+          const fruit = user.fruitPick || "🍇";
           const nature = user.naturePick || "cool";
           const city = user.location || user.city || "Lagos";
           const country = user.country || "Nigeria";
@@ -4345,7 +4345,7 @@ function renderCards(videosToRender) {
     card.setAttribute("data-uploader", video.uploaderName || "Anonymous");
     card.setAttribute("data-title", video.title || "");
 
-    const cardWidth = isTrendingCard ? "240px" : "230px"; // slightly smaller for trending
+    const cardWidth = isTrendingCard ? "200px" : "230px"; // slightly smaller for trending
     Object.assign(card.style, {
       minWidth: cardWidth, maxWidth: cardWidth, background: "#0f0a1a", borderRadius: "16px",
       overflow: "hidden", display: "flex", flexDirection: "column", cursor: "pointer",
@@ -4365,7 +4365,7 @@ function renderCards(videosToRender) {
 
     // Video container
     const videoContainer = document.createElement("div");
-    videoContainer.style.cssText = `height:${isTrendingCard ? "360px" : "320px"};overflow:hidden;position:relative;background:#000;cursor:pointer;border-radius:16px 16px 0 0;`;
+    videoContainer.style.cssText = `height:${isTrendingCard ? "300px" : "320px"};overflow:hidden;position:relative;background:#000;cursor:pointer;border-radius:16px 16px 0 0;`;
 
     const videoEl = document.createElement("video");
     videoEl.muted = true;
@@ -4430,11 +4430,16 @@ function renderCards(videosToRender) {
 
       // Meet button — small cute heart, centered
       const meetBtn = document.createElement("div");
-      meetBtn.style.cssText = `
-        width:40px;height:40px;border-radius:50%;background:rgba(0,255,234,0.15);
-        display:flex;align-items:center;justify-content:center;margin:0 auto 12px;
-        cursor:pointer;border:1px solid rgba(0,255,234,0.4);transition:all 0.3s;
-      `;
+    meetBtn.style.cssText = `
+  width:40px;height:40px;border-radius:50%;
+  background:rgba(255,0,242,0.15);
+  display:flex;align-items:center;justify-content:center;
+  margin:0 auto 12px;
+  cursor:pointer;
+  border:1px solid rgba(255,0,242,0.5);
+  transition:all 0.3s ease;
+  box-shadow:0 0 12px rgba(255,0,242,0.3);
+`;
       meetBtn.innerHTML = `<img src="https://cdn.shopify.com/s/files/1/0962/6648/6067/files/hearts__128_x_128_px.svg?v=1761809626" style="width:24px;height:24px;filter:drop-shadow(0 0 6px #00ffea);"/>`;
       meetBtn.onclick = (e) => {
         e.stopPropagation();

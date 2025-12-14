@@ -512,7 +512,7 @@ submitBtn.onclick = async () => {
     messageEl.textContent = 'Must be 18+';
     return;
   }
-  if (!/@(gmail|yahoo|icloud|proton)\.(com|me)$/.test(email)) {
+  if (!/@(gmail|yahoo|icloud|proton|hotmail|outlook)\.(com|me)$/.test(email)) {
     messageEl.textContent = 'Invalid email';
     return;
   }

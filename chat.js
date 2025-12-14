@@ -4165,7 +4165,7 @@ intro.innerHTML = `
   -webkit-text-fill-color:transparent;
   font-weight:700;
   display:inline-block;
-  transform: translateX(5px); /* ← adjust this */
+  transform: translateX(6px); /* ← adjust this */
 ">
   Cuties 💕
 </span>

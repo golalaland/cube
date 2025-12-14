@@ -4150,25 +4150,46 @@ function showHighlightsModal(videos) {
   });
 
   // === STICKY INTRO ===
-  const intro = document.createElement("div");
-  intro.innerHTML = `
-    <div style="text-align:center;color:#e0b0ff;max-width:640px;margin:0 auto;line-height:1.6;font-size:14px;
-      background:linear-gradient(135deg,rgba(255,0,242,0.15),rgba(138,43,226,0.12));
-      padding:14px 48px 14px 20px;border:1px solid rgba(138,43,226,0.5);
-      box-shadow:0 0 16px rgba(255,0,242,0.25);border-radius:12px;position:relative;">
-      <p style="margin:0;">
-        <span style="background:linear-gradient(90deg,#00ffea,#ff00f2,#8a2be2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:700;">
-          Cuties 💕
-        </span> are cam-worthy moments from girls on cube.
-<br>
-       Unlock a cutie’s clip with STRZ and get closer.
-      </p>
-    </div>`;
-  Object.assign(intro.style, { position: "sticky", top: "10px", zIndex: "1001", marginBottom: "12px" });
-  modal.appendChild(intro);
-  modal.addEventListener("scroll", () => {
-    intro.style.opacity = modal.scrollTop > 50 ? "0.7" : "1";
-  });
+const intro = document.createElement("div");
+intro.innerHTML = `
+  <div style="text-align:center;color:#e0b0ff;max-width:640px;margin:0 auto;line-height:1.6;font-size:14px;
+    background:linear-gradient(135deg,rgba(255,0,242,0.15),rgba(138,43,226,0.12));
+    padding:14px 48px 14px 20px;border:1px solid rgba(138,43,226,0.5);
+    box-shadow:0 0 16px rgba(255,0,242,0.25);border-radius:12px;position:relative;">
+
+    <!-- Small centered header -->
+    <div style="margin-bottom:6px;">
+      <span style="
+        background:linear-gradient(90deg,#00ffea,#ff00f2,#8a2be2);
+        -webkit-background-clip:text;
+        -webkit-text-fill-color:transparent;
+        font-weight:700;
+        display:inline-block;
+      ">
+        Cuties 💕
+      </span>
+    </div>
+
+    <!-- Text lines with tight spacing -->
+    <p style="margin:0 0 4px;">
+      Cam-worthy moments from girlies
+    </p>
+    <p style="margin:0;">
+      Unlock a cutie’s clip with STRZ and get closer.
+    </p>
+
+  </div>`;
+Object.assign(intro.style, {
+  position: "sticky",
+  top: "10px",
+  zIndex: "1001",
+  marginBottom: "12px"
+});
+
+modal.appendChild(intro);
+modal.addEventListener("scroll", () => {
+  intro.style.opacity = modal.scrollTop > 50 ? "0.7" : "1";
+});
 
    // === CLOSE BUTTON (YOUR DOPE X – MORPHINE EDITION) ===
   const closeBtn = document.createElement("div");

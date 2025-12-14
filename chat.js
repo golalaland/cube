@@ -4172,8 +4172,8 @@ intro.innerHTML = `
     </div>
 
     <!-- Text lines with tight spacing -->
-    <p style="margin:0 0 4px;">
-      Cam-worthy exclusives from cute girls on cube. 
+    <p style="margin:0 0 3px;">
+      Cam-worthy moments from girls on cube. 
     </p>
     <p style="margin:0;">
       Unlock a cutie’s clip with STRZ and get closer.

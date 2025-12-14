@@ -4182,21 +4182,6 @@ intro.innerHTML = `
 </span>
     </div>
     
-    const shimmerStyle = document.createElement("style");
-shimmerStyle.textContent = `
-  @keyframes cutieShimmer {
-    0%   { background-position: 0% 50%; }
-    50%  { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-  }
-
-  .cutie-shimmer {
-    background-size: 300% 300%;
-    animation: cutieShimmer 6s ease-in-out infinite;
-  }
-`;
-document.head.appendChild(shimmerStyle);
-    
 
     <!-- Body text -->
     <p style="margin:0 0 3px;">
@@ -4832,3 +4817,17 @@ window.revealChatAfterLogin = function() {
   const footer = document.getElementById('startupFooter');
   if (footer) footer.classList.add('hidden');
 };
+    const shimmerStyle = document.createElement("style");
+shimmerStyle.textContent = `
+  @keyframes cutieShimmer {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  .cutie-shimmer {
+    background-size: 300% 300%;
+    animation: cutieShimmer 6s ease-in-out infinite;
+  }
+`;
+document.head.appendChild(shimmerStyle);

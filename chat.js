@@ -4280,42 +4280,76 @@ function renderCards(videosToRender) {
       card.style.boxShadow = "0 4px 20px rgba(138,43,226,0.4)";
     };
 
-    const videoContainer = document.createElement("div");
-    videoContainer.style.cssText = "height:320px;overflow:hidden;position:relative;background:#000;cursor:pointer;";
-    const videoEl = document.createElement("video");
-    videoEl.muted = true;
-    videoEl.loop = true;
-    videoEl.preload = "metadata";
-    videoEl.style.cssText = "width:100%;height:100%;object-fit:cover;";
+   const videoContainer = document.createElement("div");
+videoContainer.style.cssText = "height:320px;overflow:hidden;position:relative;background:#000;cursor:pointer;";
 
-    if (isUnlocked) {
-      videoEl.src = video.previewClip || video.highlightVideo || video.videoUrl || "";
-      videoEl.load();
-      videoContainer.onmouseenter = () => videoEl.play().catch(() => {});
-      videoContainer.onmouseleave = () => { videoEl.pause(); videoEl.currentTime = 0; };
-    } else {
-      videoEl.src = "";
-      const lockedOverlay = document.createElement("div");
-      lockedOverlay.innerHTML = `
-        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(10,5,30,0.85);z-index:2;">
-          <div style="text-align:center;">
-            <svg width="80" height="80" viewBox="0 0 24 24" fill="none">
-              <path d="M12 2C9.2 2 7 4.2 7 7V11H6C4.9 11 4 11.9 4 13V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V13C20 11.9 19.1 11 18 11H17V7C17 4.2 14.8 2 12 2ZM12 4C13.7 4 15 5.3 15 7V11H9V7C9 5.3 10.3 4 12 4Z" fill="#ff00f2"/>
-            </svg>
-          </div>
-        </div>`;
-      videoContainer.appendChild(lockedOverlay);
-    }
+const videoEl = document.createElement("video");
+videoEl.muted = true;
+videoEl.loop = true;
+videoEl.preload = "metadata";
+videoEl.style.cssText = "width:100%;height:100%;object-fit:cover;";
 
-    videoContainer.onclick = (e) => {
-      e.stopPropagation();
-      if (isUnlocked) {
-        playFullVideo(video);
-      } else {
-        showUnlockConfirm(video, () => renderCards(videos));
-      }
-    };
-    videoContainer.appendChild(videoEl);
+if (isUnlocked) {
+  videoEl.src = video.previewClip || video.highlightVideo || video.videoUrl || "";
+  videoEl.load();
+  videoContainer.onmouseenter = () => videoEl.play().catch(() => {});
+  videoContainer.onmouseleave = () => { videoEl.pause(); videoEl.currentTime = 0; };
+} else {
+  videoEl.src = "";
+  const lockedOverlay = document.createElement("div");
+  lockedOverlay.innerHTML = `
+    <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(10,5,30,0.85);z-index:2;">
+      <div style="text-align:center;">
+        <svg width="80" height="80" viewBox="0 0 24 24" fill="none">
+          <path d="M12 2C9.2 2 7 4.2 7 7V11H6C4.9 11 4 11.9 4 13V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V13C20 11.9 19.1 11 18 11H17V7C17 4.2 14.8 2 12 2ZM12 4C13.7 4 15 5.3 15 7V11H9V7C9 5.3 10.3 4 12 4Z" fill="#ff00f2"/>
+        </svg>
+      </div>
+    </div>`;
+  videoContainer.appendChild(lockedOverlay);
+}
+
+// — FULL REPLACEMENT: FULLSCREEN NATIVE VIDEO ON TAP —
+videoContainer.onclick = (e) => {
+  e.stopPropagation();
+
+  if (!isUnlocked) {
+    showUnlockConfirm(video, () => renderCards(videos));
+    return;
+  }
+
+  const fullVideo = document.createElement("video");
+  fullVideo.src = video.videoUrl || video.highlightVideo || video.previewClip || "";
+  fullVideo.muted = false;
+  fullVideo.playsInline = false;           // crucial for iOS fullscreen
+  fullVideo.controls = true;
+  fullVideo.style.cssText = `
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw;
+    height: 100vh;
+    object-fit: contain;
+    background: #000;
+    z-index: 99999;
+  `;
+
+  // Close on tap or end
+  fullVideo.onclick = () => fullVideo.remove();
+  fullVideo.onended = () => fullVideo.remove();
+
+  document.body.appendChild(fullVideo);
+  fullVideo.play();
+
+  // Trigger native fullscreen
+  if (fullVideo.requestFullscreen) {
+    fullVideo.requestFullscreen();
+  } else if (fullVideo.webkitRequestFullscreen) { /* Safari */
+    fullVideo.webkitRequestFullscreen();
+  } else if (fullVideo.msRequestFullscreen) { /* IE11 */
+    fullVideo.msRequestFullscreen();
+  }
+};
+
+videoContainer.appendChild(videoEl);
 
     const infoPanel = document.createElement("div");
     infoPanel.style.cssText = "background: linear-gradient(180deg, #1a0b2e, #0f0519);padding:12px;display:flex;flex-direction:column;gap:6px;border-top: 1px solid #8a2be2;";

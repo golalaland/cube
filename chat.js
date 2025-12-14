@@ -4292,7 +4292,6 @@ modal.appendChild(content);
 // State
 let unlockedVideos = JSON.parse(localStorage.getItem("userUnlockedVideos") || "[]");
 let filterMode = "all";
-
 function renderCards(videosToRender) {
   content.innerHTML = "";
 
@@ -4302,54 +4301,203 @@ function renderCards(videosToRender) {
     return true;
   });
 
-  // Reset content to horizontal scroll (always, for both modes)
+  // ———————————————————————
+  // TRENDING MODE: GLOBAL GALLERY STYLE (CUTE, GRID-LIKE, LOTS OF GIRLS)
+  // ———————————————————————
+  if (filterMode === "trending") {
+    // Grid layout for trending – 2–3 columns depending on screen, lots visible
+    Object.assign(content.style, {
+      display: "grid",
+      gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))",
+      gap: "20px",
+      padding: "20px",
+      paddingBottom: "60px",
+      overflowY: "auto",
+      width: "100%",
+      boxSizing: "border-box",
+      justifyItems: "center"
+    });
+
+    filtered.forEach(async (video) => {
+      const isUnlocked = unlockedVideos.includes(video.id);
+
+      // Fetch bio if available
+      let bio = "No bio yet~";
+      if (video.uploaderId) {
+        try {
+          const userSnap = await getDoc(doc(db, "users", video.uploaderId));
+          if (userSnap.exists()) bio = userSnap.data().bio || bio;
+        } catch (e) {}
+      }
+
+      const galleryItem = document.createElement("div");
+      galleryItem.style.cssText = `
+        width: 100%;
+        max-width: 220px;
+        background: rgba(15,8,30,0.6);
+        border-radius: 20px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 8px 32px rgba(138,43,226,0.3);
+        border: 1px solid rgba(138,43,226,0.4);
+        transition: transform 0.3s ease;
+      `;
+      galleryItem.onmouseenter = () => galleryItem.style.transform = "translateY(-10px)";
+      galleryItem.onmouseleave = () => galleryItem.style.transform = "translateY(0)";
+
+      // Video preview
+      const videoContainer = document.createElement("div");
+      videoContainer.style.cssText = "position:relative; height:280px; background:#000; cursor:pointer;";
+      
+      const videoEl = document.createElement("video");
+      videoEl.muted = true;
+      videoEl.loop = true;
+      videoEl.preload = "metadata";
+      videoEl.playsInline = true;
+      videoEl.style.cssText = "width:100%; height:100%; object-fit:cover;";
+
+      if (isUnlocked) {
+        videoEl.src = video.videoUrl || "";
+        videoEl.load();
+        videoEl.play().catch(() => {});
+        videoContainer.onmouseenter = () => videoEl.play().catch(() => {});
+        videoContainer.onmouseleave = () => videoEl.pause();
+      }
+
+      // Locked overlay
+      if (!isUnlocked && video.highlightVideoPrice > 0) {
+        const overlay = document.createElement("div");
+        overlay.style.cssText = `
+          position:absolute; inset:0; background:rgba(0,0,0,0.7);
+          display:flex; flex-direction:column; align-items:center; justify-content:center;
+          z-index:2;
+        `;
+        overlay.innerHTML = `
+          <svg width="60" height="60" viewBox="0 0 24 24" fill="none">
+            <path d="M12 2C9.2 2 7 4.2 7 7V11H6C4.9 11 4 11.9 4 13V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V13C20 11.9 19.1 11 18 11H17V7C17 4.2 14.8 2 12 2ZM12 4C13.7 4 15 5.3 15 7V11H9V7C9 5.3 10.3 4 12 4Z" fill="#ff00f2"/>
+          </svg>
+          <div style="margin-top:12px; font-size:16px; font-weight:800; color:#ff00f2;">
+            ${video.highlightVideoPrice} STRZ
+          </div>
+        `;
+        videoContainer.appendChild(overlay);
+      }
+
+      // Fullscreen on tap
+      videoContainer.onclick = (e) => {
+        e.stopPropagation();
+        if (!isUnlocked) {
+          showUnlockConfirm(video, () => renderCards(videosToRender));
+          return;
+        }
+        const full = document.createElement("video");
+        full.src = video.videoUrl || "";
+        full.controls = true;
+        full.playsInline = false;
+        full.style.cssText = "position:fixed;top:0;left:0;width:100vw;height:100vh;object-fit:contain;background:#000;z-index:99999;";
+        full.onclick = () => full.remove();
+        document.body.appendChild(full);
+        full.play();
+        if (full.requestFullscreen) full.requestFullscreen();
+      };
+
+      videoContainer.appendChild(videoEl);
+
+      // Bottom section: name, bio, buttons
+      const bottom = document.createElement("div");
+      bottom.style.cssText = "padding:16px; display:flex; flex-direction:column; gap:10px;";
+
+      const name = document.createElement("div");
+      name.textContent = `@${video.uploaderName || "Anonymous"}`;
+      name.style.cssText = "font-weight:800; font-size:16px; color:#00ffea;";
+
+      const bioEl = document.createElement("div");
+      bioEl.textContent = bio;
+      bioEl.style.cssText = "font-size:13px; color:#ccc; line-height:1.4; opacity:0.9;";
+
+      const btns = document.createElement("div");
+      btns.style.cssText = "display:flex; gap:10px; margin-top:8px;";
+
+      // Meet button — always visible in trending gallery
+      const meetBtn = document.createElement("button");
+      meetBtn.textContent = "Meet";
+      meetBtn.style.cssText = `
+        flex:1; padding:10px; background:rgba(0,255,234,0.15);
+        border:1px solid rgba(0,255,234,0.4); border-radius:12px;
+        color:#00ffea; font-weight:700; font-size:14px; cursor:pointer;
+        transition:all 0.3s;
+      `;
+      meetBtn.onmouseenter = () => meetBtn.style.background = "rgba(0,255,234,0.3)";
+      meetBtn.onmouseleave = () => meetBtn.style.background = "rgba(0,255,234,0.15)";
+      meetBtn.onclick = (e) => {
+        e.stopPropagation();
+        alert(`Opening meet with @${video.uploaderName} 💕`); // replace with real meet/DM
+      };
+
+      // Unlock button — only if price > 0
+      if (video.highlightVideoPrice > 0) {
+        const unlockBtn = document.createElement("button");
+        unlockBtn.textContent = isUnlocked ? "Unlocked ♡" : `Unlock ${video.highlightVideoPrice} STRZ`;
+        unlockBtn.style.cssText = `
+          flex:1; padding:10px; background:linear-gradient(135deg,#ff00f2,#8a2be2);
+          border:none; border-radius:12px; color:#fff; font-weight:800;
+          font-size:14px; cursor:pointer; box-shadow:0 4px 16px rgba(255,0,242,0.3);
+        `;
+        if (!isUnlocked) {
+          unlockBtn.onclick = (e) => {
+            e.stopPropagation();
+            showUnlockConfirm(video, () => renderCards(videosToRender));
+          };
+        }
+        btns.append(unlockBtn, meetBtn);
+      } else {
+        // Free clip — only Meet button
+        btns.appendChild(meetBtn);
+      }
+
+      bottom.append(name, bioEl, btns);
+      galleryItem.append(videoContainer, bottom);
+      content.appendChild(galleryItem);
+    });
+
+    return; // stop normal rendering
+  }
+
+  // ———————————————————————
+  // NORMAL / ALL / UNLOCKED: YOUR PERFECT ORIGINAL HORIZONTAL CARDS (100% UNTOUCHED)
+  // ———————————————————————
   Object.assign(content.style, {
     display: "flex", gap: "16px", flexWrap: "nowrap", overflowX: "auto",
     paddingBottom: "40px", scrollBehavior: "smooth", width: "100%", justifyContent: "flex-start"
   });
 
-  filtered.forEach(async (video) => {
+  filtered.forEach(video => {
     const isUnlocked = unlockedVideos.includes(video.id);
-    const isTrendingCard = filterMode === "trending";
-
-    // Fetch uploader bio (only once per user)
-    let bio = "";
-    if (video.uploaderId) {
-      try {
-        const userSnap = await getDoc(doc(db, "users", video.uploaderId));
-        if (userSnap.exists()) {
-          bio = userSnap.data().bio || "No bio yet~";
-        }
-      } catch (e) { bio = "Mystery creator"; }
-    }
 
     const card = document.createElement("div");
     card.className = "videoCard";
     card.setAttribute("data-uploader", video.uploaderName || "Anonymous");
     card.setAttribute("data-title", video.title || "");
-    
-    // Slightly smaller & cuter for trending
-    const cardWidth = isTrendingCard ? "260px" : "230px";
     Object.assign(card.style, {
-      minWidth: cardWidth, maxWidth: cardWidth, background: "#0f0a1a", borderRadius: "16px",
+      minWidth: "230px", maxWidth: "230px", background: "#0f0a1a", borderRadius: "12px",
       overflow: "hidden", display: "flex", flexDirection: "column", cursor: "pointer",
-      flexShrink: 0, boxShadow: "0 6px 24px rgba(138,43,226,0.35)",
+      flexShrink: 0, boxShadow: "0 4px 20px rgba(138,43,226,0.4)",
       transition: "transform 0.3s ease, box-shadow 0.3s ease",
       border: "1px solid rgba(138,43,226,0.5)"
     });
 
     card.onmouseenter = () => {
-      card.style.transform = "translateY(-8px)";
-      card.style.boxShadow = "0 16px 40px rgba(255,0,242,0.4)";
+      card.style.transform = "scale(1.03)";
+      card.style.boxShadow = "0 12px 32px rgba(255,0,242,0.6)";
     };
     card.onmouseleave = () => {
-      card.style.transform = "translateY(0)";
-      card.style.boxShadow = "0 6px 24px rgba(138,43,226,0.35)";
+      card.style.transform = "scale(1)";
+      card.style.boxShadow = "0 4px 20px rgba(138,43,226,0.4)";
     };
 
-    // Video container
     const videoContainer = document.createElement("div");
-    videoContainer.style.cssText = `height:${isTrendingCard ? "360px" : "320px"};overflow:hidden;position:relative;background:#000;cursor:pointer;border-radius:16px 16px 0 0;`;
+    videoContainer.style.cssText = "height:320px;overflow:hidden;position:relative;background:#000;cursor:pointer;";
 
     const videoEl = document.createElement("video");
     videoEl.muted = true;
@@ -4358,7 +4506,7 @@ function renderCards(videosToRender) {
     videoEl.style.cssText = "width:100%;height:100%;object-fit:cover;";
 
     if (isUnlocked) {
-      videoEl.src = video.videoUrl || video.previewClip || "";
+      videoEl.src = video.previewClip || video.highlightVideo || video.videoUrl || "";
       videoEl.load();
       videoContainer.onmouseenter = () => videoEl.play().catch(() => {});
       videoContainer.onmouseleave = () => { videoEl.pause(); videoEl.currentTime = 0; };
@@ -4366,117 +4514,88 @@ function renderCards(videosToRender) {
       videoEl.src = "";
       const lockedOverlay = document.createElement("div");
       lockedOverlay.innerHTML = `
-        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(10,5,30,0.9);z-index:2;border-radius:16px 16px 0 0;">
+        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(10,5,30,0.85);z-index:2;">
           <div style="text-align:center;">
-            <svg width="70" height="70" viewBox="0 0 24 24" fill="none">
+            <svg width="80" height="80" viewBox="0 0 24 24" fill="none">
               <path d="M12 2C9.2 2 7 4.2 7 7V11H6C4.9 11 4 11.9 4 13V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V13C20 11.9 19.1 11 18 11H17V7C17 4.2 14.8 2 12 2ZM12 4C13.7 4 15 5.3 15 7V11H9V7C9 5.3 10.3 4 12 4Z" fill="#ff00f2"/>
             </svg>
-            ${video.highlightVideoPrice > 0 ? `<div style="margin-top:12px;font-size:18px;font-weight:800;color:#ff00f2;">${video.highlightVideoPrice} STRZ</div>` : ''}
           </div>
         </div>`;
       videoContainer.appendChild(lockedOverlay);
     }
 
-    // Fullscreen playback on tap
     videoContainer.onclick = (e) => {
       e.stopPropagation();
       if (!isUnlocked) {
-        showUnlockConfirm(video, () => renderCards(videosToRender));
+        showUnlockConfirm(video, () => renderCards(videos));
         return;
       }
       const fullVideo = document.createElement("video");
-      fullVideo.src = video.videoUrl || "";
-      fullVideo.controls = true;
+      fullVideo.src = video.videoUrl || video.highlightVideo || video.previewClip || "";
+      fullVideo.muted = false;
       fullVideo.playsInline = false;
-      fullVideo.style.cssText = "position:fixed;top:0;left:0;width:100vw;height:100vh;object-fit:contain;background:#000;z-index:99999;";
+      fullVideo.controls = true;
+      fullVideo.style.cssText = `
+        position: fixed;
+        top: 0; left: 0;
+        width: 100vw;
+        height: 100vh;
+        object-fit: contain;
+        background: #000;
+        z-index: 99999;
+      `;
       fullVideo.onclick = () => fullVideo.remove();
+      fullVideo.onended = () => fullVideo.remove();
       document.body.appendChild(fullVideo);
       fullVideo.play();
       if (fullVideo.requestFullscreen) fullVideo.requestFullscreen();
+      else if (fullVideo.webkitRequestFullscreen) fullVideo.webkitRequestFullscreen();
+      else if (fullVideo.msRequestFullscreen) fullVideo.msRequestFullscreen();
     };
 
     videoContainer.appendChild(videoEl);
 
-    // Info panel
     const infoPanel = document.createElement("div");
-    infoPanel.style.cssText = "background:linear-gradient(180deg,#1a0b2e,#0f0519);padding:14px;display:flex;flex-direction:column;gap:8px;border-radius:0 0 16px 16px;";
+    infoPanel.style.cssText = "background: linear-gradient(180deg, #1a0b2e, #0f0519);padding:12px;display:flex;flex-direction:column;gap:6px;border-top: 1px solid #8a2be2;";
 
     const title = document.createElement("div");
     title.textContent = video.title || "Untitled";
-    title.style.cssText = "font-weight:800;color:#e0b0ff;font-size:15px;";
+    title.style.cssText = "font-weight:800;color:#e0b0ff;font-size:15px;text-shadow: 0 0 8px #ff00f2;";
 
-    const uploaderLine = document.createElement("div");
-    uploaderLine.innerHTML = `
-      <div style="font-size:13px;color:#00ffea;font-weight:600;">@${video.uploaderName || "Anonymous"}</div>
-      <div style="font-size:12px;color:#bbb;margin-top:4px;line-height:1.3;">${bio}</div>
-    `;
+    const uploader = document.createElement("div");
+    uploader.textContent = `By: ${video.uploaderName || "Anonymous"}`;
+    uploader.style.cssText = "font-size:12px;color:#00ffea;opacity:0.9;";
 
-    // Buttons row
-    const buttonsRow = document.createElement("div");
-    buttonsRow.style.cssText = "display:flex;gap:10px;align-items:center;margin-top:8px;";
+    const unlockBtn = document.createElement("button");
+    unlockBtn.textContent = isUnlocked ? "Unlocked" : `Unlock ${video.highlightVideoPrice || 100} ⭐️`;
+    Object.assign(unlockBtn.style, {
+      background: isUnlocked ? "rgba(138,43,226,0.3)" : "linear-gradient(135deg, #ff00f2, #8a2be2, #00ffea)",
+      border: "1px solid #ff00f2", borderRadius: "6px", padding: "8px 0", fontWeight: "800",
+      color: "#fff", cursor: isUnlocked ? "default" : "pointer",
+      transition: "all 0.3s ease", fontSize: "13px", textShadow: "0 0 10px rgba(255,0,242,0.8)",
+      boxShadow: isUnlocked ? "inset 0 2px 10px rgba(0,0,0,0.5)" : "0 0 20px rgba(255,0,242,0.6)"
+    });
 
-    // Unlock button (skip if price 0 and trending)
-    if (video.highlightVideoPrice > 0 || !isTrendingCard) {
-      const unlockBtn = document.createElement("button");
-      unlockBtn.textContent = isUnlocked ? "Unlocked ♡" : `Unlock ${video.highlightVideoPrice || 100} STRZ`;
-      Object.assign(unlockBtn.style, {
-        flex: 1,
-        padding: "10px",
-        background: isUnlocked ? "rgba(138,43,226,0.3)" : "linear-gradient(135deg,#ff00f2,#8a2be2,#00ffea)",
-        border: "1px solid #ff00f2",
-        borderRadius: "10px",
-        color: "#fff",
-        fontWeight: "700",
-        fontSize: "13px",
-        cursor: isUnlocked ? "default" : "pointer",
-        boxShadow: "0 3px 12px rgba(255,0,242,0.3)"
-      });
-      if (!isUnlocked) {
-        unlockBtn.onclick = (e) => {
-          e.stopPropagation();
-          showUnlockConfirm(video, () => renderCards(videosToRender));
-        };
-      }
-      buttonsRow.appendChild(unlockBtn);
-    }
-
-    // Meet button (cute & always visible in trending)
-    if (isTrendingCard) {
-      const meetBtn = document.createElement("div");
-      meetBtn.innerHTML = "Chat";
-      meetBtn.style.cssText = `
-        width:44px;height:44px;border-radius:50%;background:rgba(0,255,234,0.15);
-        display:flex;align-items:center;justify-content:center;font-size:22px;
-        cursor:pointer;border:1px solid rgba(0,255,234,0.4);transition:all 0.3s;
-      `;
-      meetBtn.onclick = (e) => {
-        e.stopPropagation();
-        alert(`Chatting with @${video.uploaderName} 💬`); // replace with real DM
+    if (!isUnlocked) {
+      unlockBtn.onmouseenter = () => {
+        unlockBtn.style.background = "linear-gradient(135deg, #00ffea, #ff00f2, #8a2be2)";
+        unlockBtn.style.transform = "translateY(-2px)";
+        unlockBtn.style.boxShadow = "0 0 30px rgba(0,255,234,0.8)";
       };
-      meetBtn.onmouseenter = () => meetBtn.style.transform = "scale(1.15)";
-      meetBtn.onmouseleave = () => meetBtn.style.transform = "scale(1)";
-      buttonsRow.appendChild(meetBtn);
-    }
-
-    // 3-frame preview (only in trending)
-    if (isTrendingCard) {
-      const frames = document.createElement("div");
-      frames.style.cssText = "display:flex;gap:6px;margin-top:10px;justify-content:center;";
-      for (let i = 0; i < 3; i++) {
-        const frame = document.createElement("div");
-        frame.style.cssText = `
-          width:70px;height:100px;background:#111;border-radius:8px;
-          background-image:url(${isUnlocked ? video.videoUrl : ''});
-          background-size:cover;background-position:center;
-          border:1px solid rgba(255,0,242,0.2);
-        `;
-        frames.appendChild(frame);
-      }
-      infoPanel.append(title, uploaderLine, frames, buttonsRow);
+      unlockBtn.onmouseleave = () => {
+        unlockBtn.style.background = "linear-gradient(135deg, #ff00f2, #8a2be2, #00ffea)";
+        unlockBtn.style.transform = "translateY(0)";
+        unlockBtn.style.boxShadow = "0 0 20px rgba(255,0,242,0.6)";
+      };
+      unlockBtn.onclick = (e) => {
+        e.stopPropagation();
+        showUnlockConfirm(video, () => renderCards(videos));
+      };
     } else {
-      infoPanel.append(title, uploaderLine, buttonsRow);
+      unlockBtn.disabled = true;
     }
 
+    infoPanel.append(title, uploader, unlockBtn);
     card.append(videoContainer, infoPanel);
     content.appendChild(card);
   });

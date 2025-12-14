@@ -2167,7 +2167,7 @@ function forceRenderStreak() {
       el.querySelector('.streak-dot')?.classList.remove('active');
     });
     if (btn) {
-      btn.textContent = 'CLAIM 350 STRZ (0/7)';
+      btn.textContent = 'CLAIM 100 STRZ (0/7)';
       btn.style.opacity = '0.4';
       btn.style.pointerEvents = 'none';
     }
@@ -2200,7 +2200,7 @@ function forceRenderStreak() {
     btn.style.background = 'linear-gradient(90deg,#00ff88,#00cc66)';
     btn.style.color = '#000';
     btn.style.boxShadow = '0 0 20px rgba(0,255,136,0.6)';
-    btn.textContent = 'CLAIM 350 STRZ NOW';
+    btn.textContent = 'CLAIM 100 STRZ NOW';
   } else {
     btn.style.opacity = '0.4';
     btn.style.pointerEvents = 'none';
@@ -2209,7 +2209,7 @@ function forceRenderStreak() {
     btn.style.boxShadow = 'none';
     btn.textContent = claimedThisWeek 
       ? 'CLAIMED THIS WEEK' 
-      : `CLAIM 350 STRZ (${playedCount}/7)`;
+      : `CLAIM 100 STRZ (${playedCount}/7)`;
   }
 }
 
@@ -2219,7 +2219,7 @@ async function claimWeeklyStreak() {
 
   const played = currentUser.weekStreak.filter(d => d.played).length;
   if (played < 7) {
-    await showNiceAlert("Play all 7 days to claim 350 STRZ!");
+    await showNiceAlert("Play all 7 days to claim 100 STRZ!");
     return;
   }
   if (currentUser.lastStreakClaim === currentUser.currentWeekStart) {
@@ -2228,6 +2228,7 @@ async function claimWeeklyStreak() {
   }
 
   const userRef = doc(db, "users", currentUser.uid);
+
   try {
     await runTransaction(db, async (t) => {
       const snap = await t.get(userRef);
@@ -2236,20 +2237,38 @@ async function claimWeeklyStreak() {
       if (data.lastStreakClaim === currentUser.currentWeekStart) throw "Already claimed";
 
       t.update(userRef, {
-        stars: (data.stars || 0) + 350,
+        stars: (data.stars || 0) + 100,
         lastStreakClaim: currentUser.currentWeekStart,
         updatedAt: serverTimestamp()
       });
     });
 
+    // UPDATE LOCAL
     currentUser.stars += 350;
     currentUser.lastStreakClaim = currentUser.currentWeekStart;
     if (starCountEl) starCountEl.textContent = formatNumber(currentUser.stars);
 
+    // SEND NOTIFICATION — THIS IS THE KEY
+    await addDoc(collection(db, "notifications"), {
+      userId: currentUser.uid,
+      type: "streak_reward",
+      title: "Streak Reward!",
+      message: "You just claimed 100 STRZ for your 7-day streak!\nKeep the fire going!",
+      read: false,
+      timestamp: serverTimestamp(),
+      icon: "fire",
+      data: {
+        reward: 350,
+        type: "weekly_streak"
+      }
+    });
+
     forceRenderStreak();
     triggerConfetti();
     await showNiceAlert("350 STRZ CLAIMED!\nYour streak is fire!");
+
   } catch (e) {
+    console.error("Streak claim failed:", e);
     await showNiceAlert("Claim failed — try again");
   }
 }

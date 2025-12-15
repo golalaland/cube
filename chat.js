@@ -788,7 +788,7 @@ function showTapModal(targetEl, msgData) {
   tapModalEl.className = "tap-modal";
 
   const replyBtn = document.createElement("button");
-  replyBtn.textContent = "Reply";
+  replyBtn.textContent = "↪";
   replyBtn.onclick = () => {
     currentReplyTarget = { id: msgData.id, chatId: msgData.chatId, content: msgData.content };
     refs.messageInputEl.placeholder = `Replying to ${msgData.chatId}: ${msgData.content.substring(0, 30)}...`;
@@ -4448,7 +4448,7 @@ function renderCards(videosToRender) {
     // Clickable @username — opens social card directly (no unlock requirement)
     const uploader = document.createElement("div");
     const usernameSpan = document.createElement("span");
-    usernameSpan.textContent = `@${video.uploaderName || "Anonymous"}`;
+    usernameSpan.textContent = `@${video.uploaderName || "Cutie"}`;
     usernameSpan.style.cssText = "color:#00ffea; font-size:12px; cursor:pointer; font-weight:600;";
     usernameSpan.onclick = (e) => {
       e.stopPropagation();
@@ -4492,7 +4492,7 @@ function renderCards(videosToRender) {
 
     // Unlock button
     const unlockBtn = document.createElement("button");
-    unlockBtn.textContent = isUnlocked ? "Unlocked♡" : `Unlock ${video.highlightVideoPrice || 100} ⭐️`;
+    unlockBtn.textContent = isUnlocked ? "Unlocked ♡" : `Unlock ${video.highlightVideoPrice || 100} ⭐️`;
     Object.assign(unlockBtn.style, {
       background: isUnlocked ? "rgba(138,43,226,0.3)" : "linear-gradient(135deg, #ff00f2, #8a2be2, #00ffea)",
       border: "1px solid #ff00f2", borderRadius: "6px", padding: "8px 0", fontWeight: "800",

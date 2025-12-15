@@ -1549,26 +1549,27 @@ function sanitizeKey(email) {
     };
     card.appendChild(closeBtn);
 
-// ==================== VIDEO CONTAINER ====================
+// ==================== VIDEO CONTAINER — PERFECTLY CENTERED ====================
 const videoContainer = document.createElement("div");
 videoContainer.style.cssText = `
   width:100%;
   height:320px;
   position:relative;
   overflow:hidden;
-  background:#000;      /* black backdrop */
+  background:#000; /* Full black cinematic backdrop */
   border-radius:16px 16px 0 0;
   touch-action:pan-y;
+  cursor:pointer;
 `;
 
 const videos = Array.isArray(user.socialcardvideoUrl)
   ? user.socialcardvideoUrl.filter(Boolean)
   : [];
 
+let currentIndex = 0;
 let activeVideo = null;
 
 if (videos.length) {
-
   // ===== SWIPE WRAPPER =====
   const swipeWrapper = document.createElement("div");
   swipeWrapper.style.cssText = `
@@ -1578,112 +1579,157 @@ if (videos.length) {
     transition:transform 0.35s ease;
   `;
 
-  let currentIndex = 0;
-  let startX = 0;
   const videoEls = [];
 
   videos.forEach(src => {
-
-    // ===== OUTER FRAME (black backdrop per video) =====
-    const wrap = document.createElement("div");
-    wrap.style.cssText = `
+    // ===== VIDEO FRAME (centered) =====
+    const frame = document.createElement("div");
+    frame.style.cssText = `
       position:relative;
       width:100%;
       height:100%;
       flex-shrink:0;
-      overflow:hidden;
-      background:#000;
       display:flex;
-      justify-content:flex-start;  /* push video left */
-      align-items:center;
+      justify-content:center;    /* Horizontal center */
+      align-items:center;        /* Vertical center */
+      background:#000;
+      overflow:hidden;
     `;
 
-    // ===== VIDEO =====
+    // ===== VIDEO ELEMENT =====
     const video = document.createElement("video");
     video.src = src;
     video.muted = true;
     video.loop = true;
     video.autoplay = true;
     video.preload = "metadata";
-    video.setAttribute("playsinline", "");
+    video.playsInline = true;
     video.setAttribute("webkit-playsinline", "");
 
-    // ===== INNER FRAME STYLE =====
     video.style.cssText = `
-      height:100%;
+      max-width:100%;
+      max-height:100%;
       width:auto;
+      height:auto;
       object-fit:contain;
-      object-position:left center;   /* push to left inside the frame */
-      background:transparent;
       display:block;
-    `;
-
-    // ===== MUTE ICON =====
-    const muteIcon = document.createElement("div");
-    muteIcon.textContent = "🔇";
-    muteIcon.style.cssText = `
-      position:absolute;
-      bottom:12px;
-      right:12px;
-      font-size:16px;
-      background:rgba(0,0,0,0.55);
-      padding:6px;
-      border-radius:50%;
-      color:#fff;
-      opacity:0.6;
-      transition:0.25s;
-      pointer-events:none;
-      z-index:5;
+      background:transparent;
     `;
 
     video.play().catch(() => {});
 
-    // 🔊 TAP TO TOGGLE SOUND
-    video.addEventListener("click", e => {
-      e.stopPropagation();
-      if (activeVideo && activeVideo !== video) {
-        activeVideo.muted = true;
-      }
-      video.muted = !video.muted;
-      muteIcon.style.opacity = video.muted ? "0.6" : "0";
-      activeVideo = video;
-    });
-
-    wrap.append(video, muteIcon);
-    swipeWrapper.appendChild(wrap);
-    videoEls.push({ video, muteIcon });
+    frame.appendChild(video);
+    swipeWrapper.appendChild(frame);
+    videoEls.push(video);
   });
 
   videoContainer.appendChild(swipeWrapper);
 
-  // ===== DOTS =====
+  // ===== GLOBAL MUTE ICON (one for the whole carousel) =====
+  const muteIcon = document.createElement("div");
+  muteIcon.textContent = "🔇";
+  muteIcon.style.cssText = `
+    position:absolute;
+    bottom:12px;
+    right:12px;
+    font-size:20px;
+    background:rgba(0,0,0,0.6);
+    padding:8px 10px;
+    border-radius:50%;
+    color:#fff;
+    opacity:0.7;
+    transition:opacity 0.3s;
+    pointer-events:none;
+    z-index:6;
+  `;
+  videoContainer.appendChild(muteIcon);
+
+  // ===== TAP TO TOGGLE MUTE (on container) =====
+  videoContainer.onclick = (e) => {
+    e.stopPropagation();
+    const currentVideo = videoEls[currentIndex];
+    if (currentVideo) {
+      // Mute all others
+      videoEls.forEach(v => v.muted = true);
+      // Toggle current
+      currentVideo.muted = !currentVideo.muted;
+      muteIcon.textContent = currentVideo.muted ? "🔇" : "🔊";
+      muteIcon.style.opacity = "1";
+      clearTimeout(muteIcon.hideTimer);
+      muteIcon.hideTimer = setTimeout(() => {
+        muteIcon.style.opacity = "0.7";
+      }, 1500);
+      activeVideo = currentVideo;
+    }
+  };
+
+  // ===== SWIPE LOGIC =====
+  let startX = 0;
+  videoContainer.onpointerdown = (e) => {
+    startX = e.clientX;
+  };
+  videoContainer.onpointerup = (e) => {
+    const diff = startX - e.clientX;
+    if (Math.abs(diff) > 50) {
+      if (diff > 0 && currentIndex < videos.length - 1) {
+        currentIndex++;
+      } else if (diff < 0 && currentIndex > 0) {
+        currentIndex--;
+      }
+      swipeWrapper.style.transform = `translateX(-${currentIndex * 100}%)`;
+      updateDots();
+    }
+  };
+
+  // ===== DOTS INDICATOR =====
   let dots;
   if (videos.length > 1) {
     dots = document.createElement("div");
     dots.style.cssText = `
       position:absolute;
-      bottom:10px;
+      bottom:12px;
       left:50%;
       transform:translateX(-50%);
       display:flex;
-      gap:6px;
+      gap:7px;
       z-index:6;
     `;
 
     videos.forEach((_, i) => {
       const dot = document.createElement("div");
       dot.style.cssText = `
-        width:7px;
-        height:7px;
+        width:8px;
+        height:8px;
         border-radius:50%;
-        background:${i === 0 ? "#ff00f2" : "rgba(255,0,242,0.35)"};
+        background:${i === 0 ? "#ff00f2" : "rgba(255,0,242,0.4)"};
         transition:0.3s;
       `;
       dots.appendChild(dot);
     });
 
     videoContainer.appendChild(dots);
+
+    const updateDots = () => {
+      dots.querySelectorAll("div").forEach((dot, i) => {
+        dot.style.background = i === currentIndex ? "#ff00f2" : "rgba(255,0,242,0.4)";
+        dot.style.transform = i === currentIndex ? "scale(1.2)" : "scale(1)";
+      });
+    };
+
+    // Initial dots update
+    updateDots();
   }
+
+} else {
+  // No video fallback
+  videoContainer.style.display = "flex";
+  videoContainer.style.justifyContent = "center";
+  videoContainer.style.alignItems = "center";
+  videoContainer.style.color = "#555";
+  videoContainer.innerHTML = "<div>No video yet~</div>";
+}
+
+card.appendChild(videoContainer);
 
   const updateDots = () => {
     if (!dots) return;

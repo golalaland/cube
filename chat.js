@@ -1455,10 +1455,10 @@ function sanitizeKey(email) {
   return email.toLowerCase().replace(/[@.]/g, "_").trim();
 }
 /* ======================================================
-  SOCIAL CARD SYSTEM — TRENDING STYLE FOR HOSTS (2025)
+  SOCIAL CARD SYSTEM — TRENDING STYLE FOR HOSTS (2025 FIXED)
   • Exact trending design for isHost
-  • Original compact style for isVIP
-  • Multi-video swipe support (socialcardvideoUrl array)
+  • Original compact style for isVIP (no gift slider)
+  • Multi-video swipe support via socialcardvideoUrl array
   • Gift slider only for isHost
 ====================================================== */
 (async function initSocialCardSystem() {
@@ -1480,25 +1480,22 @@ function sanitizeKey(email) {
     console.error("Failed to load users:", err);
   }
 
+  // Main show function — decides which card to display
   function showSocialCard(user) {
     if (!user) return;
     document.getElementById('socialCard')?.remove();
 
-    // Decide which style to use
     if (user.isHost) {
       showTrendingStyleHostCard(user);
-    } else if (user.isVIP) {
-      showOriginalVIPCard(user); // Original compact style, no gift slider
     } else {
-      showOriginalVIPCard(user); // Fallback to compact
+      showOriginalVIPCard(user); // Used for both isVIP and regular users
     }
   }
 
-  // ==================== TRENDING-STYLE CARD FOR HOSTS ====================
+  // ==================== TRENDING STYLE CARD FOR HOSTS ====================
   function showTrendingStyleHostCard(user) {
     const card = document.createElement("div");
     card.id = "socialCard";
-    card.className = "videoCard"; // Reuse trending class for consistency
 
     Object.assign(card.style, {
       position: "fixed",
@@ -1512,7 +1509,6 @@ function sanitizeKey(email) {
       overflow: "hidden",
       display: "flex",
       flexDirection: "column",
-      cursor: "default",
       boxShadow: "0 6px 24px rgba(138,43,226,0.35)",
       transition: "transform 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease",
       border: "1px solid rgba(138,43,226,0.5)",
@@ -1520,7 +1516,7 @@ function sanitizeKey(email) {
       opacity: "0"
     });
 
-    // Hover lift effect
+    // Hover effect
     card.onmouseenter = () => {
       card.style.transform = "translate(-50%, -50%) translateY(-8px)";
       card.style.boxShadow = "0 16px 40px rgba(255,0,242,0.4)";
@@ -1532,27 +1528,35 @@ function sanitizeKey(email) {
 
     // Close on outside click
     const closeOut = (e) => {
-      if (!card.contains(e.target)) card.remove();
+      if (!card.contains(e.target)) {
+        card.remove();
+        document.removeEventListener("click", closeOut);
+      }
     };
     setTimeout(() => document.addEventListener("click", closeOut), 100);
 
     // Close X button
     const closeBtn = document.createElement("div");
     closeBtn.innerHTML = "×";
-    closeBtn.style.cssText = "position:absolute;top:8px;right:12px;font-size:20px;font-weight:700;cursor:pointer;z-index:10;opacity:0.7;";
+    closeBtn.style.cssText = "position:absolute;top:8px;right:12px;font-size:20px;font-weight:700;cursor:pointer;z-index:10;opacity:0.7;color:#fff;";
     closeBtn.onmouseenter = () => closeBtn.style.opacity = "1";
     closeBtn.onmouseleave = () => closeBtn.style.opacity = "0.7";
-    closeBtn.onclick = (e) => { e.stopPropagation(); card.remove(); document.removeEventListener("click", closeOut); };
+    closeBtn.onclick = (e) => {
+      e.stopPropagation();
+      card.remove();
+      document.removeEventListener("click", closeOut);
+    };
     card.appendChild(closeBtn);
 
-    // ==================== VIDEO CONTAINER (Multi-video swipe) ====================
+    // ==================== MULTI-VIDEO SWIPE CONTAINER ====================
     const videoContainer = document.createElement("div");
     videoContainer.style.cssText = "height:360px;overflow:hidden;position:relative;background:#000;border-radius:16px 16px 0 0;";
 
     const videos = Array.isArray(user.socialcardvideoUrl) ? user.socialcardvideoUrl.filter(url => url) : [];
+
     if (videos.length > 0) {
       const swipeWrapper = document.createElement("div");
-      swipeWrapper.style.cssText = "display:flex;width:" + (videos.length * 100) + "%;height:100%;transition:transform 0.4s ease;";
+      swipeWrapper.style.cssText = `display:flex;width:${videos.length * 100}%;height:100%;transition:transform 0.4s ease;`;
 
       videos.forEach(src => {
         const videoEl = document.createElement("video");
@@ -1571,9 +1575,10 @@ function sanitizeKey(email) {
       if (videos.length > 1) {
         const dots = document.createElement("div");
         dots.style.cssText = "position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:5;";
+
         videos.forEach((_, i) => {
           const dot = document.createElement("div");
-          dot.style.cssText = `width:8px;height:8px;border-radius:50%;background:${i===0 ? "#ff00f2" : "rgba(255,0,242,0.3)"};transition:0.3s;`;
+          dot.style.cssText = `width:8px;height:8px;border-radius:50%;background:${i === 0 ? "#ff00f2" : "rgba(255,0,242,0.3)"};transition:0.3s;`;
           dots.appendChild(dot);
         });
         videoContainer.appendChild(dots);
@@ -1587,9 +1592,7 @@ function sanitizeKey(email) {
         };
 
         let startX = 0;
-        videoContainer.onpointerdown = (e) => {
-          startX = e.clientX;
-        };
+        videoContainer.onpointerdown = (e) => startX = e.clientX;
         videoContainer.onpointerup = (e) => {
           const diff = startX - e.clientX;
           if (Math.abs(diff) > 50) {
@@ -1601,14 +1604,11 @@ function sanitizeKey(email) {
         };
       }
     } else {
-      // Fallback if no video
-      videoContainer.style.background = "#111";
-      videoContainer.textContent = "No video";
       videoContainer.style.display = "flex";
       videoContainer.style.alignItems = "center";
       videoContainer.style.justifyContent = "center";
       videoContainer.style.color = "#555";
-      videoContainer.style.fontSize = "14px";
+      videoContainer.innerHTML = "<div>No video yet~</div>";
     }
 
     card.appendChild(videoContainer);
@@ -1638,16 +1638,9 @@ function sanitizeKey(email) {
     detailsEl.style.cssText = "margin:0 0 10px;font-size:14px;line-height:1.4;color:#ccc;text-align:center;opacity:0.9;";
     infoPanel.appendChild(detailsEl);
 
-    // Meet button (heart style like trending)
+    // Meet button (heart icon)
     const meetBtn = document.createElement("div");
-    meetBtn.style.cssText = `
-      width:40px;height:40px;border-radius:50%;
-      background:rgba(255,0,242,0.15);
-      display:flex;align-items:center;justify-content:center;
-      margin:0 auto;cursor:pointer;
-      border:1px solid rgba(255,0,242,0.5);
-      transition:all 0.3s ease;box-shadow:0 0 12px rgba(255,0,242,0.3);
-    `;
+    meetBtn.style.cssText = "width:40px;height:40px;border-radius:50%;background:rgba(255,0,242,0.15);display:flex;align-items:center;justify-content:center;margin:0 auto;cursor:pointer;border:1px solid rgba(255,0,242,0.5);transition:all 0.3s ease;box-shadow:0 0 12px rgba(255,0,242,0.3);";
     meetBtn.innerHTML = `<img src="https://cdn.shopify.com/s/files/1/0962/6648/6067/files/hearts__128_x_128_px.svg?v=1761809626" style="width:24px;height:24px;filter:drop-shadow(0 0 8px #ff00f2);"/>`;
     meetBtn.onclick = (e) => {
       e.stopPropagation();
@@ -1665,8 +1658,7 @@ function sanitizeKey(email) {
     };
     infoPanel.appendChild(meetBtn);
 
-    // Gift slider + Gift button (ONLY for isHost — already here)
-    // COMPACT SLIDER (same as before)
+    // Gift slider + button (ONLY for hosts)
     const sliderPanel = document.createElement("div");
     sliderPanel.style.cssText = "width:100%;padding:6px 8px;border-radius:8px;background:rgba(255,255,255,0.06);backdrop-filter:blur(8px);display:flex;align-items:center;gap:8px;margin-top:8px;";
 
@@ -1710,7 +1702,8 @@ function sanitizeKey(email) {
       try {
         await sendStarsToUser(user, amt);
         showStarPopup(`Sent ${amt} stars to ${user.chatId}!`);
-        slider.value = 100; sliderLabel.textContent = "100";
+        slider.value = 100;
+        sliderLabel.textContent = "100";
         setTimeout(() => card.remove(), 800);
       } catch (e) {
         showStarPopup("Failed — try again");
@@ -1724,13 +1717,10 @@ function sanitizeKey(email) {
     document.body.appendChild(card);
 
     // Fade in
-    requestAnimationFrame(() => {
-      card.style.opacity = "1";
-      card.style.transform = "translate(-50%, -50%)";
-    });
+    requestAnimationFrame(() => card.style.opacity = "1");
   }
 
-  // ==================== ORIGINAL COMPACT CARD FOR VIP / OTHERS (NO GIFT SLIDER) ====================
+  // ==================== ORIGINAL COMPACT CARD FOR VIP & OTHERS ====================
   function showOriginalVIPCard(user) {
     const card = document.createElement("div");
     card.id = "socialCard";
@@ -1770,6 +1760,7 @@ function sanitizeKey(email) {
     const nature = user.naturePick || "cool";
     const city = user.location || user.city || "Lagos";
     const country = user.country || "Nigeria";
+
     detailsEl.innerHTML = user.isVIP
       ? `A ${gender} in ${pronoun} ${ageGroup}, currently in ${city}, ${country}. ${flair}`
       : `A ${gender} from ${city}, ${country}. ${flair}`;
@@ -1787,10 +1778,11 @@ function sanitizeKey(email) {
       card.style.transform = "translate(-50%, -50%) scale(1)";
     });
 
-    const closeOut = e => { if (!card.contains(e.target)) card.remove(); };
+    const closeOut = (e) => { if (!card.contains(e.target)) card.remove(); };
     setTimeout(() => document.addEventListener("click", closeOut), 10);
   }
 
+  // Typewriter effect
   function typeWriterEffect(el, text, speed = 40) {
     el.textContent = "";
     let i = 0;
@@ -1800,7 +1792,7 @@ function sanitizeKey(email) {
     }, speed);
   }
 
-  // Click listener (same as before)
+  // Click to open social card
   document.addEventListener("pointerdown", e => {
     const el = e.target.closest("[data-user-id]") || e.target;
     if (!el.textContent) return;
@@ -1814,7 +1806,7 @@ function sanitizeKey(email) {
     showSocialCard(u);
   });
 
-  console.log("NEW Social Card System READY — Trending style for Hosts ♡");
+  console.log("Social Card System READY — Trending for Hosts, Clean for VIPs ♡");
   window.showSocialCard = showSocialCard;
   window.typeWriterEffect = typeWriterEffect;
 })();

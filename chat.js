@@ -1368,8 +1368,8 @@ const hostBtn = document.getElementById('hostSettingsBtn');
 const hostBadge = document.getElementById('hostBadge');
 
 async function checkHostNotifications() {
-  if (!currentUser?.isHost || !hostBadge) {
-    hostBadge && (hostBadge.style.display = "none");
+  if (!currentUser || !currentUser.isHost || !hostBadge) {
+    if (hostBadge) hostBadge.style.display = "none";
     return;
   }
 
@@ -1381,21 +1381,26 @@ async function checkHostNotifications() {
       where("read", "==", false),
       limit(1)
     );
+
     const snap = await getDocs(q);
-    
-    // THIS LINE IS THE KEY
-    hostBadge.style.display = snap.empty ? "none" : "block";
-    
+    if (hostBadge) {
+      hostBadge.style.display = snap.empty ? "none" : "block";
+    }
+
   } catch (e) {
     console.warn("Badge check failed:", e);
-    hostBadge.style.display = "none";
+    if (hostBadge) hostBadge.style.display = "none";
   }
 }
 
+
 // Hide badge when clicked
 hostBtn?.addEventListener("click", () => {
-  hostBadge.style.display = "none";
+  if (hostBadge) {
+    hostBadge.style.display = "none";
+  }
 });
+
 
 // Check every 15 seconds
 setInterval(checkHostNotifications, 15000);

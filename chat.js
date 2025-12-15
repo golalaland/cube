@@ -1455,8 +1455,11 @@ function sanitizeKey(email) {
   return email.toLowerCase().replace(/[@.]/g, "_").trim();
 }
 /* ======================================================
-  Social Card + Gift Stars System — FINAL 2025 BULLETPROOF EDITION
-  FULLY RESTORED SOUL — SANITIZED IDs — WORKS FOREVER
+  SOCIAL CARD SYSTEM — TRENDING STYLE FOR HOSTS (2025)
+  • Exact trending design for isHost
+  • Original compact style for isVIP
+  • Multi-video swipe support (socialcardvideoUrl array)
+  • Gift slider only for isHost
 ====================================================== */
 (async function initSocialCardSystem() {
   const allUsers = [];
@@ -1477,51 +1480,150 @@ function sanitizeKey(email) {
     console.error("Failed to load users:", err);
   }
 
-  // Inject spinner animation once
-  if (!document.getElementById("gift-spinner-style")) {
-    const s = document.createElement("style");
-    s.id = "gift-spinner-style";
-    s.textContent = `@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`;
-    document.head.appendChild(s);
-  }
-
   function showSocialCard(user) {
     if (!user) return;
     document.getElementById('socialCard')?.remove();
 
-    const card = document.createElement('div');
-    card.id = 'socialCard';
+    // Decide which style to use
+    if (user.isHost) {
+      showTrendingStyleHostCard(user);
+    } else if (user.isVIP) {
+      showOriginalVIPCard(user); // Original compact style, no gift slider
+    } else {
+      showOriginalVIPCard(user); // Fallback to compact
+    }
+  }
+
+  // ==================== TRENDING-STYLE CARD FOR HOSTS ====================
+  function showTrendingStyleHostCard(user) {
+    const card = document.createElement("div");
+    card.id = "socialCard";
+    card.className = "videoCard"; // Reuse trending class for consistency
+
     Object.assign(card.style, {
-      position: 'fixed', top: '50%', left: '50%',
-      transform: 'translate(-50%, -50%)',
-      background: 'linear-gradient(135deg, rgba(20,20,22,0.9), rgba(25,25,27,0.9))',
-      backdropFilter: 'blur(10px)', borderRadius: '14px',
-      padding: '12px 16px', color: '#fff', width: '230px', maxWidth: '90%',
-      zIndex: '999999', textAlign: 'center',
-      boxShadow: '0 6px 24px rgba(0,0,0,0.5)',
-      fontFamily: 'Poppins, sans-serif', opacity: '0',
-      transition: 'opacity .18s ease, transform .18s ease'
+      position: "fixed",
+      top: "50%",
+      left: "50%",
+      transform: "translate(-50%, -50%)",
+      minWidth: "220px",
+      maxWidth: "220px",
+      background: "#0f0a1a",
+      borderRadius: "16px",
+      overflow: "hidden",
+      display: "flex",
+      flexDirection: "column",
+      cursor: "default",
+      boxShadow: "0 6px 24px rgba(138,43,226,0.35)",
+      transition: "transform 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease",
+      border: "1px solid rgba(138,43,226,0.5)",
+      zIndex: "999999",
+      opacity: "0"
     });
 
-    // Close X
-    const closeBtn = document.createElement('div');
-    closeBtn.innerHTML = '×';
-    Object.assign(closeBtn.style, { position: 'absolute', top: '6px', right: '10px', fontSize: '16px', fontWeight: '700', cursor: 'pointer', opacity: '0.6' });
-    closeBtn.onmouseenter = () => closeBtn.style.opacity = '1';
-    closeBtn.onmouseleave = () => closeBtn.style.opacity = '0.6';
-    closeBtn.onclick = e => { e.stopPropagation(); card.remove(); };
+    // Hover lift effect
+    card.onmouseenter = () => {
+      card.style.transform = "translate(-50%, -50%) translateY(-8px)";
+      card.style.boxShadow = "0 16px 40px rgba(255,0,242,0.4)";
+    };
+    card.onmouseleave = () => {
+      card.style.transform = "translate(-50%, -50%)";
+      card.style.boxShadow = "0 6px 24px rgba(138,43,226,0.35)";
+    };
+
+    // Close on outside click
+    const closeOut = (e) => {
+      if (!card.contains(e.target)) card.remove();
+    };
+    setTimeout(() => document.addEventListener("click", closeOut), 100);
+
+    // Close X button
+    const closeBtn = document.createElement("div");
+    closeBtn.innerHTML = "×";
+    closeBtn.style.cssText = "position:absolute;top:8px;right:12px;font-size:20px;font-weight:700;cursor:pointer;z-index:10;opacity:0.7;";
+    closeBtn.onmouseenter = () => closeBtn.style.opacity = "1";
+    closeBtn.onmouseleave = () => closeBtn.style.opacity = "0.7";
+    closeBtn.onclick = (e) => { e.stopPropagation(); card.remove(); document.removeEventListener("click", closeOut); };
     card.appendChild(closeBtn);
 
-    // Header
-    const header = document.createElement('h3');
-    header.textContent = user.chatId ? user.chatId.charAt(0).toUpperCase() + user.chatId.slice(1) : 'Unknown';
-    const color = user.isHost ? '#ff6600' : user.isVIP ? '#ff0099' : '#cccccc';
-    header.style.cssText = `margin:0 0 8px; font-size:18px; font-weight:700; background:linear-gradient(90deg,${color},#ff33cc); -webkit-background-clip:text; -webkit-text-fill-color:transparent;`;
-    card.appendChild(header);
+    // ==================== VIDEO CONTAINER (Multi-video swipe) ====================
+    const videoContainer = document.createElement("div");
+    videoContainer.style.cssText = "height:360px;overflow:hidden;position:relative;background:#000;border-radius:16px 16px 0 0;";
 
-    // Legendary Details
-    const detailsEl = document.createElement('p');
-    detailsEl.style.cssText = 'margin:0 0 10px; font-size:14px; line-height:1.4';
+    const videos = Array.isArray(user.socialcardvideoUrl) ? user.socialcardvideoUrl.filter(url => url) : [];
+    if (videos.length > 0) {
+      const swipeWrapper = document.createElement("div");
+      swipeWrapper.style.cssText = "display:flex;width:" + (videos.length * 100) + "%;height:100%;transition:transform 0.4s ease;";
+
+      videos.forEach(src => {
+        const videoEl = document.createElement("video");
+        videoEl.src = src;
+        videoEl.muted = true;
+        videoEl.loop = true;
+        videoEl.preload = "metadata";
+        videoEl.style.cssText = "width:100%;height:100%;object-fit:cover;flex-shrink:0;";
+        videoEl.play().catch(() => {});
+        swipeWrapper.appendChild(videoEl);
+      });
+
+      videoContainer.appendChild(swipeWrapper);
+
+      // Dots indicator
+      if (videos.length > 1) {
+        const dots = document.createElement("div");
+        dots.style.cssText = "position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:5;";
+        videos.forEach((_, i) => {
+          const dot = document.createElement("div");
+          dot.style.cssText = `width:8px;height:8px;border-radius:50%;background:${i===0 ? "#ff00f2" : "rgba(255,0,242,0.3)"};transition:0.3s;`;
+          dots.appendChild(dot);
+        });
+        videoContainer.appendChild(dots);
+
+        // Swipe logic
+        let currentIndex = 0;
+        const updateDots = () => {
+          dots.querySelectorAll("div").forEach((d, i) => {
+            d.style.background = i === currentIndex ? "#ff00f2" : "rgba(255,0,242,0.3)";
+          });
+        };
+
+        let startX = 0;
+        videoContainer.onpointerdown = (e) => {
+          startX = e.clientX;
+        };
+        videoContainer.onpointerup = (e) => {
+          const diff = startX - e.clientX;
+          if (Math.abs(diff) > 50) {
+            if (diff > 0 && currentIndex < videos.length - 1) currentIndex++;
+            if (diff < 0 && currentIndex > 0) currentIndex--;
+            swipeWrapper.style.transform = `translateX(-${currentIndex * 100}%)`;
+            updateDots();
+          }
+        };
+      }
+    } else {
+      // Fallback if no video
+      videoContainer.style.background = "#111";
+      videoContainer.textContent = "No video";
+      videoContainer.style.display = "flex";
+      videoContainer.style.alignItems = "center";
+      videoContainer.style.justifyContent = "center";
+      videoContainer.style.color = "#555";
+      videoContainer.style.fontSize = "14px";
+    }
+
+    card.appendChild(videoContainer);
+
+    // ==================== INFO PANEL ====================
+    const infoPanel = document.createElement("div");
+    infoPanel.style.cssText = "background:linear-gradient(180deg,#1a0b2e,#0f0519);padding:14px;display:flex;flex-direction:column;gap:10px;border-radius:0 0 16px 16px;";
+
+    // @chatId
+    const chatIdEl = document.createElement("div");
+    chatIdEl.textContent = `@${user.chatId || "Unknown"}`;
+    chatIdEl.style.cssText = "font-weight:800;color:#e0b0ff;font-size:15px;text-align:center;";
+    infoPanel.appendChild(chatIdEl);
+
+    // Legendary details
     const gender = (user.gender || "person").toLowerCase();
     const pronoun = gender === "male" ? "his" : "her";
     const ageGroup = !user.age ? "20s" : user.age >= 30 ? "30s" : "20s";
@@ -1530,62 +1632,54 @@ function sanitizeKey(email) {
     const nature = user.naturePick || "cool";
     const city = user.location || user.city || "Lagos";
     const country = user.country || "Nigeria";
-    if (user.isHost) {
-      detailsEl.innerHTML = `A ${fruit} ${nature} ${gender} in ${pronoun} ${ageGroup}, currently in ${city}, ${country}. ${flair}`;
-    } else if (user.isVIP) {
-      detailsEl.innerHTML = `A ${gender} in ${pronoun} ${ageGroup}, currently in ${city}, ${country}. ${flair}`;
-    } else {
-      detailsEl.innerHTML = `A ${gender} from ${city}, ${country}. ${flair}`;
-    }
-    card.appendChild(detailsEl);
 
-    // Bio
-    const bioEl = document.createElement('div');
-    bioEl.style.cssText = 'margin:6px 0 12px; font-style:italic; font-weight:600; font-size:13px';
-    bioEl.style.color = ['#ff99cc','#ffcc33','#66ff99','#66ccff','#ff6699','#ff9966','#ccccff','#f8b500'][Math.floor(Math.random()*8)];
-    card.appendChild(bioEl);
-    typeWriterEffect(bioEl, user.bioPick || 'Nothing shared yet...');
+    const detailsEl = document.createElement("p");
+    detailsEl.textContent = `A ${fruit} ${nature} ${gender} in ${pronoun} ${ageGroup}, currently in ${city}, ${country}. ${flair}`;
+    detailsEl.style.cssText = "margin:0 0 10px;font-size:14px;line-height:1.4;color:#ccc;text-align:center;opacity:0.9;";
+    infoPanel.appendChild(detailsEl);
 
-    // Buttons wrapper
-    const btnWrap = document.createElement('div');
-    btnWrap.style.cssText = 'display:flex; flex-direction:column; gap:8px; align-items:center; margin-top:4px';
+    // Meet button (heart style like trending)
+    const meetBtn = document.createElement("div");
+    meetBtn.style.cssText = `
+      width:40px;height:40px;border-radius:50%;
+      background:rgba(255,0,242,0.15);
+      display:flex;align-items:center;justify-content:center;
+      margin:0 auto;cursor:pointer;
+      border:1px solid rgba(255,0,242,0.5);
+      transition:all 0.3s ease;box-shadow:0 0 12px rgba(255,0,242,0.3);
+    `;
+    meetBtn.innerHTML = `<img src="https://cdn.shopify.com/s/files/1/0962/6648/6067/files/hearts__128_x_128_px.svg?v=1761809626" style="width:24px;height:24px;filter:drop-shadow(0 0 8px #ff00f2);"/>`;
+    meetBtn.onclick = (e) => {
+      e.stopPropagation();
+      if (typeof showMeetModal === 'function') showMeetModal(user);
+    };
+    meetBtn.onmouseenter = () => {
+      meetBtn.style.transform = "scale(1.15)";
+      meetBtn.style.background = "rgba(255,0,242,0.3)";
+      meetBtn.style.boxShadow = "0 0 20px rgba(255,0,242,0.6)";
+    };
+    meetBtn.onmouseleave = () => {
+      meetBtn.style.transform = "scale(1)";
+      meetBtn.style.background = "rgba(255,0,242,0.15)";
+      meetBtn.style.boxShadow = "0 0 12px rgba(255,0,242,0.3)";
+    };
+    infoPanel.appendChild(meetBtn);
 
-    // Meet button
-    if (user.isHost) {
-      const meetBtn = document.createElement('button');
-      meetBtn.textContent = 'Meet';
-      meetBtn.style.cssText = 'padding:7px 14px; border-radius:6px; border:none; font-weight:600; background:linear-gradient(90deg,#ff6600,#ff0099); color:#fff; cursor:pointer';
-      meetBtn.onclick = () => { if (typeof showMeetModal === 'function') showMeetModal(user); };
-      btnWrap.appendChild(meetBtn);
-    }
-
-    // COMPACT CUTE SLIDER
-    const sliderPanel = document.createElement('div');
-    sliderPanel.style.cssText = 'width:100%; padding:6px 8px; border-radius:8px; background:rgba(255,255,255,0.06); backdrop-filter:blur(8px); display:flex; align-items:center; gap:8px';
+    // Gift slider + Gift button (ONLY for isHost — already here)
+    // COMPACT SLIDER (same as before)
+    const sliderPanel = document.createElement("div");
+    sliderPanel.style.cssText = "width:100%;padding:6px 8px;border-radius:8px;background:rgba(255,255,255,0.06);backdrop-filter:blur(8px);display:flex;align-items:center;gap:8px;margin-top:8px;";
 
     const fieryColors = [["#ff0000","#ff8c00"],["#ff4500","#ffd700"],["#ff1493","#ff6347"],["#ff0055","#ff7a00"],["#ff5500","#ffcc00"],["#ff3300","#ff0066"]];
     const randomFieryGradient = () => `linear-gradient(90deg, ${fieryColors[Math.floor(Math.random()*fieryColors.length)].join(', ')})`;
 
-    const slider = document.createElement('input');
-    slider.type = 'range'; slider.min = 100; slider.max = 999; slider.value = 100;
-    slider.style.cssText = `flex:1; height:5px; border-radius:5px; outline:none; cursor:pointer; -webkit-appearance:none; background:${randomFieryGradient()}`;
+    const slider = document.createElement("input");
+    slider.type = "range"; slider.min = 100; slider.max = 999; slider.value = 100;
+    slider.style.cssText = `flex:1;height:5px;border-radius:5px;outline:none;cursor:pointer;-webkit-appearance:none;background:${randomFieryGradient()};`;
 
-    const thumbStyle = document.createElement('style');
-    thumbStyle.textContent = `
-      #socialCard input[type="range"]::-webkit-slider-thumb {
-        -webkit-appearance:none; width:16px; height:16px; border-radius:50%;
-        background:white; border:2px solid #ff3300; box-shadow:0 0 10px #ff6600; cursor:pointer;
-      }
-      #socialCard input[type="range"]::-moz-range-thumb {
-        width:16px; height:16px; border-radius:50%; background:white;
-        border:2px solid #ff3300; box-shadow:0 0 10px #ff6600; cursor:pointer; border:none;
-      }
-    `;
-    document.head.appendChild(thumbStyle);
-
-    const sliderLabel = document.createElement('span');
+    const sliderLabel = document.createElement("span");
     sliderLabel.textContent = "100";
-    sliderLabel.style.cssText = 'font-size:13px; font-weight:700; min-width:50px; text-align:right; color:#fff';
+    sliderLabel.style.cssText = "font-size:13px;font-weight:700;min-width:50px;text-align:right;color:#fff;";
 
     slider.oninput = () => {
       sliderLabel.textContent = slider.value;
@@ -1593,26 +1687,25 @@ function sanitizeKey(email) {
     };
 
     sliderPanel.append(slider, sliderLabel);
-    btnWrap.appendChild(sliderPanel);
+    infoPanel.appendChild(sliderPanel);
 
-    // TINY GIFT BUTTON
-    const giftBtnLocal = document.createElement('button');
-    giftBtnLocal.textContent = 'Gift';
-    giftBtnLocal.style.cssText = 'padding:8px 16px; border-radius:10px; border:none; font-weight:700; font-size:14px; background:linear-gradient(90deg,#ff0099,#ff0066); color:#fff; cursor:pointer; box-shadow:0 4px 12px rgba(255,0,153,0.4); transition:all 0.2s';
-    giftBtnLocal.onmouseenter = () => giftBtnLocal.style.transform = 'translateY(-3px)';
-    giftBtnLocal.onmouseleave = () => giftBtnLocal.style.transform = '';
-
-    giftBtnLocal.onclick = async () => {
+    const giftBtn = document.createElement("button");
+    giftBtn.textContent = "Gift";
+    giftBtn.style.cssText = "padding:8px 16px;border-radius:10px;border:none;font-weight:700;font-size:14px;background:linear-gradient(90deg,#ff0099,#ff0066);color:#fff;cursor:pointer;box-shadow:0 4px 12px rgba(255,0,153,0.4);transition:all 0.2s;margin-top:6px;";
+    giftBtn.onmouseenter = () => giftBtn.style.transform = "translateY(-3px)";
+    giftBtn.onmouseleave = () => giftBtn.style.transform = "";
+    giftBtn.onclick = async (e) => {
+      e.stopPropagation();
       const amt = parseInt(slider.value);
       if (amt < 100) return showStarPopup("Minimum 100 stars");
       if ((currentUser?.stars || 0) < amt) return showStarPopup("Not enough stars");
       if (user.chatId?.toLowerCase() === currentUser?.chatId?.toLowerCase()) return showStarPopup("You can't gift yourself silly!");
 
-      const orig = giftBtnLocal.textContent;
-      giftBtnLocal.textContent = '';
-      const spin = document.createElement('div');
-      spin.style.cssText = 'width:18px; height:18px; border:3px solid #fff3; border-top:3px solid white; border-radius:50%; animation:spin 0.7s linear infinite; margin:0 auto';
-      giftBtnLocal.appendChild(spin);
+      const orig = giftBtn.textContent;
+      giftBtn.textContent = "";
+      const spin = document.createElement("div");
+      spin.style.cssText = "width:18px;height:18px;border:3px solid #fff3;border-top:3px solid white;border-radius:50%;animation:spin 0.7s linear infinite;margin:0 auto;";
+      giftBtn.appendChild(spin);
 
       try {
         await sendStarsToUser(user, amt);
@@ -1620,24 +1713,82 @@ function sanitizeKey(email) {
         slider.value = 100; sliderLabel.textContent = "100";
         setTimeout(() => card.remove(), 800);
       } catch (e) {
-        console.error(e);
         showStarPopup("Failed — try again");
       } finally {
-        giftBtnLocal.textContent = orig;
+        giftBtn.textContent = orig;
       }
     };
+    infoPanel.appendChild(giftBtn);
 
-    btnWrap.appendChild(giftBtnLocal);
-    card.appendChild(btnWrap);
+    card.appendChild(infoPanel);
     document.body.appendChild(card);
 
+    // Fade in
     requestAnimationFrame(() => {
-      card.style.opacity = '1';
-      card.style.transform = 'translate(-50%, -50%) scale(1)';
+      card.style.opacity = "1";
+      card.style.transform = "translate(-50%, -50%)";
+    });
+  }
+
+  // ==================== ORIGINAL COMPACT CARD FOR VIP / OTHERS (NO GIFT SLIDER) ====================
+  function showOriginalVIPCard(user) {
+    const card = document.createElement("div");
+    card.id = "socialCard";
+    Object.assign(card.style, {
+      position: "fixed", top: "50%", left: "50%",
+      transform: "translate(-50%, -50%)",
+      background: "linear-gradient(135deg, rgba(20,20,22,0.9), rgba(25,25,27,0.9))",
+      backdropFilter: "blur(10px)", borderRadius: "14px",
+      padding: "12px 16px", color: "#fff", width: "230px", maxWidth: "90%",
+      zIndex: "999999", textAlign: "center",
+      boxShadow: "0 6px 24px rgba(0,0,0,0.5)",
+      fontFamily: "Poppins, sans-serif", opacity: "0",
+      transition: "opacity .18s ease, transform .18s ease"
     });
 
-    const closeOut = e => { if (!card.contains(e.target)) { card.remove(); document.removeEventListener('click', closeOut); } };
-    setTimeout(() => document.addEventListener('click', closeOut), 10);
+    const closeBtn = document.createElement("div");
+    closeBtn.innerHTML = "×";
+    Object.assign(closeBtn.style, { position: "absolute", top: "6px", right: "10px", fontSize: "16px", fontWeight: "700", cursor: "pointer", opacity: "0.6" });
+    closeBtn.onmouseenter = () => closeBtn.style.opacity = "1";
+    closeBtn.onmouseleave = () => closeBtn.style.opacity = "0.6";
+    closeBtn.onclick = () => card.remove();
+    card.appendChild(closeBtn);
+
+    const header = document.createElement("h3");
+    header.textContent = user.chatId ? user.chatId.charAt(0).toUpperCase() + user.chatId.slice(1) : "Unknown";
+    const color = user.isVIP ? "#ff0099" : "#cccccc";
+    header.style.cssText = `margin:0 0 8px;font-size:18px;font-weight:700;background:linear-gradient(90deg,${color},#ff33cc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;`;
+    card.appendChild(header);
+
+    const detailsEl = document.createElement("p");
+    detailsEl.style.cssText = "margin:0 0 10px;font-size:14px;line-height:1.4";
+    const gender = (user.gender || "person").toLowerCase();
+    const pronoun = gender === "male" ? "his" : "her";
+    const ageGroup = !user.age ? "20s" : user.age >= 30 ? "30s" : "20s";
+    const flair = gender === "male" ? "😎" : "💋";
+    const fruit = user.fruitPick || "🍇";
+    const nature = user.naturePick || "cool";
+    const city = user.location || user.city || "Lagos";
+    const country = user.country || "Nigeria";
+    detailsEl.innerHTML = user.isVIP
+      ? `A ${gender} in ${pronoun} ${ageGroup}, currently in ${city}, ${country}. ${flair}`
+      : `A ${gender} from ${city}, ${country}. ${flair}`;
+    card.appendChild(detailsEl);
+
+    const bioEl = document.createElement("div");
+    bioEl.style.cssText = "margin:6px 0 12px;font-style:italic;font-weight:600;font-size:13px";
+    bioEl.style.color = ["#ff99cc","#ffcc33","#66ff99","#66ccff","#ff6699","#ff9966","#ccccff","#f8b500"][Math.floor(Math.random()*8)];
+    card.appendChild(bioEl);
+    typeWriterEffect(bioEl, user.bioPick || "Nothing shared yet...");
+
+    document.body.appendChild(card);
+    requestAnimationFrame(() => {
+      card.style.opacity = "1";
+      card.style.transform = "translate(-50%, -50%) scale(1)";
+    });
+
+    const closeOut = e => { if (!card.contains(e.target)) card.remove(); };
+    setTimeout(() => document.addEventListener("click", closeOut), 10);
   }
 
   function typeWriterEffect(el, text, speed = 40) {
@@ -1649,6 +1800,7 @@ function sanitizeKey(email) {
     }, speed);
   }
 
+  // Click listener (same as before)
   document.addEventListener("pointerdown", e => {
     const el = e.target.closest("[data-user-id]") || e.target;
     if (!el.textContent) return;
@@ -1662,10 +1814,12 @@ function sanitizeKey(email) {
     showSocialCard(u);
   });
 
-  console.log("Social Card System READY — YAH IS VICTORIOUS");
+  console.log("NEW Social Card System READY — Trending style for Hosts ♡");
   window.showSocialCard = showSocialCard;
   window.typeWriterEffect = typeWriterEffect;
+})();
 
+// Keep your existing sendStarsToUser function unchanged — it works perfectly
 })(); 
 
 async function sendStarsToUser(targetUser, amt) {

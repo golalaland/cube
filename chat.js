@@ -577,6 +577,8 @@ async function showGiftModal(targetUid, targetData) {
 
 
 
+
+
 // ==============================
 // CHAT.JS — CLEAN FULL VERSION
 // ==============================
@@ -841,6 +843,33 @@ function extractColorsFromGradient(gradient) {
   // Fallback colors if parsing fails
   return ["#ff9a9e", "#fecfef", "#a8edea", "#fed6e3"];
 }
+
+//666
+function applyHostUI() {
+  if (!currentUser || !currentUser.isHost) return;
+
+  document.querySelectorAll(".host-only").forEach(el => {
+    el.style.display = "inline-flex"; // buttons need inline-flex
+  });
+}
+
+applyHostUI();
+
+
+document.addEventListener("click", (e) => {
+  const btn = e.target.closest(".tab-btn");
+  if (!btn) return;
+
+  const tabId = btn.dataset.tab;
+
+  if (tabId === "infoTab" && (!currentUser || !currentUser.isHost)) {
+    console.warn("[tabs] Non-host blocked from Tools");
+    e.preventDefault();
+    return;
+  }
+});
+
+
 
 // =============================
 // CREATE CONFETTI INSIDE STICKER — DEFINED ONCE, OUTSIDE LOOP

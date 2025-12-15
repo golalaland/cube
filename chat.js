@@ -1454,160 +1454,170 @@ function sanitizeKey(email) {
   if (!email) return "";
   return email.toLowerCase().replace(/[@.]/g, "_").trim();
 }
-/* ======================================================
-  SOCIAL CARD SYSTEM — OPTIMIZED HOST CARD (Dec 2025)
-  • Wider (260px) + shorter video (300px) for perfect fit
-  • Gift slider now spacious and clean
-  • VIP card unchanged — perfect as is
-====================================================== */
-(async function initSocialCardSystem() {
-  const allUsers = [];
-  const usersByChatId = {};
+// ==================== OPTIMIZED TRENDING CARD FOR HOSTS ====================
+function showTrendingStyleHostCard(user) {
+  const card = document.createElement("div");
+  card.id = "socialCard";
 
-  // Load all users
-  try {
-    const snaps = await getDocs(collection(db, "users"));
-    snaps.forEach(doc => {
-      const data = doc.data();
-      data._docId = doc.id;
-      data.chatIdLower = (data.chatId || "").toString().toLowerCase();
-      allUsers.push(data);
-      usersByChatId[data.chatIdLower] = data;
-    });
-    console.log("Social card: loaded", allUsers.length, "users");
-  } catch (err) {
-    console.error("Failed to load users:", err);
-  }
+  Object.assign(card.style, {
+    position: "fixed",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    minWidth: "260px",
+    maxWidth: "260px",
+    background: "#0f0a1a",
+    borderRadius: "16px",
+    overflow: "hidden",
+    display: "flex",
+    flexDirection: "column",
+    boxShadow: "0 6px 24px rgba(138,43,226,0.35)",
+    transition: "transform 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease",
+    border: "1px solid rgba(138,43,226,0.5)",
+    zIndex: "999999",
+    opacity: "0"
+  });
 
-  function showSocialCard(user) {
-    if (!user) return;
-    document.getElementById('socialCard')?.remove();
+  // Hover lift
+  card.onmouseenter = () => {
+    card.style.transform = "translate(-50%, -50%) translateY(-8px)";
+    card.style.boxShadow = "0 16px 40px rgba(255,0,242,0.4)";
+  };
+  card.onmouseleave = () => {
+    card.style.transform = "translate(-50%, -50%)";
+    card.style.boxShadow = "0 6px 24px rgba(138,43,226,0.35)";
+  };
 
-    if (user.isHost) {
-      showTrendingStyleHostCard(user);
-    } else {
-      showOriginalVIPCard(user);
-    }
-  }
-
-  // ==================== OPTIMIZED TRENDING CARD FOR HOSTS ====================
-  function showTrendingStyleHostCard(user) {
-    const card = document.createElement("div");
-    card.id = "socialCard";
-
-    Object.assign(card.style, {
-      position: "fixed",
-      top: "50%",
-      left: "50%",
-      transform: "translate(-50%, -50%)",
-      minWidth: "260px",       // Wider for better layout
-      maxWidth: "260px",
-      background: "#0f0a1a",
-      borderRadius: "16px",
-      overflow: "hidden",
-      display: "flex",
-      flexDirection: "column",
-      boxShadow: "0 6px 24px rgba(138,43,226,0.35)",
-      transition: "transform 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease",
-      border: "1px solid rgba(138,43,226,0.5)",
-      zIndex: "999999",
-      opacity: "0"
-    });
-
-    // Hover lift
-    card.onmouseenter = () => {
-      card.style.transform = "translate(-50%, -50%) translateY(-8px)";
-      card.style.boxShadow = "0 16px 40px rgba(255,0,242,0.4)";
-    };
-    card.onmouseleave = () => {
-      card.style.transform = "translate(-50%, -50%)";
-      card.style.boxShadow = "0 6px 24px rgba(138,43,226,0.35)";
-    };
-
-    // Close on outside click
-    const closeOut = (e) => {
-      if (!card.contains(e.target)) {
-        card.remove();
-        document.removeEventListener("click", closeOut);
-      }
-    };
-    setTimeout(() => document.addEventListener("click", closeOut), 100);
-
-    // Close X
-    const closeBtn = document.createElement("div");
-    closeBtn.innerHTML = "×";
-    closeBtn.style.cssText = "position:absolute;top:8px;right:12px;font-size:20px;font-weight:700;cursor:pointer;z-index:10;opacity:0.7;color:#fff;";
-    closeBtn.onmouseenter = () => closeBtn.style.opacity = "1";
-    closeBtn.onmouseleave = () => closeBtn.style.opacity = "0.7";
-    closeBtn.onclick = (e) => {
-      e.stopPropagation();
+  // Close on outside click
+  const closeOut = (e) => {
+    if (!card.contains(e.target)) {
       card.remove();
       document.removeEventListener("click", closeOut);
-    };
-    card.appendChild(closeBtn);
+    }
+  };
+  setTimeout(() => document.addEventListener("click", closeOut), 100);
 
-    // ==================== VIDEO CONTAINER — SHORTER HEIGHT ====================
-    const videoContainer = document.createElement("div");
-    videoContainer.style.cssText = "height:300px;overflow:hidden;position:relative;background:#000;border-radius:16px 16px 0 0;"; // Reduced from 360px
+  // Close X
+  const closeBtn = document.createElement("div");
+  closeBtn.innerHTML = "×";
+  closeBtn.style.cssText = "position:absolute;top:8px;right:12px;font-size:20px;font-weight:700;cursor:pointer;z-index:10;opacity:0.7;color:#fff;";
+  closeBtn.onmouseenter = () => closeBtn.style.opacity = "1";
+  closeBtn.onmouseleave = () => closeBtn.style.opacity = "0.7";
+  closeBtn.onclick = (e) => {
+    e.stopPropagation();
+    card.remove();
+    document.removeEventListener("click", closeOut);
+  };
+  card.appendChild(closeBtn);
 
-    const videos = Array.isArray(user.socialcardvideoUrl) ? user.socialcardvideoUrl.filter(url => url) : [];
+  // ==================== VIDEO CONTAINER — FULL FRAME + TAP TO MUTE ====================
+  const videoContainer = document.createElement("div");
+  videoContainer.style.cssText = `
+    height:300px;
+    overflow:hidden;
+    position:relative;
+    background:#000;
+    border-radius:16px 16px 0 0;
+    cursor:pointer;
+  `;
 
-    if (videos.length > 0) {
-      const swipeWrapper = document.createElement("div");
-      swipeWrapper.style.cssText = `display:flex;width:${videos.length * 100}%;height:100%;transition:transform 0.4s ease;`;
+  const videos = Array.isArray(user.socialcardvideoUrl) ? user.socialcardvideoUrl.filter(url => url) : [];
 
-      videos.forEach(src => {
-        const videoEl = document.createElement("video");
-        videoEl.src = src;
-        videoEl.muted = true;
-        videoEl.loop = true;
-        videoEl.preload = "metadata";
-        videoEl.style.cssText = "width:100%;height:100%;object-fit:cover;flex-shrink:0;";
-        videoEl.play().catch(() => {});
-        swipeWrapper.appendChild(videoEl);
+  if (videos.length > 0) {
+    const swipeWrapper = document.createElement("div");
+    swipeWrapper.style.cssText = `display:flex;width:${videos.length * 100}%;height:100%;transition:transform 0.4s ease;`;
+
+    videos.forEach((src, index) => {
+      const videoEl = document.createElement("video");
+      videoEl.src = src;
+      videoEl.muted = true;         // Starts muted
+      videoEl.loop = true;
+      videoEl.preload = "metadata";
+      videoEl.playsInline = true;   // Crucial: prevents fullscreen on iOS/Android
+      videoEl.style.cssText = `
+        width:100%;
+        height:100%;
+        object-fit:contain;         // Shows full video with letterbox (no zoom/crop)
+        flex-shrink:0;
+        background:#000;
+      `;
+
+      // Auto-play when visible (after card opens)
+      requestAnimationFrame(() => videoEl.play().catch(() => {}));
+
+      swipeWrapper.appendChild(videoEl);
+    });
+
+    videoContainer.appendChild(swipeWrapper);
+
+    // === Swipe logic (unchanged) ===
+    if (videos.length > 1) {
+      const dots = document.createElement("div");
+      dots.style.cssText = "position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:5;";
+      videos.forEach((_, i) => {
+        const dot = document.createElement("div");
+        dot.style.cssText = `width:8px;height:8px;border-radius:50%;background:${i === 0 ? "#ff00f2" : "rgba(255,0,242,0.3)"};transition:0.3s;`;
+        dots.appendChild(dot);
       });
+      videoContainer.appendChild(dots);
 
-      videoContainer.appendChild(swipeWrapper);
-
-      if (videos.length > 1) {
-        const dots = document.createElement("div");
-        dots.style.cssText = "position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:5;";
-
-        videos.forEach((_, i) => {
-          const dot = document.createElement("div");
-          dot.style.cssText = `width:8px;height:8px;border-radius:50%;background:${i === 0 ? "#ff00f2" : "rgba(255,0,242,0.3)"};transition:0.3s;`;
-          dots.appendChild(dot);
+      let currentIndex = 0;
+      const updateDots = () => {
+        dots.querySelectorAll("div").forEach((d, i) => {
+          d.style.background = i === currentIndex ? "#ff00f2" : "rgba(255,0,242,0.3)";
         });
-        videoContainer.appendChild(dots);
+      };
 
-        let currentIndex = 0;
-        const updateDots = () => {
-          dots.querySelectorAll("div").forEach((d, i) => {
-            d.style.background = i === currentIndex ? "#ff00f2" : "rgba(255,0,242,0.3)";
-          });
-        };
-
-        let startX = 0;
-        videoContainer.onpointerdown = (e) => startX = e.clientX;
-        videoContainer.onpointerup = (e) => {
-          const diff = startX - e.clientX;
-          if (Math.abs(diff) > 50) {
-            if (diff > 0 && currentIndex < videos.length - 1) currentIndex++;
-            if (diff < 0 && currentIndex > 0) currentIndex--;
-            swipeWrapper.style.transform = `translateX(-${currentIndex * 100}%)`;
-            updateDots();
-          }
-        };
-      }
-    } else {
-      videoContainer.style.display = "flex";
-      videoContainer.style.alignItems = "center";
-      videoContainer.style.justifyContent = "center";
-      videoContainer.style.color = "#555";
-      videoContainer.innerHTML = "<div>No video yet~</div>";
+      let startX = 0;
+      videoContainer.onpointerdown = (e) => startX = e.clientX;
+      videoContainer.onpointerup = (e) => {
+        const diff = startX - e.clientX;
+        if (Math.abs(diff) > 50) {
+          if (diff > 0 && currentIndex < videos.length - 1) currentIndex++;
+          if (diff < 0 && currentIndex > 0) currentIndex--;
+          swipeWrapper.style.transform = `translateX(-${currentIndex * 100}%)`;
+          updateDots();
+        }
+      };
     }
 
-    card.appendChild(videoContainer);
+    // === TAP TO MUTE / UNMUTE (all videos in carousel) ===
+    videoContainer.onclick = (e) => {
+      e.stopPropagation(); // Prevent closing card
+
+      const currentVideo = swipeWrapper.children[currentIndex || 0];
+      if (currentVideo) {
+        currentVideo.muted = !currentVideo.muted;
+
+        // Optional: visual feedback (mute icon overlay)
+        let muteOverlay = videoContainer.querySelector("#muteOverlay");
+        if (!muteOverlay) {
+          muteOverlay = document.createElement("div");
+          muteOverlay.id = "muteOverlay";
+          muteOverlay.style.cssText = `
+            position:absolute; top:10px; right:10px; z-index:6;
+            font-size:24px; opacity:0; transition:opacity 0.3s;
+            pointer-events:none;
+          `;
+          videoContainer.appendChild(muteOverlay);
+        }
+        muteOverlay.innerHTML = currentVideo.muted ? "🔇" : "🔊";
+        muteOverlay.style.opacity = "1";
+        clearTimeout(muteOverlay.hideTimer);
+        muteOverlay.hideTimer = setTimeout(() => muteOverlay.style.opacity = "0", 1000);
+      }
+    };
+
+  } else {
+    videoContainer.style.display = "flex";
+    videoContainer.style.alignItems = "center";
+    videoContainer.style.justifyContent = "center";
+    videoContainer.style.color = "#555";
+    videoContainer.innerHTML = "<div>No video yet~</div>";
+  }
+
+  card.appendChild(videoContainer);
+
 
     // ==================== INFO PANEL — MORE SPACE ====================
     const infoPanel = document.createElement("div");

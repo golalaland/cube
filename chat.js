@@ -1549,9 +1549,8 @@ function sanitizeKey(email) {
     };
     card.appendChild(closeBtn);
 
-// ==================== VIDEO CONTAINER — PERFECTLY CENTERED ====================
+// ==================== VIDEO CONTAINER — CENTERED + HIDDEN MUTE TOGGLE ====================
 const videoContainer = document.createElement("div");
-
 videoContainer.style.cssText = `
   width:100%;
   height:320px;
@@ -1568,12 +1567,9 @@ const videos = Array.isArray(user.socialcardvideoUrl)
   : [];
 
 let currentIndex = 0;
-let activeVideo = null;
-let videoEls = [];
-let dots = null;
+const videoEls = []; // To keep track of all video elements
 
-if (videos.length) {
-
+if (videos.length > 0) {
   // ===== SWIPE WRAPPER =====
   const swipeWrapper = document.createElement("div");
   swipeWrapper.style.cssText = `
@@ -1584,7 +1580,7 @@ if (videos.length) {
   `;
 
   videos.forEach(src => {
-    // ===== VIDEO FRAME (centered) =====
+    // ===== CENTERED FRAME =====
     const frame = document.createElement("div");
     frame.style.cssText = `
       position:relative;
@@ -1601,12 +1597,13 @@ if (videos.length) {
     // ===== VIDEO ELEMENT =====
     const video = document.createElement("video");
     video.src = src;
-    video.muted = true;
+    video.muted = true;           // Starts muted
     video.loop = true;
     video.autoplay = true;
     video.preload = "metadata";
     video.playsInline = true;
     video.setAttribute("webkit-playsinline", "");
+
     video.style.cssText = `
       max-width:100%;
       max-height:100%;
@@ -1616,6 +1613,7 @@ if (videos.length) {
       display:block;
       background:transparent;
     `;
+
     video.play().catch(() => {});
 
     frame.appendChild(video);
@@ -1625,62 +1623,39 @@ if (videos.length) {
 
   videoContainer.appendChild(swipeWrapper);
 
-  // ===== GLOBAL MUTE ICON =====
-  const muteIcon = document.createElement("div");
-  muteIcon.textContent = "🔇";
-  muteIcon.style.cssText = `
-    position:absolute;
-    bottom:12px;
-    right:12px;
-    font-size:20px;
-    background:rgba(0,0,0,0.6);
-    padding:8px 10px;
-    border-radius:50%;
-    color:#fff;
-    opacity:0.7;
-    transition:opacity 0.3s;
-    pointer-events:none;
-    z-index:6;
-  `;
-  videoContainer.appendChild(muteIcon);
-
-  // ===== TAP TO TOGGLE MUTE =====
+  // ===== TAP TO TOGGLE MUTE (hidden — no icon shown) =====
   videoContainer.onclick = (e) => {
     e.stopPropagation();
     const currentVideo = videoEls[currentIndex];
-    if (!currentVideo) return;
-
-    // Mute all others
-    videoEls.forEach(v => v.muted = true);
-
-    // Toggle current
-    currentVideo.muted = !currentVideo.muted;
-    muteIcon.textContent = currentVideo.muted ? "🔇" : "🔊";
-    muteIcon.style.opacity = "1";
-
-    clearTimeout(muteIcon.hideTimer);
-    muteIcon.hideTimer = setTimeout(() => {
-      muteIcon.style.opacity = "0.7";
-    }, 1500);
-
-    activeVideo = currentVideo;
+    if (currentVideo) {
+      // Mute all others, toggle current
+      videoEls.forEach(v => v.muted = true);
+      currentVideo.muted = !currentVideo.muted;
+      // No visual feedback — completely hidden as requested
+    }
   };
 
-  // ===== SWIPE LOGIC =====
+  // ===== SWIPE GESTURE =====
   let startX = 0;
-  videoContainer.onpointerdown = (e) => startX = e.clientX;
+  videoContainer.onpointerdown = (e) => {
+    startX = e.clientX;
+  };
   videoContainer.onpointerup = (e) => {
     const diff = startX - e.clientX;
     if (Math.abs(diff) > 50) {
-      if (diff > 0 && currentIndex < videos.length - 1) currentIndex++;
-      else if (diff < 0 && currentIndex > 0) currentIndex--;
-      
+      if (diff > 0 && currentIndex < videos.length - 1) {
+        currentIndex++;
+      } else if (diff < 0 && currentIndex > 0) {
+        currentIndex--;
+      }
       swipeWrapper.style.transform = `translateX(-${currentIndex * 100}%)`;
-      updateDots();
+      if (dots) updateDots();
     }
   };
 
   // ===== DOTS INDICATOR =====
+  let dots = null;
+  let updateDots = () => {};
   if (videos.length > 1) {
     dots = document.createElement("div");
     dots.style.cssText = `
@@ -1692,6 +1667,7 @@ if (videos.length) {
       gap:7px;
       z-index:6;
     `;
+
     videos.forEach((_, i) => {
       const dot = document.createElement("div");
       dot.style.cssText = `
@@ -1699,13 +1675,34 @@ if (videos.length) {
         height:8px;
         border-radius:50%;
         background:${i === 0 ? "#ff00f2" : "rgba(255,0,242,0.4)"};
-        transition:0.3s;
+        transition:background 0.3s, transform 0.3s;
       `;
       dots.appendChild(dot);
     });
+
     videoContainer.appendChild(dots);
+
+    updateDots = () => {
+      dots.querySelectorAll("div").forEach((dot, i) => {
+        dot.style.background = i === currentIndex ? "#ff00f2" : "rgba(255,0,242,0.4)";
+        dot.style.transform = i === currentIndex ? "scale(1.2)" : "scale(1)";
+      });
+    };
+
+    updateDots(); // Initial
   }
 
+} else {
+  // No videos fallback
+  videoContainer.style.display = "flex";
+  videoContainer.style.justifyContent = "center";
+  videoContainer.style.alignItems = "center";
+  videoContainer.style.color = "#666";
+  videoContainer.style.fontSize = "15px";
+  videoContainer.innerHTML = "<div>No video yet~</div>";
+}
+
+card.appendChild(videoContainer);
   // ===== DOTS UPDATE FUNCTION =====
   const updateDots = () => {
     if (!dots) return;

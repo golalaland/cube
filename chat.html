@@ -1922,7 +1922,28 @@ could you have broken something?  i only asked for color change:
   opacity: 0;
   pointer-events: none;
 }
-
+  .tag-btn {
+    padding:8px 16px;
+    background:#111;
+    border:1px solid #333;
+    border-radius:20px;
+    color:#ccc;
+    font-size:13px;
+    font-weight:600;
+    cursor:pointer;
+    transition:all 0.25s;
+  }
+  .tag-btn:hover {
+    background:#222;
+    border-color:#ff2e78;
+    color:#ff2e78;
+  }
+  .tag-btn.selected {
+    background:linear-gradient(135deg,#ff2e78,#ff5e2e);
+    color:#fff;
+    border-color:#ff2e78;
+    box-shadow:0 0 12px rgba(255,46,120,0.4);
+  }
 </style>
 </head>
 <body>
@@ -2431,32 +2452,26 @@ could you have broken something?  i only asked for color change:
     ">STRZ</span>
   </div>
 </div>
-        <!-- BOOST TO TRENDING (500 STRZ) -->
-<div style="margin:24px 0 32px; text-align:center;">
-  <label style="
-    display:flex; align-items:center; justify-content:center; gap:12px;
-    color:#e0e0e0; font-size:15px; font-weight:600; cursor:pointer;
-    user-select:none;
-  ">
-    <input type="checkbox" id="boostTrendingCheckbox" style="
-      width:22px; height:22px; accent-color:#ff2e78; cursor:pointer;
-      transform:scale(1.3);
-    ">
-    <span>
-      Boost to <b style="color:#00ffea;">Trending</b> 
-      <span style="color:#ff2e78;">(500 STRZ)</span>
-    </span>
-  </label>
-  <div style="margin-top:8px; font-size:13px; color:#888;">
-    Get featured in the hot reel feed • 24h boost
+
+      <!-- TAGS SELECTOR — CUTE CLICKABLE BUTTONS -->
+<div style="margin:24px 0; text-align:center;">
+  <div style="color:#e0e0e0; font-size:14px; font-weight:600; margin-bottom:12px;">
+    Tags <span style="color:#666; font-weight:500;">(click to select)</span>
+  </div>
+  <div id="tagSelector" style="display:flex; flex-wrap:wrap; gap:8px; justify-content:center; max-width:360px; margin:0 auto;">
+    <div class="tag-btn" data-tag="hot">Hot</div>
+    <div class="tag-btn" data-tag="cute">Cute</div>
+    <div class="tag-btn" data-tag="dance">Dance</div>
+    <div class="tag-btn" data-tag="funny">Funny</div>
+    <div class="tag-btn" data-tag="sexy">Sexy</div>
+    <div class="tag-btn" data-tag="gaming">Gaming</div>
+    <div class="tag-btn" data-tag="lipsync">Lipsync</div>
+    <div class="tag-btn" data-tag="cosplay">Cosplay</div>
+    <div class="tag-btn" data-tag="beauty">Beauty</div>
+    <div class="tag-btn" data-tag="vibes">Vibes</div>
   </div>
 </div>
-        <div style="margin: 12px 0; display: flex; align-items: center; gap: 8px; font-size: 14px;">
-  <input type="checkbox" id="addToSocialCardCheckbox">
-  <label for="addToSocialCardCheckbox" style="cursor: pointer; color: #e0b0ff;">
-    Add to my Social Card (costs 100 STRZ)
-  </label>
-</div>
+        
      <!-- Upload Button -->
 <div style="text-align:center;">
   <button id="uploadHighlightBtn" style="

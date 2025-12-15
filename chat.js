@@ -3282,6 +3282,28 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     document.getElementById(tabId).style.display = 'block';
   });
 });
+
+
+  // Assuming you have both:
+// - currentUser: the logged-in viewer (from auth)
+// - user: the profile owner data (already fetched for the card/details)
+
+const isHost = currentUser && user && (currentUser.uid === user.uid) && user.isHost === true;
+// OR if you're using email as ID:
+// const isHost = currentUser && user && (currentUser.email === user.email) && user.isHost === true;
+
+if (!isHost) {
+  // Hide the Tools tab button
+  const toolsTabBtn = document.querySelector('.tab-btn[data-tab="infoTab"]');
+  if (toolsTabBtn) toolsTabBtn.style.display = "none";
+
+  // Hide the Tools content
+  const infoTab = document.getElementById("infoTab");
+  if (infoTab) {
+    infoTab.style.display = "none";
+    // Optional: infoTab.innerHTML = ""; // extra security
+  }
+}
   
   // ---------- PHONE NORMALIZER (for backend matching) ----------
   function normalizePhone(number) {

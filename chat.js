@@ -3465,7 +3465,7 @@ confirmBtn.onclick = async () => {
   }
 }
 // ================================
-// UPLOAD HIGHLIGHT — TAGS + NO SOCIAL CARD + BUTTON FIX
+// UPLOAD HIGHLIGHT — TAGS + CLEAN BUTTONS + NO ERRORS
 // ================================
 document.getElementById("uploadHighlightBtn")?.addEventListener("click", async () => {
   const btn = document.getElementById("uploadHighlightBtn");
@@ -3480,10 +3480,15 @@ document.getElementById("uploadHighlightBtn")?.addEventListener("click", async (
 
   const fileInput = document.getElementById("highlightUploadInput");
   const videoUrlInput = document.getElementById("highlightVideoInput");
-  const title = document.getElementById("highlightTitleInput").value.trim();
-  const desc = document.getElementById("highlightDescInput").value.trim();
-  const price = parseInt(document.getElementById("highlightPriceInput").value) || 0;
-  const boostTrending = document.getElementById("boostTrendingCheckbox")?.checked || false;
+  const titleInput = document.getElementById("highlightTitleInput");
+  const descInput = document.getElementById("highlightDescInput");
+  const priceInput = document.getElementById("highlightPriceInput");
+  const trendingCheckbox = document.getElementById("boostTrendingCheckbox");
+
+  const title = titleInput.value.trim();
+  const desc = descInput.value.trim();
+  const price = parseInt(priceInput.value) || 0;
+  const boostTrending = trendingCheckbox?.checked || false;
 
   // Get selected tags
   const selectedTags = Array.from(document.querySelectorAll(".tag-btn.selected"))
@@ -3539,7 +3544,7 @@ document.getElementById("uploadHighlightBtn")?.addEventListener("click", async (
       unlockedBy: [],
       views: 0,
       isTrending: boostTrending || false,
-      tags: selectedTags // ← NEW: save selected tags
+      tags: selectedTags
     };
 
     if (boostTrending) {
@@ -3548,8 +3553,7 @@ document.getElementById("uploadHighlightBtn")?.addEventListener("click", async (
 
     await addDoc(collection(db, "highlightVideos"), clipData);
 
-    // Notify fans (same as before)
-    // ... (your notification code here — unchanged)
+    // Notify fans (keep your existing code here)
 
     showStarPopup("CLIP LIVE!", "success");
     btn.textContent = boostTrending ? "TRENDING LIVE!" : "DROPPED!";
@@ -3557,29 +3561,20 @@ document.getElementById("uploadHighlightBtn")?.addEventListener("click", async (
       ? "linear-gradient(90deg,#00ffea,#8a2be2,#ff00f2)"
       : "linear-gradient(90deg,#00ff9d,#00cc66)";
 
-    // Reset form — safe version
-fileInput.value = "";
-videoUrlInput.value = "";
-document.getElementById("highlightTitleInput").value = "";
-document.getElementById("highlightDescInput").value = "";
-document.getElementById("highlightPriceInput").value = "50";
+    // Reset form
+    fileInput.value = "";
+    videoUrlInput.value = "";
+    titleInput.value = "";
+    descInput.value = "";
+    priceInput.value = "50";
+    if (trendingCheckbox) trendingCheckbox.checked = false;
 
-// Safe checkbox reset
-const trendingCheckbox = document.getElementById("boostTrendingCheckbox");
-if (trendingCheckbox) trendingCheckbox.checked = false;
-
-// Optional: clear tags if you want (or leave selected)
-document.querySelectorAll(".tag-btn").forEach(btn => btn.classList.remove("selected"));
-
-if (typeof loadMyClips === "function") loadMyClips();
-
-    // DO NOT unselect tags — user can reuse them
-    // If you want to clear tags, uncomment below:
-    // document.querySelectorAll(".tag-btn").forEach(b => b.classList.remove("selected"));
+    // Clear selected tags (or comment out to keep them)
+    document.querySelectorAll(".tag-btn").forEach(btn => btn.classList.remove("selected"));
 
     if (typeof loadMyClips === "function") loadMyClips();
 
-    // Button stays colored a bit longer, then resets smoothly
+    // Smooth button reset — stays pretty
     setTimeout(() => {
       btn.textContent = "Post Highlight";
       btn.classList.remove("uploading");
@@ -3593,19 +3588,16 @@ if (typeof loadMyClips === "function") loadMyClips();
     resetBtn();
   }
 
-function resetBtn() {
-  btn.disabled = false;
-  btn.classList.remove("uploading");
-  btn.textContent = "Post Highlight";
-  btn.style.background = "linear-gradient(90deg,#ff2e78,#ff5e2e)";
-
-  // Safe reset of checkbox
-  const trendingCheckbox = document.getElementById("boostTrendingCheckbox");
-  if (trendingCheckbox) trendingCheckbox.checked = false;
-}
+  function resetBtn() {
+    btn.disabled = false;
+    btn.classList.remove("uploading");
+    btn.textContent = "Post Highlight";
+    btn.style.background = "linear-gradient(90deg,#ff2e78,#ff5e2e)";
+    if (trendingCheckbox) trendingCheckbox.checked = false;
+  }
 });
 
-// Tag selector logic — click to toggle
+// Tag selector — toggle selected
 document.querySelectorAll(".tag-btn").forEach(btn => {
   btn.addEventListener("click", () => {
     btn.classList.toggle("selected");

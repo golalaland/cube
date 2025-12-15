@@ -1523,48 +1523,28 @@ function sanitizeKey(email) {
       card.style.transform = "translate(-50%, -50%)";
       card.style.boxShadow = "0 6px 24px rgba(138,43,226,0.35)";
     };
-     // === CINEMATIC BACKDROP BLUR OVERLAY ===
-    const backdrop = document.createElement("div");
-    backdrop.id = "socialCardBackdrop";
-    Object.assign(backdrop.style, {
-      position: "fixed",
-      top: 0, left: 0, width: "100vw", height: "100vh",
-      background: "rgba(0, 0, 0, 0.65)",
-      backdropFilter: "blur(8px)",
-      zIndex: "999998",
-      opacity: "0",
-      transition: "opacity 0.3s ease",
-      pointerEvents: "none"
-    });
-    document.body.appendChild(backdrop);
 
-    // Fade in card + backdrop
-    requestAnimationFrame(() => {
-      card.style.opacity = "1";
-      backdrop.style.opacity = "1";
-      backdrop.style.pointerEvents = "auto";
-    });
-
-    // Unified remove function
-    const removeAll = () => {
-      card.remove();
-      backdrop.remove();
-      document.removeEventListener("click", closeOut);
-    };
-
-    // Updated close X button
-    closeBtn.onclick = (e) => {
-      e.stopPropagation();
-      removeAll();
-    };
-
-    // Close on outside click (now checks both card and backdrop)
+    // Close on outside click
     const closeOut = (e) => {
-      if (!card.contains(e.target) && e.target !== backdrop) {
-        removeAll();
+      if (!card.contains(e.target)) {
+        card.remove();
+        document.removeEventListener("click", closeOut);
       }
     };
     setTimeout(() => document.addEventListener("click", closeOut), 100);
+
+    // Close X
+    const closeBtn = document.createElement("div");
+    closeBtn.innerHTML = "×";
+    closeBtn.style.cssText = "position:absolute;top:8px;right:12px;font-size:20px;font-weight:700;cursor:pointer;z-index:10;opacity:0.7;color:#fff;";
+    closeBtn.onmouseenter = () => closeBtn.style.opacity = "1";
+    closeBtn.onmouseleave = () => closeBtn.style.opacity = "0.7";
+    closeBtn.onclick = (e) => {
+      e.stopPropagation();
+      card.remove();
+      document.removeEventListener("click", closeOut);
+    };
+    card.appendChild(closeBtn);
 
     // ==================== VIDEO CONTAINER — SHORTER HEIGHT ====================
     const videoContainer = document.createElement("div");
@@ -1675,7 +1655,7 @@ function sanitizeKey(email) {
     infoPanel.appendChild(meetBtn);
 
     // Gift slider — now has perfect spacing
- // Gift slider — number now hugs the slider nicely, away from edge
+   // Gift slider — number now hugs the slider nicely, away from edge
 const sliderPanel = document.createElement("div");
 sliderPanel.style.cssText = "width:100%;padding:8px 14px;border-radius:8px;background:rgba(255,255,255,0.06);backdrop-filter:blur(8px);display:flex;align-items:center;gap:10px;box-sizing:border-box;";
 
@@ -1704,6 +1684,7 @@ slider.oninput = () => {
 
 sliderPanel.append(slider, sliderLabel);
 infoPanel.appendChild(sliderPanel);
+    
     // Gift button
     const giftBtn = document.createElement("button");
     giftBtn.textContent = "Gift";
@@ -3648,7 +3629,7 @@ confirmBtn.onclick = async () => {
   }
 }
 // ================================
-// UPLOAD HIGHLIGHT — FINAL FIX: NO TIMESTAMP ERROR
+// UPLOAD HIGHLIGHT + SOCIAL CARD SUPPORT
 // ================================
 document.getElementById("uploadHighlightBtn")?.addEventListener("click", async () => {
   const btn = document.getElementById("uploadHighlightBtn");
@@ -3667,30 +3648,36 @@ document.getElementById("uploadHighlightBtn")?.addEventListener("click", async (
   const desc = document.getElementById("highlightDescInput").value.trim();
   const price = parseInt(document.getElementById("highlightPriceInput").value) || 0;
   const boostTrending = document.getElementById("boostTrendingCheckbox")?.checked || false;
+  const addToSocialCard = document.getElementById("addToSocialCardCheckbox")?.checked || false;
 
   if (!title) return showStarPopup("Title required", "error");
   if (price < 10) return showStarPopup("Minimum 10 STRZ", "error");
   if (!fileInput.files[0] && !videoUrlInput.value.trim())
     return showStarPopup("Add file or URL", "error");
 
-  // === TRENDING BOOST COST CHECK ===
-  if (boostTrending) {
+  // === COST CHECKS ===
+  let totalCost = 0;
+  if (boostTrending) totalCost += 500;
+  if (addToSocialCard) totalCost += 100;
+
+  if (totalCost > 0) {
     const userDoc = await getDoc(doc(db, "users", currentUser.uid));
     const stars = userDoc.data()?.stars || 0;
-    if (stars < 500) {
-      showStarPopup("Not enough STRZ for trending boost (need 500)", "error");
+    if (stars < totalCost) {
+      showStarPopup(`Not enough STRZ (need ${totalCost})`, "error");
       return;
     }
     await updateDoc(doc(db, "users", currentUser.uid), {
-      stars: increment(-500)
+      stars: increment(-totalCost)
     });
-    showStarPopup("500 STRZ spent — Boost activated!", "success");
+    if (boostTrending) showStarPopup("500 STRZ spent — Trending boost on!", "success");
+    if (addToSocialCard) showStarPopup("100 STRZ spent — Added to Social Card!", "success");
   }
 
   btn.disabled = true;
   btn.classList.add("uploading");
   btn.textContent = "....";
-  showStarPopup("Dropping fire...", "loading");
+  showStarPopup("Uploading fire...", "loading");
 
   try {
     let finalVideoUrl = videoUrlInput.value.trim();
@@ -3707,7 +3694,7 @@ document.getElementById("uploadHighlightBtn")?.addEventListener("click", async (
       finalVideoUrl = await getDownloadURL(snapshot.ref);
     }
 
-    // === SAVE TO FIRESTORE — SAFE trendingUntil WITHOUT Timestamp ===
+    // === SAVE HIGHLIGHT CLIP (unchanged) ===
     const clipData = {
       uploaderId: currentUser.uid,
       uploaderName: currentUser.chatId || "Legend",
@@ -3722,15 +3709,22 @@ document.getElementById("uploadHighlightBtn")?.addEventListener("click", async (
       isTrending: boostTrending || false
     };
 
-    // Only add trendingUntil if boosted — using plain JS Date converted safely
     if (boostTrending) {
-      clipData.trendingUntil = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours from now
-      // Firestore automatically converts JS Date to Timestamp
+      clipData.trendingUntil = new Date(Date.now() + 24 * 60 * 60 * 1000);
     }
 
     const clipRef = await addDoc(collection(db, "highlightVideos"), clipData);
 
-    // === NOTIFY FANS (unchanged) ===
+    // === ADD TO SOCIAL CARD IF CHECKED (silent, no notifications) ===
+    if (addToSocialCard && finalVideoUrl) {
+      const userRef = doc(db, "users", currentUser.uid);
+      await updateDoc(userRef, {
+        socialcardvideoUrl: arrayUnion(finalVideoUrl)
+      });
+      console.log("Video added to socialcardvideoUrl array");
+    }
+
+    // === NOTIFY FANS ONLY FOR HIGHLIGHT (not for social card) ===
     try {
       const pastClips = await getDocs(
         query(collection(db, "highlightVideos"), where("uploaderId", "==", currentUser.uid))
@@ -3744,6 +3738,7 @@ document.getElementById("uploadHighlightBtn")?.addEventListener("click", async (
           });
         }
       });
+
       if (loyalFans.size > 0) {
         const batch = writeBatch(db);
         const message = `@${currentUser.chatId} just dropped ${boostTrending ? "a TRENDING" : "a new"} highlight!`;
@@ -3763,12 +3758,14 @@ document.getElementById("uploadHighlightBtn")?.addEventListener("click", async (
         }
         await batch.commit();
       }
-    } catch (e) { console.warn("Notifications failed", e); }
+    } catch (e) {
+      console.warn("Notifications failed", e);
+    }
 
-    showStarPopup("CLIP LIVE — FANS NOTIFIED!", "success");
+    showStarPopup("CLIP LIVE!", "success");
     btn.textContent = boostTrending ? "TRENDING LIVE!" : "DROPPED!";
-    btn.style.background = boostTrending 
-      ? "linear-gradient(90deg,#00ffea,#8a2be2,#ff00f2)" 
+    btn.style.background = boostTrending
+      ? "linear-gradient(90deg,#00ffea,#8a2be2,#ff00f2)"
       : "linear-gradient(90deg,#00ff9d,#00cc66)";
 
     // Reset form
@@ -3778,6 +3775,7 @@ document.getElementById("uploadHighlightBtn")?.addEventListener("click", async (
     document.getElementById("highlightDescInput").value = "";
     document.getElementById("highlightPriceInput").value = "50";
     document.getElementById("boostTrendingCheckbox").checked = false;
+    document.getElementById("addToSocialCardCheckbox").checked = false;
 
     if (typeof loadMyClips === "function") loadMyClips();
 

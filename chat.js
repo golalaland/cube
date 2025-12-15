@@ -1549,7 +1549,7 @@ function sanitizeKey(email) {
 // ==================== VIDEO CONTAINER ====================
 const videoContainer = document.createElement("div");
 videoContainer.style.cssText = `
-  height:300px;
+  width:100%;
   position:relative;
   overflow:hidden;
   background:#000;
@@ -1569,7 +1569,6 @@ if (videos.length) {
   swipeWrapper.style.cssText = `
     display:flex;
     width:${videos.length * 100}%;
-    height:100%;
     transition:transform 0.35s ease;
   `;
 
@@ -1583,7 +1582,6 @@ if (videos.length) {
     wrap.style.cssText = `
       position:relative;
       width:100%;
-      height:100%;
       flex-shrink:0;
       background:#000;
     `;
@@ -1595,19 +1593,25 @@ if (videos.length) {
     video.autoplay = true;
     video.preload = "metadata";
 
-    // 🔒 iOS INLINE
+    // 🔒 INLINE
     video.setAttribute("playsinline", "");
     video.setAttribute("webkit-playsinline", "");
 
-    // ✅ FILL WITHOUT BLACK BARS
+    // 🎯 NO ZOOM, TRUE FRAME
     video.style.cssText = `
       width:100%;
-      height:100%;
-      object-fit:cover;
-      object-position:center;
+      height:auto;
+      display:block;
+      object-fit:contain;
+      background:#000;
     `;
 
-    // 🔇 ICON
+    // 🎚 Adjust container height once metadata loads
+    video.addEventListener("loadedmetadata", () => {
+      const ratio = video.videoHeight / video.videoWidth;
+      videoContainer.style.height = `${Math.min(400, window.innerWidth * ratio)}px`;
+    });
+
     const muteIcon = document.createElement("div");
     muteIcon.textContent = "🔇";
     muteIcon.style.cssText = `
@@ -1625,17 +1629,14 @@ if (videos.length) {
       z-index:5;
     `;
 
-    // ▶️ play safely
     video.play().catch(() => {});
 
-    // 🔊 TAP TO TOGGLE SOUND (ONLY ACTIVE VIDEO)
+    // 🔊 TAP TO TOGGLE SOUND
     video.addEventListener("click", e => {
       e.stopPropagation();
-
       if (activeVideo && activeVideo !== video) {
         activeVideo.muted = true;
       }
-
       video.muted = !video.muted;
       muteIcon.style.opacity = video.muted ? "0.6" : "0";
       activeVideo = video;
@@ -1669,7 +1670,6 @@ if (videos.length) {
         height:7px;
         border-radius:50%;
         background:${i === 0 ? "#ff00f2" : "rgba(255,0,242,0.35)"};
-        transition:0.3s;
       `;
       dots.appendChild(dot);
     });
@@ -1696,10 +1696,10 @@ if (videos.length) {
     const diff = startX - e.clientX;
     if (Math.abs(diff) < 50) return;
 
-    // 🔇 HARD STOP ALL AUDIO ON SWIPE
+    // 🔇 STOP ALL AUDIO
     videoEls.forEach(v => {
-      v.video.muted = true;
       v.video.pause();
+      v.video.muted = true;
       v.muteIcon.style.opacity = "0.6";
     });
 
@@ -1711,9 +1711,7 @@ if (videos.length) {
     swipeWrapper.style.transform = `translateX(-${currentIndex * 100}%)`;
     updateDots();
 
-    // ▶️ PLAY ONLY CURRENT VIDEO (MUTED)
     const current = videoEls[currentIndex].video;
-    current.currentTime = 0;
     current.play().catch(() => {});
   });
 
@@ -1723,7 +1721,6 @@ if (videos.length) {
     align-items:center;
     justify-content:center;
     color:#555;
-    font-size:14px;
   `;
   videoContainer.textContent = "No video yet~";
 }

@@ -3557,13 +3557,21 @@ document.getElementById("uploadHighlightBtn")?.addEventListener("click", async (
       ? "linear-gradient(90deg,#00ffea,#8a2be2,#ff00f2)"
       : "linear-gradient(90deg,#00ff9d,#00cc66)";
 
-    // Reset form — BUT keep tag buttons highlighted until next upload
-    fileInput.value = "";
-    videoUrlInput.value = "";
-    document.getElementById("highlightTitleInput").value = "";
-    document.getElementById("highlightDescInput").value = "";
-    document.getElementById("highlightPriceInput").value = "50";
-    document.getElementById("boostTrendingCheckbox").checked = false;
+    // Reset form — safe version
+fileInput.value = "";
+videoUrlInput.value = "";
+document.getElementById("highlightTitleInput").value = "";
+document.getElementById("highlightDescInput").value = "";
+document.getElementById("highlightPriceInput").value = "50";
+
+// Safe checkbox reset
+const trendingCheckbox = document.getElementById("boostTrendingCheckbox");
+if (trendingCheckbox) trendingCheckbox.checked = false;
+
+// Optional: clear tags if you want (or leave selected)
+document.querySelectorAll(".tag-btn").forEach(btn => btn.classList.remove("selected"));
+
+if (typeof loadMyClips === "function") loadMyClips();
 
     // DO NOT unselect tags — user can reuse them
     // If you want to clear tags, uncomment below:
@@ -3585,12 +3593,16 @@ document.getElementById("uploadHighlightBtn")?.addEventListener("click", async (
     resetBtn();
   }
 
-  function resetBtn() {
-    btn.disabled = false;
-    btn.classList.remove("uploading");
-    btn.textContent = "Post Highlight";
-    btn.style.background = "linear-gradient(90deg,#ff2e78,#ff5e2e)";
-  }
+function resetBtn() {
+  btn.disabled = false;
+  btn.classList.remove("uploading");
+  btn.textContent = "Post Highlight";
+  btn.style.background = "linear-gradient(90deg,#ff2e78,#ff5e2e)";
+
+  // Safe reset of checkbox
+  const trendingCheckbox = document.getElementById("boostTrendingCheckbox");
+  if (trendingCheckbox) trendingCheckbox.checked = false;
+}
 });
 
 // Tag selector logic — click to toggle

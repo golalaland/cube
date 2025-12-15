@@ -1454,268 +1454,376 @@ function sanitizeKey(email) {
   if (!email) return "";
   return email.toLowerCase().replace(/[@.]/g, "_").trim();
 }
-// ==================== OPTIMIZED TRENDING CARD FOR HOSTS ====================
-function showTrendingStyleHostCard(user) {
-  const card = document.createElement("div");
-  card.id = "socialCard";
+/* ======================================================
+  SOCIAL CARD SYSTEM — OPTIMIZED HOST CARD (Dec 2025)
+  • Wider (260px) + shorter video (300px) for perfect fit
+  • Gift slider now spacious and clean
+  • VIP card unchanged — perfect as is
+====================================================== */
+(async function initSocialCardSystem() {
+  const allUsers = [];
+  const usersByChatId = {};
 
-  Object.assign(card.style, {
-    position: "fixed",
-    top: "50%",
-    left: "50%",
-    transform: "translate(-50%, -50%)",
-    minWidth: "260px",
-    maxWidth: "260px",
-    background: "#0f0a1a",
-    borderRadius: "16px",
-    overflow: "hidden",
-    display: "flex",
-    flexDirection: "column",
-    boxShadow: "0 6px 24px rgba(138,43,226,0.35)",
-    transition: "transform 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease",
-    border: "1px solid rgba(138,43,226,0.5)",
-    zIndex: "999999",
-    opacity: "0"
-  });
-
-  // Hover lift
-  card.onmouseenter = () => {
-    card.style.transform = "translate(-50%, -50%) translateY(-8px)";
-    card.style.boxShadow = "0 16px 40px rgba(255,0,242,0.4)";
-  };
-  card.onmouseleave = () => {
-    card.style.transform = "translate(-50%, -50%)";
-    card.style.boxShadow = "0 6px 24px rgba(138,43,226,0.35)";
-  };
-
-  // Close on outside click
-  const closeOut = (e) => {
-    if (!card.contains(e.target)) {
-      card.remove();
-      document.removeEventListener("click", closeOut);
-    }
-  };
-  setTimeout(() => document.addEventListener("click", closeOut), 100);
-
-  // Close X
-  const closeBtn = document.createElement("div");
-  closeBtn.innerHTML = "×";
-  closeBtn.style.cssText = "position:absolute;top:8px;right:12px;font-size:20px;font-weight:700;cursor:pointer;z-index:10;opacity:0.7;color:#fff;";
-  closeBtn.onmouseenter = () => closeBtn.style.opacity = "1";
-  closeBtn.onmouseleave = () => closeBtn.style.opacity = "0.7";
-  closeBtn.onclick = (e) => {
-    e.stopPropagation();
-    card.remove();
-    document.removeEventListener("click", closeOut);
-  };
-  card.appendChild(closeBtn);
-
-  // ==================== VIDEO CONTAINER — FULL FRAME + TAP TO MUTE ====================
-  const videoContainer = document.createElement("div");
-  videoContainer.style.cssText = `
-    height:300px;
-    overflow:hidden;
-    position:relative;
-    background:#000;
-    border-radius:16px 16px 0 0;
-    cursor:pointer;
-  `;
-
-  const videos = Array.isArray(user.socialcardvideoUrl) ? user.socialcardvideoUrl.filter(url => url) : [];
-
-  let currentIndex = 0;
-
-  if (videos.length > 0) {
-    const swipeWrapper = document.createElement("div");
-    swipeWrapper.style.cssText = `display:flex;width:${videos.length * 100}%;height:100%;transition:transform 0.4s ease;`;
-
-    videos.forEach(src => {
-      const videoEl = document.createElement("video");
-      videoEl.src = src;
-      videoEl.muted = true;
-      videoEl.loop = true;
-      videoEl.preload = "metadata";
-      videoEl.playsInline = true;
-      videoEl.style.cssText = `
-        width:100%;
-        height:100%;
-        object-fit:contain;
-        flex-shrink:0;
-        background:#000;
-      `;
-      videoEl.play().catch(() => {});
-      swipeWrapper.appendChild(videoEl);
+  // Load all users
+  try {
+    const snaps = await getDocs(collection(db, "users"));
+    snaps.forEach(doc => {
+      const data = doc.data();
+      data._docId = doc.id;
+      data.chatIdLower = (data.chatId || "").toString().toLowerCase();
+      allUsers.push(data);
+      usersByChatId[data.chatIdLower] = data;
     });
-
-    videoContainer.appendChild(swipeWrapper);
-
-    // Dots for multiple videos
-    if (videos.length > 1) {
-      const dots = document.createElement("div");
-      dots.style.cssText = "position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:5;";
-      videos.forEach((_, i) => {
-        const dot = document.createElement("div");
-        dot.style.cssText = `width:8px;height:8px;border-radius:50%;background:${i === 0 ? "#ff00f2" : "rgba(255,0,242,0.3)"};transition:0.3s;`;
-        dots.appendChild(dot);
-      });
-      videoContainer.appendChild(dots);
-
-      const updateDots = () => {
-        dots.querySelectorAll("div").forEach((d, i) => {
-          d.style.background = i === currentIndex ? "#ff00f2" : "rgba(255,0,242,0.3)";
-        });
-      };
-
-      let startX = 0;
-      videoContainer.onpointerdown = (e) => startX = e.clientX;
-      videoContainer.onpointerup = (e) => {
-        const diff = startX - e.clientX;
-        if (Math.abs(diff) > 50) {
-          if (diff > 0 && currentIndex < videos.length - 1) currentIndex++;
-          if (diff < 0 && currentIndex > 0) currentIndex--;
-          swipeWrapper.style.transform = `translateX(-${currentIndex * 100}%)`;
-          updateDots();
-        }
-      };
-    }
-
-    // Tap to mute/unmute
-    videoContainer.onclick = (e) => {
-      e.stopPropagation();
-      const currentVideo = swipeWrapper.children[currentIndex];
-      if (currentVideo) {
-        currentVideo.muted = !currentVideo.muted;
-
-        let muteOverlay = videoContainer.querySelector("#muteOverlay");
-        if (!muteOverlay) {
-          muteOverlay = document.createElement("div");
-          muteOverlay.id = "muteOverlay";
-          muteOverlay.style.cssText = "position:absolute;top:10px;right:10px;z-index:6;font-size:24px;opacity:0;transition:opacity 0.3s;pointer-events:none;";
-          videoContainer.appendChild(muteOverlay);
-        }
-        muteOverlay.innerHTML = currentVideo.muted ? "🔇" : "🔊";
-        muteOverlay.style.opacity = "1";
-        clearTimeout(muteOverlay.hideTimer);
-        muteOverlay.hideTimer = setTimeout(() => muteOverlay.style.opacity = "0", 1000);
-      }
-    };
-
-  } else {
-    videoContainer.style.display = "flex";
-    videoContainer.style.alignItems = "center";
-    videoContainer.style.justifyContent = "center";
-    videoContainer.style.color = "#555";
-    videoContainer.innerHTML = "<div>No video yet~</div>";
+    console.log("Social card: loaded", allUsers.length, "users");
+  } catch (err) {
+    console.error("Failed to load users:", err);
   }
 
-  card.appendChild(videoContainer);
+  function showSocialCard(user) {
+    if (!user) return;
+    document.getElementById('socialCard')?.remove();
 
-  // ==================== INFO PANEL ====================
-  const infoPanel = document.createElement("div");
-  infoPanel.style.cssText = "background:linear-gradient(180deg,#1a0b2e,#0f0519);padding:16px 18px;display:flex;flex-direction:column;gap:12px;border-radius:0 0 16px 16px;";
-
-  // @chatId
-  const chatIdEl = document.createElement("div");
-  chatIdEl.textContent = `@${user.chatId || "Unknown"}`;
-  chatIdEl.style.cssText = "font-weight:800;color:#e0b0ff;font-size:16px;text-align:center;";
-  infoPanel.appendChild(chatIdEl);
-
-  // Legendary details
-  const gender = (user.gender || "person").toLowerCase();
-  const pronoun = gender === "male" ? "his" : "her";
-  const ageGroup = !user.age ? "20s" : user.age >= 30 ? "30s" : "20s";
-  const flair = gender === "male" ? "😎" : "💋";
-  const fruit = user.fruitPick || "🍇";
-  const nature = user.naturePick || "cool";
-  const city = user.location || user.city || "Lagos";
-  const country = user.country || "Nigeria";
-
-  const detailsEl = document.createElement("p");
-  detailsEl.textContent = `A ${fruit} ${nature} ${gender} in ${pronoun} ${ageGroup}, currently in ${city}, ${country}. ${flair}`;
-  detailsEl.style.cssText = "margin:0 0 10px;font-size:14.5px;line-height:1.45;color:#ccc;text-align:center;opacity:0.9;";
-  infoPanel.appendChild(detailsEl);
-
-  // Meet button
-  const meetBtn = document.createElement("div");
-  meetBtn.style.cssText = "width:44px;height:44px;border-radius:50%;background:rgba(255,0,242,0.15);display:flex;align-items:center;justify-content:center;margin:0 auto;cursor:pointer;border:1px solid rgba(255,0,242,0.5);transition:all 0.3s ease;box-shadow:0 0 12px rgba(255,0,242,0.3);";
-  meetBtn.innerHTML = `<img src="https://cdn.shopify.com/s/files/1/0962/6648/6067/files/hearts__128_x_128_px.svg?v=1761809626" style="width:26px;height:26px;filter:drop-shadow(0 0 8px #ff00f2);"/>`;
-  meetBtn.onclick = (e) => {
-    e.stopPropagation();
-    if (typeof showMeetModal === 'function') showMeetModal(user);
-  };
-  meetBtn.onmouseenter = () => {
-    meetBtn.style.transform = "scale(1.15)";
-    meetBtn.style.background = "rgba(255,0,242,0.3)";
-    meetBtn.style.boxShadow = "0 0 20px rgba(255,0,242,0.6)";
-  };
-  meetBtn.onmouseleave = () => {
-    meetBtn.style.transform = "scale(1)";
-    meetBtn.style.background = "rgba(255,0,242,0.15)";
-    meetBtn.style.boxShadow = "0 0 12px rgba(255,0,242,0.3)";
-  };
-  infoPanel.appendChild(meetBtn);
-
-  // Gift slider (balanced spacing)
-  const sliderPanel = document.createElement("div");
-  sliderPanel.style.cssText = "width:100%;padding:8px 14px;border-radius:8px;background:rgba(255,255,255,0.06);backdrop-filter:blur(8px);display:flex;align-items:center;gap:10px;box-sizing:border-box;";
-
-  const fieryColors = [["#ff0000","#ff8c00"],["#ff4500","#ffd700"],["#ff1493","#ff6347"],["#ff0055","#ff7a00"],["#ff5500","#ffcc00"],["#ff3300","#ff0066"]];
-  const randomFieryGradient = () => `linear-gradient(90deg, ${fieryColors[Math.floor(Math.random()*fieryColors.length)].join(', ')})`;
-
-  const slider = document.createElement("input");
-  slider.type = "range"; slider.min = 100; slider.max = 999; slider.value = 100;
-  slider.style.cssText = `flex:1;height:6px;border-radius:5px;outline:none;cursor:pointer;-webkit-appearance:none;background:${randomFieryGradient()};`;
-
-  const sliderLabel = document.createElement("span");
-  sliderLabel.textContent = "100";
-  sliderLabel.style.cssText = "font-size:14.5px;font-weight:700;color:#fff;width:50px;text-align:center;";
-
-  slider.oninput = () => {
-    sliderLabel.textContent = slider.value;
-    slider.style.background = randomFieryGradient();
-  };
-
-  sliderPanel.append(slider, sliderLabel);
-  infoPanel.appendChild(sliderPanel);
-
-  // Gift button
-  const giftBtn = document.createElement("button");
-  giftBtn.textContent = "Gift";
-  giftBtn.style.cssText = "padding:10px 18px;border-radius:10px;border:none;font-weight:700;font-size:15px;background:linear-gradient(90deg,#ff0099,#ff0066);color:#fff;cursor:pointer;box-shadow:0 4px 12px rgba(255,0,153,0.4);transition:all 0.2s;";
-  giftBtn.onmouseenter = () => giftBtn.style.transform = "translateY(-3px)";
-  giftBtn.onmouseleave = () => giftBtn.style.transform = "";
-  giftBtn.onclick = async (e) => {
-    e.stopPropagation();
-    const amt = parseInt(slider.value);
-    if (amt < 100) return showStarPopup("Minimum 100 stars");
-    if ((currentUser?.stars || 0) < amt) return showStarPopup("Not enough stars");
-    if (user.chatId?.toLowerCase() === currentUser?.chatId?.toLowerCase()) return showStarPopup("You can't gift yourself silly!");
-
-    const orig = giftBtn.textContent;
-    giftBtn.textContent = "";
-    const spin = document.createElement("div");
-    spin.style.cssText = "width:18px;height:18px;border:3px solid #fff3;border-top:3px solid white;border-radius:50%;animation:spin 0.7s linear infinite;margin:0 auto;";
-    giftBtn.appendChild(spin);
-
-    try {
-      await sendStarsToUser(user, amt);
-      showStarPopup(`Sent ${amt} stars to ${user.chatId}!`);
-      slider.value = 100;
-      sliderLabel.textContent = "100";
-      setTimeout(() => card.remove(), 800);
-    } catch (e) {
-      showStarPopup("Failed — try again");
-    } finally {
-      giftBtn.textContent = orig;
+    if (user.isHost) {
+      showTrendingStyleHostCard(user);
+    } else {
+      showOriginalVIPCard(user);
     }
+  }
+
+  // ==================== OPTIMIZED TRENDING CARD FOR HOSTS ====================
+  function showTrendingStyleHostCard(user) {
+    const card = document.createElement("div");
+    card.id = "socialCard";
+
+    Object.assign(card.style, {
+      position: "fixed",
+      top: "50%",
+      left: "50%",
+      transform: "translate(-50%, -50%)",
+      minWidth: "260px",       // Wider for better layout
+      maxWidth: "260px",
+      background: "#0f0a1a",
+      borderRadius: "16px",
+      overflow: "hidden",
+      display: "flex",
+      flexDirection: "column",
+      boxShadow: "0 6px 24px rgba(138,43,226,0.35)",
+      transition: "transform 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease",
+      border: "1px solid rgba(138,43,226,0.5)",
+      zIndex: "999999",
+      opacity: "0"
+    });
+
+    // Hover lift
+    card.onmouseenter = () => {
+      card.style.transform = "translate(-50%, -50%) translateY(-8px)";
+      card.style.boxShadow = "0 16px 40px rgba(255,0,242,0.4)";
+    };
+    card.onmouseleave = () => {
+      card.style.transform = "translate(-50%, -50%)";
+      card.style.boxShadow = "0 6px 24px rgba(138,43,226,0.35)";
+    };
+
+    // Close on outside click
+    const closeOut = (e) => {
+      if (!card.contains(e.target)) {
+        card.remove();
+        document.removeEventListener("click", closeOut);
+      }
+    };
+    setTimeout(() => document.addEventListener("click", closeOut), 100);
+
+    // Close X
+    const closeBtn = document.createElement("div");
+    closeBtn.innerHTML = "×";
+    closeBtn.style.cssText = "position:absolute;top:8px;right:12px;font-size:20px;font-weight:700;cursor:pointer;z-index:10;opacity:0.7;color:#fff;";
+    closeBtn.onmouseenter = () => closeBtn.style.opacity = "1";
+    closeBtn.onmouseleave = () => closeBtn.style.opacity = "0.7";
+    closeBtn.onclick = (e) => {
+      e.stopPropagation();
+      card.remove();
+      document.removeEventListener("click", closeOut);
+    };
+    card.appendChild(closeBtn);
+
+  // ==================== VIDEO CONTAINER ====================
+const videoContainer = document.createElement("div");
+videoContainer.style.cssText = `
+  height:300px;
+  position:relative;
+  overflow:hidden;
+  background:#000;
+  border-radius:16px 16px 0 0;
+  touch-action:pan-y;
+`;
+
+const videos = Array.isArray(user.socialcardvideoUrl)
+  ? user.socialcardvideoUrl.filter(Boolean)
+  : [];
+
+if (videos.length) {
+
+  // ===== SWIPE WRAPPER =====
+  const swipeWrapper = document.createElement("div");
+  swipeWrapper.style.cssText = `
+    display:flex;
+    width:${videos.length * 100}%;
+    height:100%;
+    transition:transform 0.35s ease;
+  `;
+
+  let currentIndex = 0;
+  let startX = 0;
+
+  videos.forEach(src => {
+
+    // ===== VIDEO WRAPPER =====
+    const videoWrap = document.createElement("div");
+    videoWrap.style.cssText = `
+      position:relative;
+      width:100%;
+      height:100%;
+      flex-shrink:0;
+    `;
+
+    // ===== VIDEO ELEMENT =====
+    const video = document.createElement("video");
+    video.src = src;
+    video.muted = true;
+    video.autoplay = true;
+    video.loop = true;
+    video.preload = "metadata";
+
+    // 🔒 INLINE PLAYBACK (CRITICAL)
+    video.setAttribute("playsinline", "");
+    video.setAttribute("webkit-playsinline", "");
+
+    // 🎯 FULL FRAME (NO ZOOM)
+    video.style.cssText = `
+      width:100%;
+      height:100%;
+      object-fit:contain;
+      background:#000;
+    `;
+
+    // ===== MUTE ICON =====
+    const muteIcon = document.createElement("div");
+    muteIcon.textContent = "🔇";
+    muteIcon.style.cssText = `
+      position:absolute;
+      bottom:12px;
+      right:12px;
+      font-size:16px;
+      background:rgba(0,0,0,0.55);
+      padding:6px;
+      border-radius:50%;
+      color:#fff;
+      pointer-events:none;
+      opacity:0.6;
+      transition:opacity 0.25s;
+      z-index:5;
+    `;
+
+    // ▶️ Safe autoplay
+    video.play().catch(() => {});
+
+    // 🔊 TAP TO MUTE / UNMUTE
+    video.addEventListener("click", e => {
+      e.stopPropagation();
+      video.muted = !video.muted;
+      muteIcon.style.opacity = video.muted ? "0.6" : "0";
+    });
+
+    videoWrap.append(video, muteIcon);
+    swipeWrapper.appendChild(videoWrap);
+  });
+
+  videoContainer.appendChild(swipeWrapper);
+
+  // ===== DOT INDICATORS =====
+  let dots;
+  if (videos.length > 1) {
+    dots = document.createElement("div");
+    dots.style.cssText = `
+      position:absolute;
+      bottom:10px;
+      left:50%;
+      transform:translateX(-50%);
+      display:flex;
+      gap:6px;
+      z-index:6;
+    `;
+
+    videos.forEach((_, i) => {
+      const dot = document.createElement("div");
+      dot.style.cssText = `
+        width:7px;
+        height:7px;
+        border-radius:50%;
+        background:${i === 0 ? "#ff00f2" : "rgba(255,0,242,0.35)"};
+        transition:0.3s;
+      `;
+      dots.appendChild(dot);
+    });
+
+    videoContainer.appendChild(dots);
+  }
+
+  const updateDots = () => {
+    if (!dots) return;
+    [...dots.children].forEach((d, i) => {
+      d.style.background =
+        i === currentIndex
+          ? "#ff00f2"
+          : "rgba(255,0,242,0.35)";
+    });
   };
-  infoPanel.appendChild(giftBtn);
 
-  card.appendChild(infoPanel);
-  document.body.appendChild(card);
+  // ===== SWIPE HANDLERS =====
+  videoContainer.addEventListener("pointerdown", e => {
+    startX = e.clientX;
+  });
 
-  requestAnimationFrame(() => card.style.opacity = "1");
+  videoContainer.addEventListener("pointerup", e => {
+    const diff = startX - e.clientX;
+    if (Math.abs(diff) < 50) return;
+
+    if (diff > 0 && currentIndex < videos.length - 1) currentIndex++;
+    if (diff < 0 && currentIndex > 0) currentIndex--;
+
+    swipeWrapper.style.transform = `translateX(-${currentIndex * 100}%)`;
+    updateDots();
+  });
+
+} else {
+  // ===== EMPTY STATE =====
+  videoContainer.style.cssText += `
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#555;
+    font-size:14px;
+  `;
+  videoContainer.textContent = "No video yet~";
 }
+
+card.appendChild(videoContainer);
+
+
+    // ==================== INFO PANEL — MORE SPACE ====================
+    const infoPanel = document.createElement("div");
+    infoPanel.style.cssText = "background:linear-gradient(180deg,#1a0b2e,#0f0519);padding:16px 18px;display:flex;flex-direction:column;gap:12px;border-radius:0 0 16px 16px;"; // Slightly more padding
+
+    // @chatId
+    const chatIdEl = document.createElement("div");
+    chatIdEl.textContent = `@${user.chatId || "Unknown"}`;
+    chatIdEl.style.cssText = "font-weight:800;color:#e0b0ff;font-size:16px;text-align:center;"; // Slightly larger
+    infoPanel.appendChild(chatIdEl);
+
+    // Legendary details
+    const gender = (user.gender || "person").toLowerCase();
+    const pronoun = gender === "male" ? "his" : "her";
+    const ageGroup = !user.age ? "20s" : user.age >= 30 ? "30s" : "20s";
+    const flair = gender === "male" ? "😎" : "💋";
+    const fruit = user.fruitPick || "🍇";
+    const nature = user.naturePick || "cool";
+    const city = user.location || user.city || "Lagos";
+    const country = user.country || "Nigeria";
+
+    const detailsEl = document.createElement("p");
+    detailsEl.textContent = `A ${fruit} ${nature} ${gender} in ${pronoun} ${ageGroup}, currently in ${city}, ${country}. ${flair}`;
+    detailsEl.style.cssText = "margin:0 0 10px;font-size:14.5px;line-height:1.45;color:#ccc;text-align:center;opacity:0.9;";
+    infoPanel.appendChild(detailsEl);
+
+    // Meet heart button
+    const meetBtn = document.createElement("div");
+    meetBtn.style.cssText = "width:44px;height:44px;border-radius:50%;background:rgba(255,0,242,0.15);display:flex;align-items:center;justify-content:center;margin:0 auto;cursor:pointer;border:1px solid rgba(255,0,242,0.5);transition:all 0.3s ease;box-shadow:0 0 12px rgba(255,0,242,0.3);";
+    meetBtn.innerHTML = `<img src="https://cdn.shopify.com/s/files/1/0962/6648/6067/files/hearts__128_x_128_px.svg?v=1761809626" style="width:26px;height:26px;filter:drop-shadow(0 0 8px #ff00f2);"/>`;
+    meetBtn.onclick = (e) => {
+      e.stopPropagation();
+      if (typeof showMeetModal === 'function') showMeetModal(user);
+    };
+    meetBtn.onmouseenter = () => {
+      meetBtn.style.transform = "scale(1.15)";
+      meetBtn.style.background = "rgba(255,0,242,0.3)";
+      meetBtn.style.boxShadow = "0 0 20px rgba(255,0,242,0.6)";
+    };
+    meetBtn.onmouseleave = () => {
+      meetBtn.style.transform = "scale(1)";
+      meetBtn.style.background = "rgba(255,0,242,0.15)";
+      meetBtn.style.boxShadow = "0 0 12px rgba(255,0,242,0.3)";
+    };
+    infoPanel.appendChild(meetBtn);
+
+   // Gift slider — number now hugs the slider nicely, away from edge
+const sliderPanel = document.createElement("div");
+sliderPanel.style.cssText = "width:100%;padding:8px 14px;border-radius:8px;background:rgba(255,255,255,0.06);backdrop-filter:blur(8px);display:flex;align-items:center;gap:10px;box-sizing:border-box;";
+
+const fieryColors = [["#ff0000","#ff8c00"],["#ff4500","#ffd700"],["#ff1493","#ff6347"],["#ff0055","#ff7a00"],["#ff5500","#ffcc00"],["#ff3300","#ff0066"]];
+const randomFieryGradient = () => `linear-gradient(90deg, ${fieryColors[Math.floor(Math.random()*fieryColors.length)].join(', ')})`;
+
+const slider = document.createElement("input");
+slider.type = "range";
+slider.min = 100;
+slider.max = 999;
+slider.value = 100;
+slider.style.cssText = `flex:1;height:6px;border-radius:5px;outline:none;cursor:pointer;-webkit-appearance:none;background:${randomFieryGradient()};`;
+
+const sliderLabel = document.createElement("span");
+sliderLabel.textContent = "100";
+sliderLabel.style.cssText = "font-size:14.5px;font-weight:700;color:#fff;width:50px;text-align:center;";  
+// Key changes:
+// - Removed min-width + padding-right → now fixed width
+// - text-align:center → number sits neatly in its own space
+// - width:50px → perfect snug fit, no hugging the edge
+
+slider.oninput = () => {
+  sliderLabel.textContent = slider.value;
+  slider.style.background = randomFieryGradient();
+};
+
+sliderPanel.append(slider, sliderLabel);
+infoPanel.appendChild(sliderPanel);
+
+    // Gift button
+    const giftBtn = document.createElement("button");
+    giftBtn.textContent = "Gift";
+    giftBtn.style.cssText = "padding:10px 18px;border-radius:10px;border:none;font-weight:700;font-size:15px;background:linear-gradient(90deg,#ff0099,#ff0066);color:#fff;cursor:pointer;box-shadow:0 4px 12px rgba(255,0,153,0.4);transition:all 0.2s;";
+    giftBtn.onmouseenter = () => giftBtn.style.transform = "translateY(-3px)";
+    giftBtn.onmouseleave = () => giftBtn.style.transform = "";
+    giftBtn.onclick = async (e) => {
+      e.stopPropagation();
+      const amt = parseInt(slider.value);
+      if (amt < 100) return showStarPopup("Minimum 100 stars");
+      if ((currentUser?.stars || 0) < amt) return showStarPopup("Not enough stars");
+      if (user.chatId?.toLowerCase() === currentUser?.chatId?.toLowerCase()) return showStarPopup("You can't gift yourself silly!");
+
+      const orig = giftBtn.textContent;
+      giftBtn.textContent = "";
+      const spin = document.createElement("div");
+      spin.style.cssText = "width:18px;height:18px;border:3px solid #fff3;border-top:3px solid white;border-radius:50%;animation:spin 0.7s linear infinite;margin:0 auto;";
+      giftBtn.appendChild(spin);
+
+      try {
+        await sendStarsToUser(user, amt);
+        showStarPopup(`Sent ${amt} stars to ${user.chatId}!`);
+        slider.value = 100;
+        sliderLabel.textContent = "100";
+        setTimeout(() => card.remove(), 800);
+      } catch (e) {
+        showStarPopup("Failed — try again");
+      } finally {
+        giftBtn.textContent = orig;
+      }
+    };
+    infoPanel.appendChild(giftBtn);
+
+    card.appendChild(infoPanel);
+    document.body.appendChild(card);
+
+    requestAnimationFrame(() => card.style.opacity = "1");
+  }
+
   // ==================== VIP CARD — UNCHANGED (PERFECT) ====================
   function showOriginalVIPCard(user) {
     const card = document.createElement("div");

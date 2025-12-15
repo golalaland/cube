@@ -1610,121 +1610,112 @@ function showTrendingStyleHostCard(user) {
 
   card.appendChild(videoContainer);
 
-    // ==================== INFO PANEL — MORE SPACE ====================
-    const infoPanel = document.createElement("div");
-    infoPanel.style.cssText = "background:linear-gradient(180deg,#1a0b2e,#0f0519);padding:16px 18px;display:flex;flex-direction:column;gap:12px;border-radius:0 0 16px 16px;"; // Slightly more padding
+  // ==================== INFO PANEL ====================
+  const infoPanel = document.createElement("div");
+  infoPanel.style.cssText = "background:linear-gradient(180deg,#1a0b2e,#0f0519);padding:16px 18px;display:flex;flex-direction:column;gap:12px;border-radius:0 0 16px 16px;";
 
-    // @chatId
-    const chatIdEl = document.createElement("div");
-    chatIdEl.textContent = `@${user.chatId || "Unknown"}`;
-    chatIdEl.style.cssText = "font-weight:800;color:#e0b0ff;font-size:16px;text-align:center;"; // Slightly larger
-    infoPanel.appendChild(chatIdEl);
+  // @chatId
+  const chatIdEl = document.createElement("div");
+  chatIdEl.textContent = `@${user.chatId || "Unknown"}`;
+  chatIdEl.style.cssText = "font-weight:800;color:#e0b0ff;font-size:16px;text-align:center;";
+  infoPanel.appendChild(chatIdEl);
 
-    // Legendary details
-    const gender = (user.gender || "person").toLowerCase();
-    const pronoun = gender === "male" ? "his" : "her";
-    const ageGroup = !user.age ? "20s" : user.age >= 30 ? "30s" : "20s";
-    const flair = gender === "male" ? "😎" : "💋";
-    const fruit = user.fruitPick || "🍇";
-    const nature = user.naturePick || "cool";
-    const city = user.location || user.city || "Lagos";
-    const country = user.country || "Nigeria";
+  // Legendary details
+  const gender = (user.gender || "person").toLowerCase();
+  const pronoun = gender === "male" ? "his" : "her";
+  const ageGroup = !user.age ? "20s" : user.age >= 30 ? "30s" : "20s";
+  const flair = gender === "male" ? "😎" : "💋";
+  const fruit = user.fruitPick || "🍇";
+  const nature = user.naturePick || "cool";
+  const city = user.location || user.city || "Lagos";
+  const country = user.country || "Nigeria";
 
-    const detailsEl = document.createElement("p");
-    detailsEl.textContent = `A ${fruit} ${nature} ${gender} in ${pronoun} ${ageGroup}, currently in ${city}, ${country}. ${flair}`;
-    detailsEl.style.cssText = "margin:0 0 10px;font-size:14.5px;line-height:1.45;color:#ccc;text-align:center;opacity:0.9;";
-    infoPanel.appendChild(detailsEl);
+  const detailsEl = document.createElement("p");
+  detailsEl.textContent = `A ${fruit} ${nature} ${gender} in ${pronoun} ${ageGroup}, currently in ${city}, ${country}. ${flair}`;
+  detailsEl.style.cssText = "margin:0 0 10px;font-size:14.5px;line-height:1.45;color:#ccc;text-align:center;opacity:0.9;";
+  infoPanel.appendChild(detailsEl);
 
-    // Meet heart button
-    const meetBtn = document.createElement("div");
-    meetBtn.style.cssText = "width:44px;height:44px;border-radius:50%;background:rgba(255,0,242,0.15);display:flex;align-items:center;justify-content:center;margin:0 auto;cursor:pointer;border:1px solid rgba(255,0,242,0.5);transition:all 0.3s ease;box-shadow:0 0 12px rgba(255,0,242,0.3);";
-    meetBtn.innerHTML = `<img src="https://cdn.shopify.com/s/files/1/0962/6648/6067/files/hearts__128_x_128_px.svg?v=1761809626" style="width:26px;height:26px;filter:drop-shadow(0 0 8px #ff00f2);"/>`;
-    meetBtn.onclick = (e) => {
-      e.stopPropagation();
-      if (typeof showMeetModal === 'function') showMeetModal(user);
-    };
-    meetBtn.onmouseenter = () => {
-      meetBtn.style.transform = "scale(1.15)";
-      meetBtn.style.background = "rgba(255,0,242,0.3)";
-      meetBtn.style.boxShadow = "0 0 20px rgba(255,0,242,0.6)";
-    };
-    meetBtn.onmouseleave = () => {
-      meetBtn.style.transform = "scale(1)";
-      meetBtn.style.background = "rgba(255,0,242,0.15)";
-      meetBtn.style.boxShadow = "0 0 12px rgba(255,0,242,0.3)";
-    };
-    infoPanel.appendChild(meetBtn);
+  // Meet button
+  const meetBtn = document.createElement("div");
+  meetBtn.style.cssText = "width:44px;height:44px;border-radius:50%;background:rgba(255,0,242,0.15);display:flex;align-items:center;justify-content:center;margin:0 auto;cursor:pointer;border:1px solid rgba(255,0,242,0.5);transition:all 0.3s ease;box-shadow:0 0 12px rgba(255,0,242,0.3);";
+  meetBtn.innerHTML = `<img src="https://cdn.shopify.com/s/files/1/0962/6648/6067/files/hearts__128_x_128_px.svg?v=1761809626" style="width:26px;height:26px;filter:drop-shadow(0 0 8px #ff00f2);"/>`;
+  meetBtn.onclick = (e) => {
+    e.stopPropagation();
+    if (typeof showMeetModal === 'function') showMeetModal(user);
+  };
+  meetBtn.onmouseenter = () => {
+    meetBtn.style.transform = "scale(1.15)";
+    meetBtn.style.background = "rgba(255,0,242,0.3)";
+    meetBtn.style.boxShadow = "0 0 20px rgba(255,0,242,0.6)";
+  };
+  meetBtn.onmouseleave = () => {
+    meetBtn.style.transform = "scale(1)";
+    meetBtn.style.background = "rgba(255,0,242,0.15)";
+    meetBtn.style.boxShadow = "0 0 12px rgba(255,0,242,0.3)";
+  };
+  infoPanel.appendChild(meetBtn);
 
-    // Gift slider — now has perfect spacing
-   // Gift slider — number now hugs the slider nicely, away from edge
-const sliderPanel = document.createElement("div");
-sliderPanel.style.cssText = "width:100%;padding:8px 14px;border-radius:8px;background:rgba(255,255,255,0.06);backdrop-filter:blur(8px);display:flex;align-items:center;gap:10px;box-sizing:border-box;";
+  // Gift slider (balanced spacing)
+  const sliderPanel = document.createElement("div");
+  sliderPanel.style.cssText = "width:100%;padding:8px 14px;border-radius:8px;background:rgba(255,255,255,0.06);backdrop-filter:blur(8px);display:flex;align-items:center;gap:10px;box-sizing:border-box;";
 
-const fieryColors = [["#ff0000","#ff8c00"],["#ff4500","#ffd700"],["#ff1493","#ff6347"],["#ff0055","#ff7a00"],["#ff5500","#ffcc00"],["#ff3300","#ff0066"]];
-const randomFieryGradient = () => `linear-gradient(90deg, ${fieryColors[Math.floor(Math.random()*fieryColors.length)].join(', ')})`;
+  const fieryColors = [["#ff0000","#ff8c00"],["#ff4500","#ffd700"],["#ff1493","#ff6347"],["#ff0055","#ff7a00"],["#ff5500","#ffcc00"],["#ff3300","#ff0066"]];
+  const randomFieryGradient = () => `linear-gradient(90deg, ${fieryColors[Math.floor(Math.random()*fieryColors.length)].join(', ')})`;
 
-const slider = document.createElement("input");
-slider.type = "range";
-slider.min = 100;
-slider.max = 999;
-slider.value = 100;
-slider.style.cssText = `flex:1;height:6px;border-radius:5px;outline:none;cursor:pointer;-webkit-appearance:none;background:${randomFieryGradient()};`;
+  const slider = document.createElement("input");
+  slider.type = "range"; slider.min = 100; slider.max = 999; slider.value = 100;
+  slider.style.cssText = `flex:1;height:6px;border-radius:5px;outline:none;cursor:pointer;-webkit-appearance:none;background:${randomFieryGradient()};`;
 
-const sliderLabel = document.createElement("span");
-sliderLabel.textContent = "100";
-sliderLabel.style.cssText = "font-size:14.5px;font-weight:700;color:#fff;width:50px;text-align:center;";  
-// Key changes:
-// - Removed min-width + padding-right → now fixed width
-// - text-align:center → number sits neatly in its own space
-// - width:50px → perfect snug fit, no hugging the edge
+  const sliderLabel = document.createElement("span");
+  sliderLabel.textContent = "100";
+  sliderLabel.style.cssText = "font-size:14.5px;font-weight:700;color:#fff;width:50px;text-align:center;";
 
-slider.oninput = () => {
-  sliderLabel.textContent = slider.value;
-  slider.style.background = randomFieryGradient();
-};
+  slider.oninput = () => {
+    sliderLabel.textContent = slider.value;
+    slider.style.background = randomFieryGradient();
+  };
 
-sliderPanel.append(slider, sliderLabel);
-infoPanel.appendChild(sliderPanel);
-    
-    // Gift button
-    const giftBtn = document.createElement("button");
-    giftBtn.textContent = "Gift";
-    giftBtn.style.cssText = "padding:10px 18px;border-radius:10px;border:none;font-weight:700;font-size:15px;background:linear-gradient(90deg,#ff0099,#ff0066);color:#fff;cursor:pointer;box-shadow:0 4px 12px rgba(255,0,153,0.4);transition:all 0.2s;";
-    giftBtn.onmouseenter = () => giftBtn.style.transform = "translateY(-3px)";
-    giftBtn.onmouseleave = () => giftBtn.style.transform = "";
-    giftBtn.onclick = async (e) => {
-      e.stopPropagation();
-      const amt = parseInt(slider.value);
-      if (amt < 100) return showStarPopup("Minimum 100 stars");
-      if ((currentUser?.stars || 0) < amt) return showStarPopup("Not enough stars");
-      if (user.chatId?.toLowerCase() === currentUser?.chatId?.toLowerCase()) return showStarPopup("You can't gift yourself silly!");
+  sliderPanel.append(slider, sliderLabel);
+  infoPanel.appendChild(sliderPanel);
 
-      const orig = giftBtn.textContent;
-      giftBtn.textContent = "";
-      const spin = document.createElement("div");
-      spin.style.cssText = "width:18px;height:18px;border:3px solid #fff3;border-top:3px solid white;border-radius:50%;animation:spin 0.7s linear infinite;margin:0 auto;";
-      giftBtn.appendChild(spin);
+  // Gift button
+  const giftBtn = document.createElement("button");
+  giftBtn.textContent = "Gift";
+  giftBtn.style.cssText = "padding:10px 18px;border-radius:10px;border:none;font-weight:700;font-size:15px;background:linear-gradient(90deg,#ff0099,#ff0066);color:#fff;cursor:pointer;box-shadow:0 4px 12px rgba(255,0,153,0.4);transition:all 0.2s;";
+  giftBtn.onmouseenter = () => giftBtn.style.transform = "translateY(-3px)";
+  giftBtn.onmouseleave = () => giftBtn.style.transform = "";
+  giftBtn.onclick = async (e) => {
+    e.stopPropagation();
+    const amt = parseInt(slider.value);
+    if (amt < 100) return showStarPopup("Minimum 100 stars");
+    if ((currentUser?.stars || 0) < amt) return showStarPopup("Not enough stars");
+    if (user.chatId?.toLowerCase() === currentUser?.chatId?.toLowerCase()) return showStarPopup("You can't gift yourself silly!");
 
-      try {
-        await sendStarsToUser(user, amt);
-        showStarPopup(`Sent ${amt} stars to ${user.chatId}!`);
-        slider.value = 100;
-        sliderLabel.textContent = "100";
-        setTimeout(() => card.remove(), 800);
-      } catch (e) {
-        showStarPopup("Failed — try again");
-      } finally {
-        giftBtn.textContent = orig;
-      }
-    };
-    infoPanel.appendChild(giftBtn);
+    const orig = giftBtn.textContent;
+    giftBtn.textContent = "";
+    const spin = document.createElement("div");
+    spin.style.cssText = "width:18px;height:18px;border:3px solid #fff3;border-top:3px solid white;border-radius:50%;animation:spin 0.7s linear infinite;margin:0 auto;";
+    giftBtn.appendChild(spin);
 
-    card.appendChild(infoPanel);
-    document.body.appendChild(card);
+    try {
+      await sendStarsToUser(user, amt);
+      showStarPopup(`Sent ${amt} stars to ${user.chatId}!`);
+      slider.value = 100;
+      sliderLabel.textContent = "100";
+      setTimeout(() => card.remove(), 800);
+    } catch (e) {
+      showStarPopup("Failed — try again");
+    } finally {
+      giftBtn.textContent = orig;
+    }
+  };
+  infoPanel.appendChild(giftBtn);
 
-    requestAnimationFrame(() => card.style.opacity = "1");
-  }
+  card.appendChild(infoPanel);
+  document.body.appendChild(card);
 
+  requestAnimationFrame(() => card.style.opacity = "1");
+}
   // ==================== VIP CARD — UNCHANGED (PERFECT) ====================
   function showOriginalVIPCard(user) {
     const card = document.createElement("div");

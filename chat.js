@@ -1655,28 +1655,29 @@ function sanitizeKey(email) {
     infoPanel.appendChild(meetBtn);
 
     // Gift slider — now has perfect spacing
-    const sliderPanel = document.createElement("div");
-    sliderPanel.style.cssText = "width:100%;padding:8px 10px;border-radius:8px;background:rgba(255,255,255,0.06);backdrop-filter:blur(8px);display:flex;align-items:center;gap:10px;";
+  // Gift slider — now perfectly centered with balanced spacing
+const sliderPanel = document.createElement("div");
+sliderPanel.style.cssText = "width:100%;padding:8px 14px;border-radius:8px;background:rgba(255,255,255,0.06);backdrop-filter:blur(8px);display:flex;align-items:center;gap:12px;box-sizing:border-box;";
 
-    const fieryColors = [["#ff0000","#ff8c00"],["#ff4500","#ffd700"],["#ff1493","#ff6347"],["#ff0055","#ff7a00"],["#ff5500","#ffcc00"],["#ff3300","#ff0066"]];
-    const randomFieryGradient = () => `linear-gradient(90deg, ${fieryColors[Math.floor(Math.random()*fieryColors.length)].join(', ')})`;
+const fieryColors = [["#ff0000","#ff8c00"],["#ff4500","#ffd700"],["#ff1493","#ff6347"],["#ff0055","#ff7a00"],["#ff5500","#ffcc00"],["#ff3300","#ff0066"]];
+const randomFieryGradient = () => `linear-gradient(90deg, ${fieryColors[Math.floor(Math.random()*fieryColors.length)].join(', ')})`;
 
-    const slider = document.createElement("input");
-    slider.type = "range"; slider.min = 100; slider.max = 999; slider.value = 100;
-    slider.style.cssText = `flex:1;height:6px;border-radius:5px;outline:none;cursor:pointer;-webkit-appearance:none;background:${randomFieryGradient()};`;
+const slider = document.createElement("input");
+slider.type = "range"; slider.min = 100; slider.max = 999; slider.value = 100;
+slider.style.cssText = `flex:1;height:6px;border-radius:5px;outline:none;cursor:pointer;-webkit-appearance:none;background:${randomFieryGradient()};`;
 
-    const sliderLabel = document.createElement("span");
-    sliderLabel.textContent = "100";
-    sliderLabel.style.cssText = "font-size:14px;font-weight:700;min-width:56px;text-align:right;color:#fff;";
+const sliderLabel = document.createElement("span");
+sliderLabel.textContent = "100";
+sliderLabel.style.cssText = "font-size:14.5px;font-weight:700;min-width:64px;text-align:right;color:#fff;padding-right:4px;";  // More breathing room
 
-    slider.oninput = () => {
-      sliderLabel.textContent = slider.value;
-      slider.style.background = randomFieryGradient();
-    };
+slider.oninput = () => {
+  sliderLabel.textContent = slider.value;
+  slider.style.background = randomFieryGradient();
+};
 
-    sliderPanel.append(slider, sliderLabel);
-    infoPanel.appendChild(sliderPanel);
-
+sliderPanel.append(slider, sliderLabel);
+infoPanel.appendChild(sliderPanel);
+    
     // Gift button
     const giftBtn = document.createElement("button");
     giftBtn.textContent = "Gift";

@@ -1549,29 +1549,27 @@ function sanitizeKey(email) {
     };
     card.appendChild(closeBtn);
 
-// ==================== VIDEO CONTAINER — FINAL, NO ERRORS ====================
+// ==================== VIDEO CONTAINER ====================
 const videoContainer = document.createElement("div");
 videoContainer.style.cssText = `
   width:100%;
   height:320px;
   position:relative;
   overflow:hidden;
-  background:#000;
+  background:#000;      /* black backdrop */
   border-radius:16px 16px 0 0;
   touch-action:pan-y;
-  cursor:pointer;
 `;
 
 const videos = Array.isArray(user.socialcardvideoUrl)
   ? user.socialcardvideoUrl.filter(Boolean)
   : [];
 
-let currentIndex = 0;
-const videoEls = [];
-let dots = null;
-let updateDots = () => {};  // ← Only declare once here
+let activeVideo = null;
 
-if (videos.length > 0) {
+if (videos.length) {
+
+  // ===== SWIPE WRAPPER =====
   const swipeWrapper = document.createElement("div");
   swipeWrapper.style.cssText = `
     display:flex;
@@ -1580,134 +1578,162 @@ if (videos.length > 0) {
     transition:transform 0.35s ease;
   `;
 
+  let currentIndex = 0;
+  let startX = 0;
+  const videoEls = [];
+
   videos.forEach(src => {
-    const frame = document.createElement("div");
-    frame.style.cssText = `
+
+    // ===== OUTER FRAME (black backdrop per video) =====
+    const wrap = document.createElement("div");
+    wrap.style.cssText = `
+      position:relative;
       width:100%;
       height:100%;
       flex-shrink:0;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      background:#000;
       overflow:hidden;
+      background:#000;
+      display:flex;
+      justify-content:flex-start;  /* push video left */
+      align-items:center;
     `;
 
+    // ===== VIDEO =====
     const video = document.createElement("video");
     video.src = src;
     video.muted = true;
     video.loop = true;
     video.autoplay = true;
     video.preload = "metadata";
-    video.playsInline = true;
+    video.setAttribute("playsinline", "");
     video.setAttribute("webkit-playsinline", "");
 
+    // ===== INNER FRAME STYLE =====
     video.style.cssText = `
-      max-width:100%;
-      max-height:100%;
+      height:100%;
       width:auto;
-      height:auto;
       object-fit:contain;
+      object-position:left center;   /* push to left inside the frame */
+      background:transparent;
       display:block;
     `;
 
+    // ===== MUTE ICON =====
+    const muteIcon = document.createElement("div");
+    muteIcon.textContent = "🔇";
+    muteIcon.style.cssText = `
+      position:absolute;
+      bottom:12px;
+      right:12px;
+      font-size:16px;
+      background:rgba(0,0,0,0.55);
+      padding:6px;
+      border-radius:50%;
+      color:#fff;
+      opacity:0.6;
+      transition:0.25s;
+      pointer-events:none;
+      z-index:5;
+    `;
+
     video.play().catch(() => {});
-    frame.appendChild(video);
-    swipeWrapper.appendChild(frame);
-    videoEls.push(video);
+
+    // 🔊 TAP TO TOGGLE SOUND
+    video.addEventListener("click", e => {
+      e.stopPropagation();
+      if (activeVideo && activeVideo !== video) {
+        activeVideo.muted = true;
+      }
+      video.muted = !video.muted;
+      muteIcon.style.opacity = video.muted ? "0.6" : "0";
+      activeVideo = video;
+    });
+
+    wrap.append(video, muteIcon);
+    swipeWrapper.appendChild(wrap);
+    videoEls.push({ video, muteIcon });
   });
 
   videoContainer.appendChild(swipeWrapper);
 
-  // DOTS — only if multiple videos
+  // ===== DOTS =====
+  let dots;
   if (videos.length > 1) {
     dots = document.createElement("div");
     dots.style.cssText = `
       position:absolute;
-      bottom:12px;
+      bottom:10px;
       left:50%;
       transform:translateX(-50%);
       display:flex;
-      gap:7px;
+      gap:6px;
       z-index:6;
     `;
 
     videos.forEach((_, i) => {
       const dot = document.createElement("div");
       dot.style.cssText = `
-        width:8px;
-        height:8px;
+        width:7px;
+        height:7px;
         border-radius:50%;
-        background:${i === 0 ? "#ff00f2" : "rgba(255,0,242,0.4)"};
-        transition:all 0.3s;
+        background:${i === 0 ? "#ff00f2" : "rgba(255,0,242,0.35)"};
+        transition:0.3s;
       `;
       dots.appendChild(dot);
     });
-    videoContainer.appendChild(dots);
 
-    // ← NO 'let' HERE — just assign the function
-    updateDots = () => {
-      dots.querySelectorAll("div").forEach((dot, i) => {
-        dot.style.background = i === currentIndex ? "#ff00f2" : "rgba(255,0,242,0.4)";
-        dot.style.transform = i === currentIndex ? "scale(1.3)" : "scale(1)";
-      });
-    };
-    updateDots(); // Initial
+    videoContainer.appendChild(dots);
   }
 
-  // TAP TO TOGGLE SOUND (hidden, no icon)
-  videoContainer.onclick = (e) => {
-    e.stopPropagation();
-    const currentVideo = videoEls[currentIndex];
-    if (currentVideo) {
-      videoEls.forEach(v => v.muted = true);
-      currentVideo.muted = !currentVideo.muted;
-    }
-  };
-
-  // SWIPE
-  let startX = 0;
-  videoContainer.onpointerdown = e => startX = e.clientX;
-  videoContainer.onpointerup = e => {
-    const diff = startX - e.clientX;
-    if (Math.abs(diff) > 50) {
-      if (diff > 0 && currentIndex < videos.length - 1) currentIndex++;
-      else if (diff < 0 && currentIndex > 0) currentIndex--;
-      swipeWrapper.style.transform = `translateX(-${currentIndex * 100}%)`;
-      if (dots) updateDots();
-    }
-  };
-
-} else {
-  videoContainer.style.cssText += "display:flex;justify-content:center;align-items:center;color:#666;font-size:15px;";
-  videoContainer.innerHTML = "<div>No video yet~</div>";
-}
-
-card.appendChild(videoContainer);
-    
-  // ===== DOTS UPDATE FUNCTION =====
   const updateDots = () => {
     if (!dots) return;
-    [...dots.children].forEach((dot, i) => {
-      dot.style.background = i === currentIndex ? "#ff00f2" : "rgba(255,0,242,0.4)";
-      dot.style.transform = i === currentIndex ? "scale(1.2)" : "scale(1)";
+    [...dots.children].forEach((d, i) => {
+      d.style.background =
+        i === currentIndex
+          ? "#ff00f2"
+          : "rgba(255,0,242,0.35)";
     });
   };
 
-  // Initial dots update
-  updateDots();
+  // ===== SWIPE =====
+  videoContainer.addEventListener("pointerdown", e => {
+    startX = e.clientX;
+  });
+
+  videoContainer.addEventListener("pointerup", e => {
+    const diff = startX - e.clientX;
+    if (Math.abs(diff) < 50) return;
+
+    // 🔇 STOP ALL VIDEOS
+    videoEls.forEach(v => {
+      v.video.pause();
+      v.video.currentTime = 0;
+      v.video.muted = true;
+      v.muteIcon.style.opacity = "0.6";
+    });
+
+    activeVideo = null;
+
+    if (diff > 0 && currentIndex < videos.length - 1) currentIndex++;
+    if (diff < 0 && currentIndex > 0) currentIndex--;
+
+    swipeWrapper.style.transform = `translateX(-${currentIndex * 100}%)`;
+    updateDots();
+
+    videoEls[currentIndex].video.play().catch(() => {});
+  });
 
 } else {
-  // ===== NO VIDEO FALLBACK =====
-  videoContainer.style.display = "flex";
-  videoContainer.style.justifyContent = "center";
-  videoContainer.style.alignItems = "center";
-  videoContainer.style.color = "#555";
-  videoContainer.innerHTML = "<div>No video yet~</div>";
+  videoContainer.style.cssText += `
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#777;
+  `;
+  videoContainer.textContent = "No video yet~";
 }
 
 card.appendChild(videoContainer);
-
 
     // ==================== INFO PANEL — MORE SPACE ====================
     const infoPanel = document.createElement("div");

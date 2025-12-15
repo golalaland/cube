@@ -1534,17 +1534,48 @@ function sanitizeKey(email) {
     setTimeout(() => document.addEventListener("click", closeOut), 100);
 
     // Close X
-    const closeBtn = document.createElement("div");
-    closeBtn.innerHTML = "×";
-    closeBtn.style.cssText = "position:absolute;top:8px;right:12px;font-size:20px;font-weight:700;cursor:pointer;z-index:10;opacity:0.7;color:#fff;";
-    closeBtn.onmouseenter = () => closeBtn.style.opacity = "1";
-    closeBtn.onmouseleave = () => closeBtn.style.opacity = "0.7";
-    closeBtn.onclick = (e) => {
-      e.stopPropagation();
+     // === CINEMATIC BACKDROP BLUR OVERLAY ===
+    const backdrop = document.createElement("div");
+    backdrop.id = "socialCardBackdrop";
+    Object.assign(backdrop.style, {
+      position: "fixed",
+      top: 0, left: 0, width: "100vw", height: "100vh",
+      background: "rgba(0, 0, 0, 0.65)",
+      backdropFilter: "blur(8px)",
+      zIndex: "999998",
+      opacity: "0",
+      transition: "opacity 0.3s ease",
+      pointerEvents: "none"
+    });
+    document.body.appendChild(backdrop);
+
+    // Fade in card + backdrop
+    requestAnimationFrame(() => {
+      card.style.opacity = "1";
+      backdrop.style.opacity = "1";
+      backdrop.style.pointerEvents = "auto";
+    });
+
+    // Unified remove function
+    const removeAll = () => {
       card.remove();
+      backdrop.remove();
       document.removeEventListener("click", closeOut);
     };
-    card.appendChild(closeBtn);
+
+    // Updated close X button
+    closeBtn.onclick = (e) => {
+      e.stopPropagation();
+      removeAll();
+    };
+
+    // Close on outside click (now checks both card and backdrop)
+    const closeOut = (e) => {
+      if (!card.contains(e.target) && e.target !== backdrop) {
+        removeAll();
+      }
+    };
+    setTimeout(() => document.addEventListener("click", closeOut), 100);
 
     // ==================== VIDEO CONTAINER — SHORTER HEIGHT ====================
     const videoContainer = document.createElement("div");
@@ -1655,20 +1686,27 @@ function sanitizeKey(email) {
     infoPanel.appendChild(meetBtn);
 
     // Gift slider — now has perfect spacing
-  // Gift slider — now perfectly centered with balanced spacing
+ // Gift slider — number now hugs the slider nicely, away from edge
 const sliderPanel = document.createElement("div");
-sliderPanel.style.cssText = "width:100%;padding:8px 14px;border-radius:8px;background:rgba(255,255,255,0.06);backdrop-filter:blur(8px);display:flex;align-items:center;gap:12px;box-sizing:border-box;";
+sliderPanel.style.cssText = "width:100%;padding:8px 14px;border-radius:8px;background:rgba(255,255,255,0.06);backdrop-filter:blur(8px);display:flex;align-items:center;gap:10px;box-sizing:border-box;";
 
 const fieryColors = [["#ff0000","#ff8c00"],["#ff4500","#ffd700"],["#ff1493","#ff6347"],["#ff0055","#ff7a00"],["#ff5500","#ffcc00"],["#ff3300","#ff0066"]];
 const randomFieryGradient = () => `linear-gradient(90deg, ${fieryColors[Math.floor(Math.random()*fieryColors.length)].join(', ')})`;
 
 const slider = document.createElement("input");
-slider.type = "range"; slider.min = 100; slider.max = 999; slider.value = 100;
+slider.type = "range";
+slider.min = 100;
+slider.max = 999;
+slider.value = 100;
 slider.style.cssText = `flex:1;height:6px;border-radius:5px;outline:none;cursor:pointer;-webkit-appearance:none;background:${randomFieryGradient()};`;
 
 const sliderLabel = document.createElement("span");
 sliderLabel.textContent = "100";
-sliderLabel.style.cssText = "font-size:14.5px;font-weight:700;min-width:64px;text-align:right;color:#fff;padding-right:4px;";  // More breathing room
+sliderLabel.style.cssText = "font-size:14.5px;font-weight:700;color:#fff;width:50px;text-align:center;";  
+// Key changes:
+// - Removed min-width + padding-right → now fixed width
+// - text-align:center → number sits neatly in its own space
+// - width:50px → perfect snug fit, no hugging the edge
 
 slider.oninput = () => {
   sliderLabel.textContent = slider.value;
@@ -1677,7 +1715,6 @@ slider.oninput = () => {
 
 sliderPanel.append(slider, sliderLabel);
 infoPanel.appendChild(sliderPanel);
-    
     // Gift button
     const giftBtn = document.createElement("button");
     giftBtn.textContent = "Gift";

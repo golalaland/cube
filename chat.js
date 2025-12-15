@@ -1550,6 +1550,7 @@ function sanitizeKey(email) {
 const videoContainer = document.createElement("div");
 videoContainer.style.cssText = `
   width:100%;
+  height:320px;
   position:relative;
   overflow:hidden;
   background:#000;
@@ -1569,6 +1570,7 @@ if (videos.length) {
   swipeWrapper.style.cssText = `
     display:flex;
     width:${videos.length * 100}%;
+    height:100%;
     transition:transform 0.35s ease;
   `;
 
@@ -1576,16 +1578,20 @@ if (videos.length) {
   let startX = 0;
   const videoEls = [];
 
-  videos.forEach((src, index) => {
+  videos.forEach((src) => {
 
+    // ===== FRAME (IMPORTANT) =====
     const wrap = document.createElement("div");
     wrap.style.cssText = `
       position:relative;
       width:100%;
+      height:100%;
       flex-shrink:0;
+      overflow:hidden;
       background:#000;
     `;
 
+    // ===== VIDEO =====
     const video = document.createElement("video");
     video.src = src;
     video.muted = true;
@@ -1593,25 +1599,20 @@ if (videos.length) {
     video.autoplay = true;
     video.preload = "metadata";
 
-    // 🔒 INLINE
+    // 🔒 INLINE (iOS SAFE)
     video.setAttribute("playsinline", "");
     video.setAttribute("webkit-playsinline", "");
 
-    // 🎯 NO ZOOM, TRUE FRAME
+    // ✅ SAME FIT AS YOUR WORKING CARD
     video.style.cssText = `
       width:100%;
-      height:auto;
-      display:block;
-      object-fit:contain;
+      height:100%;
+      object-fit:cover;
+      object-position:center;
       background:#000;
     `;
 
-    // 🎚 Adjust container height once metadata loads
-    video.addEventListener("loadedmetadata", () => {
-      const ratio = video.videoHeight / video.videoWidth;
-      videoContainer.style.height = `${Math.min(400, window.innerWidth * ratio)}px`;
-    });
-
+    // ===== MUTE ICON =====
     const muteIcon = document.createElement("div");
     muteIcon.textContent = "🔇";
     muteIcon.style.cssText = `
@@ -1631,12 +1632,14 @@ if (videos.length) {
 
     video.play().catch(() => {});
 
-    // 🔊 TAP TO TOGGLE SOUND
+    // 🔊 TAP TO TOGGLE SOUND (ACTIVE ONLY)
     video.addEventListener("click", e => {
       e.stopPropagation();
+
       if (activeVideo && activeVideo !== video) {
         activeVideo.muted = true;
       }
+
       video.muted = !video.muted;
       muteIcon.style.opacity = video.muted ? "0.6" : "0";
       activeVideo = video;
@@ -1670,6 +1673,7 @@ if (videos.length) {
         height:7px;
         border-radius:50%;
         background:${i === 0 ? "#ff00f2" : "rgba(255,0,242,0.35)"};
+        transition:0.3s;
       `;
       dots.appendChild(dot);
     });
@@ -1696,9 +1700,10 @@ if (videos.length) {
     const diff = startX - e.clientX;
     if (Math.abs(diff) < 50) return;
 
-    // 🔇 STOP ALL AUDIO
+    // 🔇 HARD STOP EVERYTHING
     videoEls.forEach(v => {
       v.video.pause();
+      v.video.currentTime = 0;
       v.video.muted = true;
       v.muteIcon.style.opacity = "0.6";
     });
@@ -1711,6 +1716,7 @@ if (videos.length) {
     swipeWrapper.style.transform = `translateX(-${currentIndex * 100}%)`;
     updateDots();
 
+    // ▶️ PLAY CURRENT (MUTED)
     const current = videoEls[currentIndex].video;
     current.play().catch(() => {});
   });

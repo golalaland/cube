@@ -829,6 +829,14 @@ function showTapModal(targetEl, msgData) {
   setTimeout(() => tapModalEl?.remove(), 3000);
 }
 
+
+if (currentUser.isHost === true) {
+  document.querySelectorAll(".host-only").forEach(el => {
+    el.style.display = "inline-flex";
+  });
+}
+
+
 // =============================
 // EXTRACT COLORS FROM GRADIENT — USED FOR CONFETTI
 // =============================
@@ -1930,11 +1938,7 @@ document.getElementById("hostLogoutBtn")?.addEventListener("click", async (e) =>
   }
 });
 
-if (userData?.isHost === true) {
-  document.querySelectorAll(".host-only").forEach(el => {
-    el.style.display = "inline-flex"; // buttons need inline-flex
-  });
-}
+
 
 
 /* ===============================

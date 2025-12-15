@@ -830,13 +830,6 @@ function showTapModal(targetEl, msgData) {
 }
 
 
-if (currentUser.isHost === true) {
-  document.querySelectorAll(".host-only").forEach(el => {
-    el.style.display = "inline-flex";
-  });
-}
-
-
 // =============================
 // EXTRACT COLORS FROM GRADIENT — USED FOR CONFETTI
 // =============================

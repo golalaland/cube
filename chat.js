@@ -4310,7 +4310,7 @@ function renderCards(videosToRender) {
     return true;
   });
 
-  // Always horizontal scroll for both normal and trending
+  // Always horizontal scroll
   Object.assign(content.style, {
     display: "flex", gap: "16px", flexWrap: "nowrap", overflowX: "auto",
     paddingBottom: "40px", scrollBehavior: "smooth", width: "100%", justifyContent: "flex-start"
@@ -4336,8 +4336,9 @@ function renderCards(videosToRender) {
     card.setAttribute("data-uploader", video.uploaderName || "Anonymous");
     card.setAttribute("data-title", video.title || "");
     card.setAttribute("data-location", video.location || ""); // for search
+    card.setAttribute("data-tags", (video.tags || []).join(" ").toLowerCase()); // for tags search
 
-    // All cards use the exact same size and style as your original normal card
+    // Exact same card style for ALL cards (normal + trending)
     Object.assign(card.style, {
       minWidth: "230px", maxWidth: "230px", background: "#0f0a1a", borderRadius: "12px",
       overflow: "hidden", display: "flex", flexDirection: "column", cursor: "pointer",
@@ -4355,7 +4356,6 @@ function renderCards(videosToRender) {
       card.style.boxShadow = "0 4px 20px rgba(138,43,226,0.4)";
     };
 
-    // Video container — same height for all
     const videoContainer = document.createElement("div");
     videoContainer.style.cssText = "height:320px;overflow:hidden;position:relative;background:#000;cursor:pointer;";
 
@@ -4384,7 +4384,7 @@ function renderCards(videosToRender) {
       videoContainer.appendChild(lockedOverlay);
     }
 
-    // Fullscreen playback (same as old)
+    // Fullscreen playback (same as your original)
     videoContainer.onclick = (e) => {
       e.stopPropagation();
       if (!isUnlocked) {
@@ -4416,20 +4416,30 @@ function renderCards(videosToRender) {
 
     videoContainer.appendChild(videoEl);
 
-    // Info panel — same as old design
+    // Info panel — same for all cards
     const infoPanel = document.createElement("div");
     infoPanel.style.cssText = "background: linear-gradient(180deg, #1a0b2e, #0f0519);padding:12px;display:flex;flex-direction:column;gap:6px;border-top: 1px solid #8a2be2;";
 
-    // Title
+    // Title — clickable for search
     const title = document.createElement("div");
     title.textContent = video.title || "Untitled";
-    title.style.cssText = "font-weight:800;color:#e0b0ff;font-size:15px;text-shadow: 0 0 8px #ff00f2;";
+    title.style.cssText = "font-weight:800;color:#e0b0ff;font-size:15px;text-shadow: 0 0 8px #ff00f2; cursor:pointer;";
+    title.onclick = (e) => {
+      e.stopPropagation();
+      // Trigger search with this title
+      const searchInput = document.getElementById("highlightSearchInput");
+      if (searchInput) {
+        searchInput.value = video.title;
+        searchInput.dispatchEvent(new Event('input'));
+      }
+    };
 
     // Uploader — clickable @username (opens social card after unlock check)
     const uploader = document.createElement("div");
-    uploader.innerHTML = `<span style="color:#00ffea; font-size:12px; cursor:pointer;">@${video.uploaderName || "Anonymous"}</span>`;
-    uploader.style.opacity = "0.9";
-    uploader.querySelector("span").onclick = (e) => {
+    const usernameSpan = document.createElement("span");
+    usernameSpan.textContent = `@${video.uploaderName || "Anonymous"}`;
+    usernameSpan.style.cssText = "color:#00ffea; font-size:12px; cursor:pointer; font-weight:600;";
+    usernameSpan.onclick = (e) => {
       e.stopPropagation();
       if (!isUnlocked) {
         showStarPopup("Unlock the clip first to view profile", "error");
@@ -4439,15 +4449,31 @@ function renderCards(videosToRender) {
       alert(`Opening profile for @${video.uploaderName}`);
       // showSocialCard(video.uploaderId);
     };
+    uploader.appendChild(usernameSpan);
+    uploader.style.cssText = "opacity:0.9;";
 
-    // Tags — for search (smart: add as data-tags attribute + display)
-    const tagsArray = video.tags || []; // assume tags are array in video doc
-    card.setAttribute("data-tags", tagsArray.join(" ").toLowerCase());
+    // Tags — clickable for search
+    const tagsArray = video.tags || [];
     const tagsEl = document.createElement("div");
-    tagsEl.textContent = tagsArray.length ? "#" + tagsArray.join(" #") : "";
-    tagsEl.style.cssText = "font-size:11px; color:#888; opacity:0.8; margin-top:4px; word-break:break-word;";
+    if (tagsArray.length > 0) {
+      tagsArray.forEach(tag => {
+        const tagSpan = document.createElement("span");
+        tagSpan.textContent = `#${tag}`;
+        tagSpan.style.cssText = "font-size:11px; color:#888; opacity:0.8; margin-right:8px; cursor:pointer;";
+        tagSpan.onclick = (e) => {
+          e.stopPropagation();
+          const searchInput = document.getElementById("highlightSearchInput");
+          if (searchInput) {
+            searchInput.value = tag;
+            searchInput.dispatchEvent(new Event('input'));
+          }
+        };
+        tagsEl.appendChild(tagSpan);
+      });
+    }
+    tagsEl.style.cssText = "margin-top:4px;";
 
-    // Unlock button — same as old
+    // Unlock button — same as original
     const unlockBtn = document.createElement("button");
     unlockBtn.textContent = isUnlocked ? "Unlocked" : `Unlock ${video.highlightVideoPrice || 100} ⭐️`;
     Object.assign(unlockBtn.style, {
@@ -4482,131 +4508,31 @@ function renderCards(videosToRender) {
     content.appendChild(card);
   });
 
-  // Enhanced search — now includes tags, location, chatId, title
+  // Enhanced smart search — title, @username, location, tags
   const searchInput = document.getElementById("highlightSearchInput");
   if (searchInput) {
     searchInput.oninput = (e) => {
       const term = e.target.value.trim().toLowerCase();
+      if (!term) {
+        content.querySelectorAll(".videoCard").forEach(card => card.style.display = "flex");
+        return;
+      }
+      
       content.querySelectorAll(".videoCard").forEach(card => {
         const title = (card.getAttribute("data-title") || "").toLowerCase();
         const uploader = (card.getAttribute("data-uploader") || "").toLowerCase();
         const location = (card.getAttribute("data-location") || "").toLowerCase();
         const tags = (card.getAttribute("data-tags") || "").toLowerCase();
-        const matches = title.includes(term) || uploader.includes(term) || location.includes(term) || tags.includes(term);
+        
+        const matches = title.includes(term) || 
+                       uploader.includes(term) || 
+                       location.includes(term) || 
+                       tags.includes(term);
+                       
         card.style.display = matches ? "flex" : "none";
       });
     };
   }
-}
-    function playFullVideo(video) {
-  const src = video.highlightVideo || video.videoUrl || video.previewClip || "";
-  if (!src) return showGoldAlert("Video not found");
-
-  // Remove any existing custom player
-  document.querySelectorAll('.custom-video-player').forEach(el => el.remove());
-
-  // Create a hidden <video> that instantly opens native browser player
-  const videoEl = document.createElement("video");
-  videoEl.src = src;
-  videoEl.controls = true;
-  videoEl.autoplay = true;
-  videoEl.playsInline = true;
-  videoEl.style.display = "none"; // invisible — we don't want to show it
-
-  // Optional: mark it so we can clean it later
-  videoEl.classList.add("custom-video-player");
-
-  document.body.appendChild(videoEl);
-
-  // This triggers the native mobile/browser fullscreen player immediately
-  videoEl.play();
-
-  // Auto-remove after it ends or user closes (keeps DOM clean)
-  videoEl.addEventListener("ended", () => videoEl.remove());
-  videoEl.addEventListener("pause", () => setTimeout(() => videoEl.remove(), 1000));
-}
-
-    // Info panel
-    const infoPanel = document.createElement("div");
-    infoPanel.style.cssText = "background:linear-gradient(180deg,#1a0b2e,#0f0519);padding:14px;display:flex;flex-direction:column;gap:10px;border-radius:0 0 16px 16px;";
-
-    if (isTrendingCard) {
-      // Centered @chatId (same style as title)
-      const chatIdEl = document.createElement("div");
-      chatIdEl.textContent = `@${video.uploaderName || "Anonymous"}`;
-      chatIdEl.style.cssText = "font-weight:800;color:#e0b0ff;font-size:15px;text-align:center;";
-
-      // Legendary details (small & cute)
-      const detailsEl = document.createElement("p");
-      detailsEl.textContent = detailsText || "Hey~";
-      detailsEl.style.cssText = "margin:0 0 10px; font-size:14px; line-height:1.4; color:#ccc; text-align:center; opacity:0.9;";
-
-      // Meet button — small cute heart, centered
-      const meetBtn = document.createElement("div");
-    meetBtn.style.cssText = `
-  width:40px;height:40px;border-radius:50%;
-  background:rgba(255,0,242,0.15);
-  display:flex;align-items:center;justify-content:center;
-  margin:0 auto 12px;
-  cursor:pointer;
-  border:1px solid rgba(255,0,242,0.5);
-  transition:all 0.3s ease;
-  box-shadow:0 0 12px rgba(255,0,242,0.3);
-`;
-      meetBtn.innerHTML = `<img src="https://cdn.shopify.com/s/files/1/0962/6648/6067/files/hearts__128_x_128_px.svg?v=1761809626" style="width:24px;height:24px;filter:drop-shadow(0 0 6px #00ffea);"/>`;
-      meetBtn.onclick = (e) => {
-        e.stopPropagation();
-        showMeetModal({
-          chatId: video.uploaderName || "this creator",
-          whatsapp: video.whatsapp || "",
-          country: video.country || "Nigeria"
-        });
-      };
-      meetBtn.onmouseenter = () => meetBtn.style.transform = "scale(1.15)";
-      meetBtn.onmouseleave = () => meetBtn.style.transform = "scale(1)";
-
-      infoPanel.append(chatIdEl, detailsEl, meetBtn);
-    } else {
-      // Normal title
-      const title = document.createElement("div");
-      title.textContent = video.title || "Untitled";
-      title.style.cssText = "font-weight:800;color:#e0b0ff;font-size:15px;text-shadow: 0 0 8px #ff00f2;";
-
-      const uploader = document.createElement("div");
-      uploader.textContent = `By: ${video.uploaderName || "Anonymous"}`;
-      uploader.style.cssText = "font-size:12px;color:#00ffea;opacity:0.9;";
-
-      infoPanel.append(title, uploader);
-    }
-
-    // Unlock button — full width, below meet (only if priced or not trending)
-    if (video.highlightVideoPrice > 0 || !isTrendingCard) {
-      const unlockBtn = document.createElement("button");
-      unlockBtn.textContent = isUnlocked ? "Unlocked ♡" : `Unlock ${video.highlightVideoPrice || 100} STRZ`;
-      Object.assign(unlockBtn.style, {
-        width: "100%",
-        padding: "10px",
-        background: isUnlocked ? "rgba(138,43,226,0.3)" : "linear-gradient(135deg,#ff00f2,#8a2be2,#00ffea)",
-        border: "1px solid #ff00f2",
-        borderRadius: "10px",
-        color: "#fff",
-        fontWeight: "700",
-        fontSize: "13px",
-        cursor: isUnlocked ? "default" : "pointer",
-        boxShadow: "0 3px 12px rgba(255,0,242,0.3)"
-      });
-      if (!isUnlocked) {
-        unlockBtn.onclick = (e) => {
-          e.stopPropagation();
-          showUnlockConfirm(video, () => renderCards(videosToRender));
-        };
-      }
-      infoPanel.appendChild(unlockBtn);
-    }
-
-    card.append(videoContainer, infoPanel);
-    content.appendChild(card);
-  });
 }
 function updateButtonStates() {
   toggleBtn.textContent = "Show Unlocked";

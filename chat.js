@@ -1523,34 +1523,33 @@ function showTrendingStyleHostCard(user) {
 
   const videos = Array.isArray(user.socialcardvideoUrl) ? user.socialcardvideoUrl.filter(url => url) : [];
 
+  let currentIndex = 0;
+
   if (videos.length > 0) {
     const swipeWrapper = document.createElement("div");
     swipeWrapper.style.cssText = `display:flex;width:${videos.length * 100}%;height:100%;transition:transform 0.4s ease;`;
 
-    videos.forEach((src, index) => {
+    videos.forEach(src => {
       const videoEl = document.createElement("video");
       videoEl.src = src;
-      videoEl.muted = true;         // Starts muted
+      videoEl.muted = true;
       videoEl.loop = true;
       videoEl.preload = "metadata";
-      videoEl.playsInline = true;   // Crucial: prevents fullscreen on iOS/Android
+      videoEl.playsInline = true;
       videoEl.style.cssText = `
         width:100%;
         height:100%;
-        object-fit:contain;         // Shows full video with letterbox (no zoom/crop)
+        object-fit:contain;
         flex-shrink:0;
         background:#000;
       `;
-
-      // Auto-play when visible (after card opens)
-      requestAnimationFrame(() => videoEl.play().catch(() => {}));
-
+      videoEl.play().catch(() => {});
       swipeWrapper.appendChild(videoEl);
     });
 
     videoContainer.appendChild(swipeWrapper);
 
-    // === Swipe logic (unchanged) ===
+    // Dots for multiple videos
     if (videos.length > 1) {
       const dots = document.createElement("div");
       dots.style.cssText = "position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:5;";
@@ -1561,7 +1560,6 @@ function showTrendingStyleHostCard(user) {
       });
       videoContainer.appendChild(dots);
 
-      let currentIndex = 0;
       const updateDots = () => {
         dots.querySelectorAll("div").forEach((d, i) => {
           d.style.background = i === currentIndex ? "#ff00f2" : "rgba(255,0,242,0.3)";
@@ -1581,24 +1579,18 @@ function showTrendingStyleHostCard(user) {
       };
     }
 
-    // === TAP TO MUTE / UNMUTE (all videos in carousel) ===
+    // Tap to mute/unmute
     videoContainer.onclick = (e) => {
-      e.stopPropagation(); // Prevent closing card
-
-      const currentVideo = swipeWrapper.children[currentIndex || 0];
+      e.stopPropagation();
+      const currentVideo = swipeWrapper.children[currentIndex];
       if (currentVideo) {
         currentVideo.muted = !currentVideo.muted;
 
-        // Optional: visual feedback (mute icon overlay)
         let muteOverlay = videoContainer.querySelector("#muteOverlay");
         if (!muteOverlay) {
           muteOverlay = document.createElement("div");
           muteOverlay.id = "muteOverlay";
-          muteOverlay.style.cssText = `
-            position:absolute; top:10px; right:10px; z-index:6;
-            font-size:24px; opacity:0; transition:opacity 0.3s;
-            pointer-events:none;
-          `;
+          muteOverlay.style.cssText = "position:absolute;top:10px;right:10px;z-index:6;font-size:24px;opacity:0;transition:opacity 0.3s;pointer-events:none;";
           videoContainer.appendChild(muteOverlay);
         }
         muteOverlay.innerHTML = currentVideo.muted ? "🔇" : "🔊";
@@ -1617,7 +1609,6 @@ function showTrendingStyleHostCard(user) {
   }
 
   card.appendChild(videoContainer);
-
 
     // ==================== INFO PANEL — MORE SPACE ====================
     const infoPanel = document.createElement("div");

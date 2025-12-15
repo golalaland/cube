@@ -1551,6 +1551,7 @@ function sanitizeKey(email) {
 
 // ==================== VIDEO CONTAINER — PERFECTLY CENTERED ====================
 const videoContainer = document.createElement("div");
+
 videoContainer.style.cssText = `
   width:100%;
   height:320px;
@@ -1568,8 +1569,11 @@ const videos = Array.isArray(user.socialcardvideoUrl)
 
 let currentIndex = 0;
 let activeVideo = null;
+let videoEls = [];
+let dots = null;
 
 if (videos.length) {
+
   // ===== SWIPE WRAPPER =====
   const swipeWrapper = document.createElement("div");
   swipeWrapper.style.cssText = `
@@ -1578,8 +1582,6 @@ if (videos.length) {
     height:100%;
     transition:transform 0.35s ease;
   `;
-
-  const videoEls = [];
 
   videos.forEach(src => {
     // ===== VIDEO FRAME (centered) =====
@@ -1590,8 +1592,8 @@ if (videos.length) {
       height:100%;
       flex-shrink:0;
       display:flex;
-      justify-content:center;    /* Horizontal center */
-      align-items:center;        /* Vertical center */
+      justify-content:center;
+      align-items:center;
       background:#000;
       overflow:hidden;
     `;
@@ -1605,7 +1607,6 @@ if (videos.length) {
     video.preload = "metadata";
     video.playsInline = true;
     video.setAttribute("webkit-playsinline", "");
-
     video.style.cssText = `
       max-width:100%;
       max-height:100%;
@@ -1615,7 +1616,6 @@ if (videos.length) {
       display:block;
       background:transparent;
     `;
-
     video.play().catch(() => {});
 
     frame.appendChild(video);
@@ -1625,7 +1625,7 @@ if (videos.length) {
 
   videoContainer.appendChild(swipeWrapper);
 
-  // ===== GLOBAL MUTE ICON (one for the whole carousel) =====
+  // ===== GLOBAL MUTE ICON =====
   const muteIcon = document.createElement("div");
   muteIcon.textContent = "🔇";
   muteIcon.style.cssText = `
@@ -1644,45 +1644,43 @@ if (videos.length) {
   `;
   videoContainer.appendChild(muteIcon);
 
-  // ===== TAP TO TOGGLE MUTE (on container) =====
+  // ===== TAP TO TOGGLE MUTE =====
   videoContainer.onclick = (e) => {
     e.stopPropagation();
     const currentVideo = videoEls[currentIndex];
-    if (currentVideo) {
-      // Mute all others
-      videoEls.forEach(v => v.muted = true);
-      // Toggle current
-      currentVideo.muted = !currentVideo.muted;
-      muteIcon.textContent = currentVideo.muted ? "🔇" : "🔊";
-      muteIcon.style.opacity = "1";
-      clearTimeout(muteIcon.hideTimer);
-      muteIcon.hideTimer = setTimeout(() => {
-        muteIcon.style.opacity = "0.7";
-      }, 1500);
-      activeVideo = currentVideo;
-    }
+    if (!currentVideo) return;
+
+    // Mute all others
+    videoEls.forEach(v => v.muted = true);
+
+    // Toggle current
+    currentVideo.muted = !currentVideo.muted;
+    muteIcon.textContent = currentVideo.muted ? "🔇" : "🔊";
+    muteIcon.style.opacity = "1";
+
+    clearTimeout(muteIcon.hideTimer);
+    muteIcon.hideTimer = setTimeout(() => {
+      muteIcon.style.opacity = "0.7";
+    }, 1500);
+
+    activeVideo = currentVideo;
   };
 
   // ===== SWIPE LOGIC =====
   let startX = 0;
-  videoContainer.onpointerdown = (e) => {
-    startX = e.clientX;
-  };
+  videoContainer.onpointerdown = (e) => startX = e.clientX;
   videoContainer.onpointerup = (e) => {
     const diff = startX - e.clientX;
     if (Math.abs(diff) > 50) {
-      if (diff > 0 && currentIndex < videos.length - 1) {
-        currentIndex++;
-      } else if (diff < 0 && currentIndex > 0) {
-        currentIndex--;
-      }
+      if (diff > 0 && currentIndex < videos.length - 1) currentIndex++;
+      else if (diff < 0 && currentIndex > 0) currentIndex--;
+      
       swipeWrapper.style.transform = `translateX(-${currentIndex * 100}%)`;
       updateDots();
     }
   };
 
   // ===== DOTS INDICATOR =====
-  let dots;
   if (videos.length > 1) {
     dots = document.createElement("div");
     dots.style.cssText = `
@@ -1694,7 +1692,6 @@ if (videos.length) {
       gap:7px;
       z-index:6;
     `;
-
     videos.forEach((_, i) => {
       const dot = document.createElement("div");
       dot.style.cssText = `
@@ -1706,77 +1703,28 @@ if (videos.length) {
       `;
       dots.appendChild(dot);
     });
-
     videoContainer.appendChild(dots);
-
-    const updateDots = () => {
-      dots.querySelectorAll("div").forEach((dot, i) => {
-        dot.style.background = i === currentIndex ? "#ff00f2" : "rgba(255,0,242,0.4)";
-        dot.style.transform = i === currentIndex ? "scale(1.2)" : "scale(1)";
-      });
-    };
-
-    // Initial dots update
-    updateDots();
   }
 
+  // ===== DOTS UPDATE FUNCTION =====
+  const updateDots = () => {
+    if (!dots) return;
+    [...dots.children].forEach((dot, i) => {
+      dot.style.background = i === currentIndex ? "#ff00f2" : "rgba(255,0,242,0.4)";
+      dot.style.transform = i === currentIndex ? "scale(1.2)" : "scale(1)";
+    });
+  };
+
+  // Initial dots update
+  updateDots();
+
 } else {
-  // No video fallback
+  // ===== NO VIDEO FALLBACK =====
   videoContainer.style.display = "flex";
   videoContainer.style.justifyContent = "center";
   videoContainer.style.alignItems = "center";
   videoContainer.style.color = "#555";
   videoContainer.innerHTML = "<div>No video yet~</div>";
-}
-
-card.appendChild(videoContainer);
-
-  const updateDots = () => {
-    if (!dots) return;
-    [...dots.children].forEach((d, i) => {
-      d.style.background =
-        i === currentIndex
-          ? "#ff00f2"
-          : "rgba(255,0,242,0.35)";
-    });
-  };
-
-  // ===== SWIPE =====
-  videoContainer.addEventListener("pointerdown", e => {
-    startX = e.clientX;
-  });
-
-  videoContainer.addEventListener("pointerup", e => {
-    const diff = startX - e.clientX;
-    if (Math.abs(diff) < 50) return;
-
-    // 🔇 STOP ALL VIDEOS
-    videoEls.forEach(v => {
-      v.video.pause();
-      v.video.currentTime = 0;
-      v.video.muted = true;
-      v.muteIcon.style.opacity = "0.6";
-    });
-
-    activeVideo = null;
-
-    if (diff > 0 && currentIndex < videos.length - 1) currentIndex++;
-    if (diff < 0 && currentIndex > 0) currentIndex--;
-
-    swipeWrapper.style.transform = `translateX(-${currentIndex * 100}%)`;
-    updateDots();
-
-    videoEls[currentIndex].video.play().catch(() => {});
-  });
-
-} else {
-  videoContainer.style.cssText += `
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    color:#777;
-  `;
-  videoContainer.textContent = "No video yet~";
 }
 
 card.appendChild(videoContainer);

@@ -1819,9 +1819,6 @@ function sanitizeKey(email) {
   window.typeWriterEffect = typeWriterEffect;
 })();
 
-// Keep your existing sendStarsToUser function unchanged — it works perfectly
-})(); 
-
 async function sendStarsToUser(targetUser, amt) {
   if (amt < 100 || !currentUser?.uid) {
     showGoldAlert("Invalid gift", 4000);

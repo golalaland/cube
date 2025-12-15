@@ -733,7 +733,7 @@ function cancelReply() {
 function showReplyCancelButton() {
   if (!refs.cancelReplyBtn) {
     const btn = document.createElement("button");
-    btn.textContent = "Cancel";
+    btn.textContent = "×";
     btn.style.marginLeft = "6px";
     btn.style.fontSize = "12px";
     btn.onclick = cancelReply;
@@ -791,7 +791,7 @@ function showTapModal(targetEl, msgData) {
   replyBtn.textContent = "↪";
   replyBtn.onclick = () => {
     currentReplyTarget = { id: msgData.id, chatId: msgData.chatId, content: msgData.content };
-    refs.messageInputEl.placeholder = `Replying to ${msgData.chatId}: ${msgData.content.substring(0, 30)}...`;
+    refs.messageInputEl.placeholder = `Replying to ${msgData.chatId}: ${msgData.content.substring(0, 30)}`;
     refs.messageInputEl.focus();
     showReplyCancelButton();
     tapModalEl.remove();

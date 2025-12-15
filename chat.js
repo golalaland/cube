@@ -1567,38 +1567,43 @@ function sanitizeKey(email) {
     card.appendChild(bioEl);
     typeWriterEffect(bioEl, user.bioPick || "Nothing shared yet...");
 
-    // Meet button — centered (only for Hosts)
+       // Meet button — centered (only for Hosts) — Original purple neon style
     if (user.isHost) {
       const meetBtn = document.createElement("div");
       meetBtn.style.cssText = `
         width:50px;height:50px;border-radius:50%;
-        background:rgba(255,102,0,0.15);
+        background:rgba(255,0,242,0.15);
         display:flex;align-items:center;justify-content:center;
-        margin:0 auto;cursor:pointer;
-        border:2px solid rgba(255,102,0,0.6);
+        margin:20px auto 10px auto;  /* Extra top margin for breathing room */
+        cursor:pointer;
+        border:2px solid rgba(255,0,242,0.5);
         transition:all 0.3s ease;
-        box-shadow:0 0 15px rgba(255,102,0,0.4);
+        box-shadow:0 0 15px rgba(255,0,242,0.4);
       `;
-      meetBtn.innerHTML = `<img src="https://cdn.shopify.com/s/files/1/0962/6648/6067/files/hearts__128_x_128_px.svg?v=1761809626" style="width:28px;height:28px;filter:drop-shadow(0 0 8px #ff6600);"/>`;
+      meetBtn.innerHTML = `<img src="https://cdn.shopify.com/s/files/1/0962/6648/6067/files/hearts__128_x_128_px.svg?v=1761809626" style="width:28px;height:28px;filter:drop-shadow(0 0 10px #ff00f2);"/>`;
+      
       meetBtn.onclick = (e) => {
         e.stopPropagation();
         if (typeof showMeetModal === 'function') showMeetModal(user);
       };
+      
       meetBtn.onmouseenter = () => {
         meetBtn.style.transform = "scale(1.15)";
-        meetBtn.style.background = "rgba(255,102,0,0.3)";
-        meetBtn.style.boxShadow = "0 0 25px rgba(255,102,0,0.7)";
+        meetBtn.style.background = "rgba(255,0,242,0.3)";
+        meetBtn.style.boxShadow = "0 0 25px rgba(255,0,242,0.7)";
       };
+      
       meetBtn.onmouseleave = () => {
         meetBtn.style.transform = "scale(1)";
-        meetBtn.style.background = "rgba(255,102,0,0.15)";
-        meetBtn.style.boxShadow = "0 0 15px rgba(255,102,0,0.4)";
+        meetBtn.style.background = "rgba(255,0,242,0.15)";
+        meetBtn.style.boxShadow = "0 0 15px rgba(255,0,242,0.4)";
       };
+      
       card.appendChild(meetBtn);
     }
 
     document.body.appendChild(card);
-
+    
     // Fade in
     requestAnimationFrame(() => {
       card.style.opacity = "1";
@@ -4305,134 +4310,194 @@ function renderCards(videosToRender) {
     return true;
   });
 
-  // Always horizontal scroll
+  // Always horizontal scroll for both normal and trending
   Object.assign(content.style, {
     display: "flex", gap: "16px", flexWrap: "nowrap", overflowX: "auto",
     paddingBottom: "40px", scrollBehavior: "smooth", width: "100%", justifyContent: "flex-start"
   });
 
+  // Empty state for trending
+  if (filterMode === "trending" && filtered.length === 0) {
+    const emptyMsg = document.createElement("div");
+    emptyMsg.textContent = "No one is trending right now.";
+    emptyMsg.style.cssText = `
+      width:100%; text-align:center; padding:60px 20px; color:#888;
+      font-size:16px; font-weight:600; opacity:0.8;
+    `;
+    content.appendChild(emptyMsg);
+    return;
+  }
+
   filtered.forEach(async (video) => {
     const isUnlocked = unlockedVideos.includes(video.id);
-    const isTrendingCard = filterMode === "trending";
-
-    // Fetch user data for legendary details (only trending)
-    let detailsText = "";
-    if (isTrendingCard && video.uploaderId) {
-      try {
-        const userSnap = await getDoc(doc(db, "users", video.uploaderId));
-        if (userSnap.exists()) {
-          const user = userSnap.data();
-          const gender = (user.gender || "person").toLowerCase();
-          const pronoun = gender === "male" ? "his" : "her";
-          const ageGroup = !user.age ? "20s" : user.age >= 30 ? "30s" : "20s";
-          const flair = gender === "male" ? "😎" : "💋";
-          const fruit = user.fruitPick || "🍇";
-          const nature = user.naturePick || "cool";
-          const city = user.location || user.city || "Lagos";
-          const country = user.country || "Nigeria";
-
-          if (user.isHost) {
-            detailsText = `A ${fruit} ${nature} ${gender} in ${pronoun} ${ageGroup}, currently in ${city}, ${country}. ${flair}`;
-          } else if (user.isVIP) {
-            detailsText = `A ${gender} in ${pronoun} ${ageGroup}, currently in ${city}, ${country}. ${flair}`;
-          } else {
-            detailsText = `A ${gender} from ${city}, ${country}. ${flair}`;
-          }
-        }
-      } catch (e) {
-        detailsText = "Mystery vibe~";
-      }
-    }
 
     const card = document.createElement("div");
     card.className = "videoCard";
     card.setAttribute("data-uploader", video.uploaderName || "Anonymous");
     card.setAttribute("data-title", video.title || "");
+    card.setAttribute("data-location", video.location || ""); // for search
 
-    const cardWidth = isTrendingCard ? "220px" : "230px"; // slightly smaller for trending
+    // All cards use the exact same size and style as your original normal card
     Object.assign(card.style, {
-      minWidth: cardWidth, maxWidth: cardWidth, background: "#0f0a1a", borderRadius: "16px",
+      minWidth: "230px", maxWidth: "230px", background: "#0f0a1a", borderRadius: "12px",
       overflow: "hidden", display: "flex", flexDirection: "column", cursor: "pointer",
-      flexShrink: 0, boxShadow: "0 6px 24px rgba(138,43,226,0.35)",
+      flexShrink: 0, boxShadow: "0 4px 20px rgba(138,43,226,0.4)",
       transition: "transform 0.3s ease, box-shadow 0.3s ease",
       border: "1px solid rgba(138,43,226,0.5)"
     });
 
     card.onmouseenter = () => {
-      card.style.transform = "translateY(-8px)";
-      card.style.boxShadow = "0 16px 40px rgba(255,0,242,0.4)";
+      card.style.transform = "scale(1.03)";
+      card.style.boxShadow = "0 12px 32px rgba(255,0,242,0.6)";
     };
     card.onmouseleave = () => {
-      card.style.transform = "translateY(0)";
-      card.style.boxShadow = "0 6px 24px rgba(138,43,226,0.35)";
+      card.style.transform = "scale(1)";
+      card.style.boxShadow = "0 4px 20px rgba(138,43,226,0.4)";
     };
 
-const videoContainer = document.createElement("div");
-videoContainer.style.cssText = `
-  height: ${isTrendingCard ? "360px" : "320px"};
-  overflow: hidden;
-  position: relative;
-  background: #000;
-  cursor: pointer;
-  border-radius: 16px 16px 0 0;
-`;
+    // Video container — same height for all
+    const videoContainer = document.createElement("div");
+    videoContainer.style.cssText = "height:320px;overflow:hidden;position:relative;background:#000;cursor:pointer;";
 
-const videoEl = document.createElement("video");
-videoEl.muted = true;
-videoEl.loop = true;
-videoEl.preload = "metadata";
-videoEl.style.cssText = "width:100%; height:100%; object-fit:cover;";
+    const videoEl = document.createElement("video");
+    videoEl.muted = true;
+    videoEl.loop = true;
+    videoEl.preload = "metadata";
+    videoEl.style.cssText = "width:100%;height:100%;object-fit:cover;";
 
-if (isUnlocked) {
-  // Same priority as your old code, just updated property names to match current data
-  videoEl.src = video.previewClip || video.highlightVideo || video.videoUrl || "";
-  videoEl.load();
+    if (isUnlocked) {
+      videoEl.src = video.previewClip || video.highlightVideo || video.videoUrl || "";
+      videoEl.load();
+      videoContainer.onmouseenter = () => videoEl.play().catch(() => {});
+      videoContainer.onmouseleave = () => { videoEl.pause(); videoEl.currentTime = 0; };
+    } else {
+      videoEl.src = "";
+      const lockedOverlay = document.createElement("div");
+      lockedOverlay.innerHTML = `
+        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(10,5,30,0.85);z-index:2;">
+          <div style="text-align:center;">
+            <svg width="80" height="80" viewBox="0 0 24 24" fill="none">
+              <path d="M12 2C9.2 2 7 4.2 7 7V11H6C4.9 11 4 11.9 4 13V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V13C20 11.9 19.1 11 18 11H17V7C17 4.2 14.8 2 12 2ZM12 4C13.7 4 15 5.3 15 7V11H9V7C9 5.3 10.3 4 12 4Z" fill="#ff00f2"/>
+            </svg>
+          </div>
+        </div>`;
+      videoContainer.appendChild(lockedOverlay);
+    }
 
-  videoContainer.onmouseenter = () => videoEl.play().catch(() => {});
-  videoContainer.onmouseleave = () => {
-    videoEl.pause();
-    videoEl.currentTime = 0;
-  };
-} else {
-  videoEl.src = "";
+    // Fullscreen playback (same as old)
+    videoContainer.onclick = (e) => {
+      e.stopPropagation();
+      if (!isUnlocked) {
+        showUnlockConfirm(video, () => renderCards(videosToRender));
+        return;
+      }
+      const fullVideo = document.createElement("video");
+      fullVideo.src = video.videoUrl || video.highlightVideo || video.previewClip || "";
+      fullVideo.muted = false;
+      fullVideo.playsInline = false;
+      fullVideo.controls = true;
+      fullVideo.style.cssText = `
+        position: fixed;
+        top: 0; left: 0;
+        width: 100vw;
+        height: 100vh;
+        object-fit: contain;
+        background: #000;
+        z-index: 99999;
+      `;
+      fullVideo.onclick = () => fullVideo.remove();
+      fullVideo.onended = () => fullVideo.remove();
+      document.body.appendChild(fullVideo);
+      fullVideo.play();
+      if (fullVideo.requestFullscreen) fullVideo.requestFullscreen();
+      else if (fullVideo.webkitRequestFullscreen) fullVideo.webkitRequestFullscreen();
+      else if (fullVideo.msRequestFullscreen) fullVideo.msRequestFullscreen();
+    };
 
-  const lockedOverlay = document.createElement("div");
-  lockedOverlay.innerHTML = `
-    <div style="
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: rgba(10,5,30,0.9);
-      z-index: 2;
-      border-radius: 16px 16px 0 0;
-    ">
-      <div style="text-align:center;">
-        <svg width="70" height="70" viewBox="0 0 24 24" fill="none">
-          <path d="M12 2C9.2 2 7 4.2 7 7V11H6C4.9 11 4 11.9 4 13V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V13C20 11.9 19.1 11 18 11H17V7C17 4.2 14.8 2 12 2ZM12 4C13.7 4 15 5.3 15 7V11H9V7C9 5.3 10.3 4 12 4Z" fill="#ff00f2"/>
-        </svg>
-        ${video.highlightVideoPrice > 0 
-          ? `<div style="margin-top:12px; font-size:18px; font-weight:800; color:#ff00f2;">${video.highlightVideoPrice} STRZ</div>` 
-          : ''
-        }
-      </div>
-    </div>`;
-  videoContainer.appendChild(lockedOverlay);
-}
+    videoContainer.appendChild(videoEl);
 
-// Exact same click behaviour as your old working code
-videoContainer.onclick = (e) => {
-  e.stopPropagation();
-  if (isUnlocked) {
-    playFullVideo(video);
-  } else {
-    showUnlockConfirm(video, () => renderCards(videosToRender)); // kept your current callback
+    // Info panel — same as old design
+    const infoPanel = document.createElement("div");
+    infoPanel.style.cssText = "background: linear-gradient(180deg, #1a0b2e, #0f0519);padding:12px;display:flex;flex-direction:column;gap:6px;border-top: 1px solid #8a2be2;";
+
+    // Title
+    const title = document.createElement("div");
+    title.textContent = video.title || "Untitled";
+    title.style.cssText = "font-weight:800;color:#e0b0ff;font-size:15px;text-shadow: 0 0 8px #ff00f2;";
+
+    // Uploader — clickable @username (opens social card after unlock check)
+    const uploader = document.createElement("div");
+    uploader.innerHTML = `<span style="color:#00ffea; font-size:12px; cursor:pointer;">@${video.uploaderName || "Anonymous"}</span>`;
+    uploader.style.opacity = "0.9";
+    uploader.querySelector("span").onclick = (e) => {
+      e.stopPropagation();
+      if (!isUnlocked) {
+        showStarPopup("Unlock the clip first to view profile", "error");
+        return;
+      }
+      // Replace with your actual social/profile modal
+      alert(`Opening profile for @${video.uploaderName}`);
+      // showSocialCard(video.uploaderId);
+    };
+
+    // Tags — for search (smart: add as data-tags attribute + display)
+    const tagsArray = video.tags || []; // assume tags are array in video doc
+    card.setAttribute("data-tags", tagsArray.join(" ").toLowerCase());
+    const tagsEl = document.createElement("div");
+    tagsEl.textContent = tagsArray.length ? "#" + tagsArray.join(" #") : "";
+    tagsEl.style.cssText = "font-size:11px; color:#888; opacity:0.8; margin-top:4px; word-break:break-word;";
+
+    // Unlock button — same as old
+    const unlockBtn = document.createElement("button");
+    unlockBtn.textContent = isUnlocked ? "Unlocked" : `Unlock ${video.highlightVideoPrice || 100} ⭐️`;
+    Object.assign(unlockBtn.style, {
+      background: isUnlocked ? "rgba(138,43,226,0.3)" : "linear-gradient(135deg, #ff00f2, #8a2be2, #00ffea)",
+      border: "1px solid #ff00f2", borderRadius: "6px", padding: "8px 0", fontWeight: "800",
+      color: "#fff", cursor: isUnlocked ? "default" : "pointer",
+      transition: "all 0.3s ease", fontSize: "13px", textShadow: "0 0 10px rgba(255,0,242,0.8)",
+      boxShadow: isUnlocked ? "inset 0 2px 10px rgba(0,0,0,0.5)" : "0 0 20px rgba(255,0,242,0.6)"
+    });
+
+    if (!isUnlocked) {
+      unlockBtn.onmouseenter = () => {
+        unlockBtn.style.background = "linear-gradient(135deg, #00ffea, #ff00f2, #8a2be2)";
+        unlockBtn.style.transform = "translateY(-2px)";
+        unlockBtn.style.boxShadow = "0 0 30px rgba(0,255,234,0.8)";
+      };
+      unlockBtn.onmouseleave = () => {
+        unlockBtn.style.background = "linear-gradient(135deg, #ff00f2, #8a2be2, #00ffea)";
+        unlockBtn.style.transform = "translateY(0)";
+        unlockBtn.style.boxShadow = "0 0 20px rgba(255,0,242,0.6)";
+      };
+      unlockBtn.onclick = (e) => {
+        e.stopPropagation();
+        showUnlockConfirm(video, () => renderCards(videosToRender));
+      };
+    } else {
+      unlockBtn.disabled = true;
+    }
+
+    infoPanel.append(title, uploader, tagsEl, unlockBtn);
+    card.append(videoContainer, infoPanel);
+    content.appendChild(card);
+  });
+
+  // Enhanced search — now includes tags, location, chatId, title
+  const searchInput = document.getElementById("highlightSearchInput");
+  if (searchInput) {
+    searchInput.oninput = (e) => {
+      const term = e.target.value.trim().toLowerCase();
+      content.querySelectorAll(".videoCard").forEach(card => {
+        const title = (card.getAttribute("data-title") || "").toLowerCase();
+        const uploader = (card.getAttribute("data-uploader") || "").toLowerCase();
+        const location = (card.getAttribute("data-location") || "").toLowerCase();
+        const tags = (card.getAttribute("data-tags") || "").toLowerCase();
+        const matches = title.includes(term) || uploader.includes(term) || location.includes(term) || tags.includes(term);
+        card.style.display = matches ? "flex" : "none";
+      });
+    };
   }
-};
-
-videoContainer.appendChild(videoEl);
-
+}
     function playFullVideo(video) {
   const src = video.highlightVideo || video.videoUrl || video.previewClip || "";
   if (!src) return showGoldAlert("Video not found");

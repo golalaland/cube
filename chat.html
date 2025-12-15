@@ -2096,10 +2096,9 @@ could you have broken something?  i only asked for color change:
     <h3 id="hostPanelTitle">Loading...</h3>
 
     <!-- 🧭 TAB HEADER -->
-   <!-- TAB HEADER -->
-<div class="tab-header" style="display:flex; gap:12px; padding:12px; border-bottom:1px solid #333;">
+  <div class="tab-header" style="display:flex; gap:12px; padding:12px; border-bottom:1px solid #333;">
   <button class="tab-btn" data-tab="mediaTab">Profile</button>
-  <button class="tab-btn" data-tab="infoTab">Tools</button>
+  <button class="tab-btn" data-tab="infoTab" id="toolsTabBtn">Tools</button>
   <button id="notificationsTabBtn" class="tab-btn" data-tab="notificationsTab" style="position:relative;">
     Notifications
     <span id="notif-badge" style="
@@ -2113,6 +2112,7 @@ could you have broken something?  i only asked for color change:
   </button>
 </div>
 
+    
 <!-- NOTIFICATIONS TAB -->
 <div id="notificationsTab" class="tab-content" style="display:none; max-height:400px; overflow-y:auto;">
   <div style="padding:8px 12px 4px; text-align:right;">

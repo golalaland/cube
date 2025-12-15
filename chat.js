@@ -1014,6 +1014,7 @@ function renderMessagesFromArray(messages) {
     });
   }
 }
+
 /* ---------- 🔔 Messages Listener (Final Optimized Version) ---------- */
 function attachMessagesListener() {
   const q = query(collection(db, CHAT_COLLECTION), orderBy("timestamp", "asc"));
@@ -1316,6 +1317,7 @@ async function loadNotifications() {
     list.innerHTML = `<div style="color:#f66; text-align:center; padding:80px;">Failed</div>`;
   }
 }
+
 // Helper: time ago
 function timeAgo(date) {
   const seconds = Math.floor((new Date() - date) / 1000);
@@ -1399,6 +1401,7 @@ setInterval(checkHostNotifications, 15000);
 
 // Run immediately
 checkHostNotifications();
+
 
 /* ---------- 🆔 ChatID Modal ---------- */
 async function promptForChatID(userRef, userData) {
@@ -1603,15 +1606,17 @@ if (videos.length) {
     video.setAttribute("playsinline", "");
     video.setAttribute("webkit-playsinline", "");
 
-    // ✅ CORRECT CONTAIN (NO SHRINK, NO ZOOM)
-    video.style.cssText = `
-      width:100%;
-      height:100%;
-      object-fit:contain;
-      object-position:center;
-      background:transparent;
-      display:block;
-    `;
+    
+   // ✅ CONTAIN WITH LEFT ALIGN (NO SHRINK, NO ZOOM)
+video.style.cssText = `
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  object-position:left center;  /* pushed to the left */
+  background:transparent;
+  display:block;
+`;
+
 
     // ===== MUTE ICON =====
     const muteIcon = document.createElement("div");

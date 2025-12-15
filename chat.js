@@ -930,7 +930,7 @@ function renderMessagesFromArray(messages) {
       preview.style.cssText = "background:rgba(255,255,255,0.06);border-left:3px solid #b3b3b3;padding:6px 10px;margin:6px 0 4px;border-radius:0 6px 6px 0;font-size:13px;color:#aaa;cursor:pointer;line-height:1.4;";
       var replyText = (m.replyToContent || "Original message").replace(/\n/g, " ").trim();
       var shortText = replyText.length > 80 ? replyText.substring(0,80) + "..." : replyText;
-      preview.innerHTML = `<strong style="color:#999;">↳ ${m.replyToChatId || "someone"}:</strong> <span style="color:#aaa;">${shortText}</span>`;
+      preview.innerHTML = `<strong style="color:#999;"> ⤿ ${m.replyToChatId || "someone"}:</strong> <span style="color:#aaa;">${shortText}</span>`;
       preview.onclick = function() {
         var target = document.getElementById(m.replyTo);
         if (target) {
@@ -1929,6 +1929,13 @@ document.getElementById("hostLogoutBtn")?.addEventListener("click", async (e) =>
     showStarPopup("Logout failed — try again!");
   }
 });
+
+if (userData?.isHost === true) {
+  document.querySelectorAll(".host-only").forEach(el => {
+    el.style.display = "inline-flex"; // buttons need inline-flex
+  });
+}
+
 
 /* ===============================
    💫 Auto Star Earning System

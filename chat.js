@@ -4312,37 +4312,46 @@ function renderCards(videosToRender) {
 
   // Always horizontal scroll
   Object.assign(content.style, {
-    display: "flex", gap: "16px", flexWrap: "nowrap", overflowX: "auto",
-    paddingBottom: "40px", scrollBehavior: "smooth", width: "100%", justifyContent: "flex-start"
+    display: "flex",
+    gap: "16px",
+    flexWrap: "nowrap",
+    overflowX: "auto",
+    paddingBottom: "40px",
+    scrollBehavior: "smooth",
+    width: "100%",
+    justifyContent: "flex-start"
   });
 
-  // Empty trending state
+  // Empty state for trending
   if (filterMode === "trending" && filtered.length === 0) {
     const emptyMsg = document.createElement("div");
     emptyMsg.textContent = "No one is trending right now.";
-    emptyMsg.style.cssText = `
-      width:100%; text-align:center; padding:60px 20px; color:#888;
-      font-size:16px; font-weight:600; opacity:0.8;
-    `;
+    emptyMsg.style.cssText = "width:100%; text-align:center; padding:60px 20px; color:#888; font-size:16px; font-weight:600; opacity:0.8;";
     content.appendChild(emptyMsg);
     return;
   }
 
-  filtered.forEach(async (video) => {
+  filtered.forEach((video) => {
     const isUnlocked = unlockedVideos.includes(video.id);
+    const isTrendingCard = filterMode === "trending";
 
     const card = document.createElement("div");
     card.className = "videoCard";
     card.setAttribute("data-uploader", video.uploaderName || "Anonymous");
     card.setAttribute("data-title", video.title || "");
-    card.setAttribute("data-location", video.location || "");
-    card.setAttribute("data-tags", (video.tags || []).join(" ").toLowerCase());
 
-    // Exact same card style for EVERY card (normal + trending) — no glow difference
+    // Same size and style for all cards
     Object.assign(card.style, {
-      minWidth: "230px", maxWidth: "230px", background: "#0f0a1a", borderRadius: "12px",
-      overflow: "hidden", display: "flex", flexDirection: "column", cursor: "pointer",
-      flexShrink: 0, boxShadow: "0 4px 20px rgba(138,43,226,0.4)",
+      minWidth: "230px",
+      maxWidth: "230px",
+      background: "#0f0a1a",
+      borderRadius: "12px",
+      overflow: "hidden",
+      display: "flex",
+      flexDirection: "column",
+      cursor: "pointer",
+      flexShrink: 0,
+      boxShadow: "0 4px 20px rgba(138,43,226,0.4)",
       transition: "transform 0.3s ease, box-shadow 0.3s ease",
       border: "1px solid rgba(138,43,226,0.5)"
     });
@@ -4356,7 +4365,7 @@ function renderCards(videosToRender) {
       card.style.boxShadow = "0 4px 20px rgba(138,43,226,0.4)";
     };
 
-    // Video container — exactly your favorite settings
+    // Video container — your exact preferred settings
     const videoContainer = document.createElement("div");
     videoContainer.style.cssText = `
       height: 320px;
@@ -4376,6 +4385,7 @@ function renderCards(videosToRender) {
     if (isUnlocked) {
       videoEl.src = video.previewClip || video.highlightVideo || video.videoUrl || "";
       videoEl.load();
+
       videoContainer.onmouseenter = () => videoEl.play().catch(() => {});
       videoContainer.onmouseleave = () => {
         videoEl.pause();
@@ -4395,7 +4405,7 @@ function renderCards(videosToRender) {
           z-index: 2;
         ">
           <div style="text-align:center;">
-            <svg width="70" height="70" viewBox="0 0 24 24" fill="none">
+            <svg width="80" height="80" viewBox="0 0 24 24" fill="none">
               <path d="M12 2C9.2 2 7 4.2 7 7V11H6C4.9 11 4 11.9 4 13V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V13C20 11.9 19.1 11 18 11H17V7C17 4.2 14.8 2 12 2ZM12 4C13.7 4 15 5.3 15 7V11H9V7C9 5.3 10.3 4 12 4Z" fill="#ff00f2"/>
             </svg>
             ${video.highlightVideoPrice > 0 ? `<div style="margin-top:12px;font-size:18px;font-weight:800;color:#ff00f2;">${video.highlightVideoPrice} STRZ</div>` : ''}
@@ -4404,7 +4414,7 @@ function renderCards(videosToRender) {
       videoContainer.appendChild(lockedOverlay);
     }
 
-    // Click behavior — exact same as your old working version
+    // Fullscreen playback
     videoContainer.onclick = (e) => {
       e.stopPropagation();
       if (!isUnlocked) {
@@ -4424,18 +4434,16 @@ function renderCards(videosToRender) {
 
     videoContainer.appendChild(videoEl);
 
-    // Info panel — same as your old design
+    // Info panel
     const infoPanel = document.createElement("div");
-    infoPanel.style.cssText = "background:linear-gradient(180deg,#1a0b2e,#0f0519);padding:14px;display:flex;flex-direction:column;gap:8px;border-radius:0 0 16px 16px;";
+    infoPanel.style.cssText = "background:linear-gradient(180deg,#1a0b2e,#0f0519);padding:14px;display:flex;flex-direction:column;gap:8px;border-radius:0 0 12px 12px;";
 
     const title = document.createElement("div");
     title.textContent = video.title || "Untitled";
     title.style.cssText = "font-weight:800;color:#e0b0ff;font-size:15px;";
 
     const uploaderLine = document.createElement("div");
-    uploaderLine.innerHTML = `
-      <div style="font-size:13px;color:#00ffea;font-weight:600;">@${video.uploaderName || "Anonymous"}</div>
-    `;
+    uploaderLine.innerHTML = `<div style="font-size:13px;color:#00ffea;font-weight:600;">@${video.uploaderName || "Anonymous"}</div>`;
 
     // Buttons row
     const buttonsRow = document.createElement("div");
@@ -4465,7 +4473,7 @@ function renderCards(videosToRender) {
     buttonsRow.appendChild(unlockBtn);
 
     // Meet button — only in trending
-    if (filterMode === "trending") {
+    if (isTrendingCard) {
       const meetBtn = document.createElement("div");
       meetBtn.innerHTML = "Chat";
       meetBtn.style.cssText = `

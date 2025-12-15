@@ -1556,7 +1556,7 @@ videoContainer.style.cssText = `
   height:320px;
   position:relative;
   overflow:hidden;
-  background:transparent;
+  background:#000;      /* black backdrop */
   border-radius:16px 16px 0 0;
   touch-action:pan-y;
 `;
@@ -1569,6 +1569,7 @@ let activeVideo = null;
 
 if (videos.length) {
 
+  // ===== SWIPE WRAPPER =====
   const swipeWrapper = document.createElement("div");
   swipeWrapper.style.cssText = `
     display:flex;
@@ -1583,7 +1584,7 @@ if (videos.length) {
 
   videos.forEach(src => {
 
-    // ===== FRAME =====
+    // ===== OUTER FRAME (black backdrop per video) =====
     const wrap = document.createElement("div");
     wrap.style.cssText = `
       position:relative;
@@ -1591,7 +1592,10 @@ if (videos.length) {
       height:100%;
       flex-shrink:0;
       overflow:hidden;
-      background:transparent;
+      background:#000;
+      display:flex;
+      justify-content:flex-start;  /* push video left */
+      align-items:center;
     `;
 
     // ===== VIDEO =====
@@ -1601,22 +1605,18 @@ if (videos.length) {
     video.loop = true;
     video.autoplay = true;
     video.preload = "metadata";
-
-    // 🔒 INLINE (iOS SAFE)
     video.setAttribute("playsinline", "");
     video.setAttribute("webkit-playsinline", "");
 
-    
-   // ✅ CONTAIN WITH LEFT ALIGN (NO SHRINK, NO ZOOM)
-video.style.cssText = `
-  width:100%;
-  height:100%;
-  object-fit:contain;
-  object-position:left center;  /* pushed to the left */
-  background:transparent;
-  display:block;
-`;
-
+    // ===== INNER FRAME STYLE =====
+    video.style.cssText = `
+      height:100%;
+      width:auto;
+      object-fit:contain;
+      object-position:left center;   /* push to left inside the frame */
+      background:transparent;
+      display:block;
+    `;
 
     // ===== MUTE ICON =====
     const muteIcon = document.createElement("div");
@@ -1641,11 +1641,9 @@ video.style.cssText = `
     // 🔊 TAP TO TOGGLE SOUND
     video.addEventListener("click", e => {
       e.stopPropagation();
-
       if (activeVideo && activeVideo !== video) {
         activeVideo.muted = true;
       }
-
       video.muted = !video.muted;
       muteIcon.style.opacity = video.muted ? "0.6" : "0";
       activeVideo = video;
@@ -1679,6 +1677,7 @@ video.style.cssText = `
         height:7px;
         border-radius:50%;
         background:${i === 0 ? "#ff00f2" : "rgba(255,0,242,0.35)"};
+        transition:0.3s;
       `;
       dots.appendChild(dot);
     });
@@ -1705,7 +1704,7 @@ video.style.cssText = `
     const diff = startX - e.clientX;
     if (Math.abs(diff) < 50) return;
 
-    // 🔇 HARD STOP AUDIO
+    // 🔇 STOP ALL VIDEOS
     videoEls.forEach(v => {
       v.video.pause();
       v.video.currentTime = 0;

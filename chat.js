@@ -4340,7 +4340,6 @@ function renderCards(videosToRender) {
     card.setAttribute("data-uploader", video.uploaderName || "Anonymous");
     card.setAttribute("data-title", video.title || "");
 
-    // Same size and style for all cards
     Object.assign(card.style, {
       minWidth: "230px",
       maxWidth: "230px",
@@ -4385,7 +4384,6 @@ function renderCards(videosToRender) {
     if (isUnlocked) {
       videoEl.src = video.previewClip || video.highlightVideo || video.videoUrl || "";
       videoEl.load();
-
       videoContainer.onmouseenter = () => videoEl.play().catch(() => {});
       videoContainer.onmouseleave = () => {
         videoEl.pause();
@@ -4414,7 +4412,6 @@ function renderCards(videosToRender) {
       videoContainer.appendChild(lockedOverlay);
     }
 
-    // Fullscreen playback
     videoContainer.onclick = (e) => {
       e.stopPropagation();
       if (!isUnlocked) {
@@ -4445,11 +4442,9 @@ function renderCards(videosToRender) {
     const uploaderLine = document.createElement("div");
     uploaderLine.innerHTML = `<div style="font-size:13px;color:#00ffea;font-weight:600;">@${video.uploaderName || "Anonymous"}</div>`;
 
-    // Buttons row
     const buttonsRow = document.createElement("div");
     buttonsRow.style.cssText = "display:flex;gap:10px;align-items:center;margin-top:8px;";
 
-    // Unlock button
     const unlockBtn = document.createElement("button");
     unlockBtn.textContent = isUnlocked ? "Unlocked ♡" : `Unlock ${video.highlightVideoPrice || 100} STRZ`;
     Object.assign(unlockBtn.style, {
@@ -4472,7 +4467,6 @@ function renderCards(videosToRender) {
     }
     buttonsRow.appendChild(unlockBtn);
 
-    // Meet button — only in trending
     if (isTrendingCard) {
       const meetBtn = document.createElement("div");
       meetBtn.innerHTML = "Chat";

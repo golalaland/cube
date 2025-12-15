@@ -3287,8 +3287,6 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
   // Assuming you have both:
 // - currentUser: the logged-in viewer (from auth)
 // - user: the profile owner data (already fetched for the card/details)
-
-const isHost = currentUser && user && (currentUser.uid === user.uid) && user.isHost === true;
 // OR if you're using email as ID:
 // const isHost = currentUser && user && (currentUser.email === user.email) && user.isHost === true;
 

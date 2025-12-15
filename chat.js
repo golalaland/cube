@@ -4335,10 +4335,9 @@ function renderCards(videosToRender) {
     card.className = "videoCard";
     card.setAttribute("data-uploader", video.uploaderName || "Anonymous");
     card.setAttribute("data-title", video.title || "");
-    card.setAttribute("data-location", video.location || ""); // for search
-    card.setAttribute("data-tags", (video.tags || []).join(" ").toLowerCase()); // for tags search
+    card.setAttribute("data-location", video.location || "");
+    card.setAttribute("data-tags", (video.tags || []).join(" ").toLowerCase());
 
-    // Exact same card style for ALL cards (normal + trending)
     Object.assign(card.style, {
       minWidth: "230px", maxWidth: "230px", background: "#0f0a1a", borderRadius: "12px",
       overflow: "hidden", display: "flex", flexDirection: "column", cursor: "pointer",
@@ -4356,25 +4355,46 @@ function renderCards(videosToRender) {
       card.style.boxShadow = "0 4px 20px rgba(138,43,226,0.4)";
     };
 
+    // Video container — restored exactly from your favorite version
     const videoContainer = document.createElement("div");
-    videoContainer.style.cssText = "height:320px;overflow:hidden;position:relative;background:#000;cursor:pointer;";
+    videoContainer.style.cssText = `
+      height: 320px;
+      overflow: hidden;
+      position: relative;
+      background: #000;
+      cursor: pointer;
+      border-radius: 12px 12px 0 0;
+    `;
 
     const videoEl = document.createElement("video");
     videoEl.muted = true;
     videoEl.loop = true;
     videoEl.preload = "metadata";
-    videoEl.style.cssText = "width:100%;height:100%;object-fit:cover;";
+    videoEl.style.cssText = "width:100%; height:100%; object-fit:cover;";
 
     if (isUnlocked) {
       videoEl.src = video.previewClip || video.highlightVideo || video.videoUrl || "";
       videoEl.load();
+
       videoContainer.onmouseenter = () => videoEl.play().catch(() => {});
-      videoContainer.onmouseleave = () => { videoEl.pause(); videoEl.currentTime = 0; };
+      videoContainer.onmouseleave = () => {
+        videoEl.pause();
+        videoEl.currentTime = 0;
+      };
     } else {
       videoEl.src = "";
+
       const lockedOverlay = document.createElement("div");
       lockedOverlay.innerHTML = `
-        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(10,5,30,0.85);z-index:2;">
+        <div style="
+          position: absolute;
+          inset: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: rgba(10,5,30,0.85);
+          z-index: 2;
+        ">
           <div style="text-align:center;">
             <svg width="80" height="80" viewBox="0 0 24 24" fill="none">
               <path d="M12 2C9.2 2 7 4.2 7 7V11H6C4.9 11 4 11.9 4 13V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V13C20 11.9 19.1 11 18 11H17V7C17 4.2 14.8 2 12 2ZM12 4C13.7 4 15 5.3 15 7V11H9V7C9 5.3 10.3 4 12 4Z" fill="#ff00f2"/>
@@ -4384,7 +4404,7 @@ function renderCards(videosToRender) {
       videoContainer.appendChild(lockedOverlay);
     }
 
-    // Fullscreen playback (same as your original)
+    // Video click — unlock or play full (no disappearing cards)
     videoContainer.onclick = (e) => {
       e.stopPropagation();
       if (!isUnlocked) {
@@ -4416,41 +4436,38 @@ function renderCards(videosToRender) {
 
     videoContainer.appendChild(videoEl);
 
-    // Info panel — same for all cards
+    // Info panel
     const infoPanel = document.createElement("div");
     infoPanel.style.cssText = "background: linear-gradient(180deg, #1a0b2e, #0f0519);padding:12px;display:flex;flex-direction:column;gap:6px;border-top: 1px solid #8a2be2;";
 
-    // Title — clickable for search
+    // Title
     const title = document.createElement("div");
     title.textContent = video.title || "Untitled";
-    title.style.cssText = "font-weight:800;color:#e0b0ff;font-size:15px;text-shadow: 0 0 8px #ff00f2; cursor:pointer;";
-    title.onclick = (e) => {
-      e.stopPropagation();
-      // Trigger search with this title
-      const searchInput = document.getElementById("highlightSearchInput");
-      if (searchInput) {
-        searchInput.value = video.title;
-        searchInput.dispatchEvent(new Event('input'));
-      }
-    };
+    title.style.cssText = "font-weight:800;color:#e0b0ff;font-size:15px;text-shadow: 0 0 8px #ff00f2;";
 
-    // Uploader — clickable @username (opens social card after unlock check)
+    // Clickable @username — opens social card directly (no unlock requirement)
     const uploader = document.createElement("div");
     const usernameSpan = document.createElement("span");
     usernameSpan.textContent = `@${video.uploaderName || "Anonymous"}`;
     usernameSpan.style.cssText = "color:#00ffea; font-size:12px; cursor:pointer; font-weight:600;";
     usernameSpan.onclick = (e) => {
       e.stopPropagation();
-      if (!isUnlocked) {
-        showStarPopup("Unlock the clip first to view profile", "error");
-        return;
-      }
-      // Replace with your actual social/profile modal
-      alert(`Opening profile for @${video.uploaderName}`);
-      // showSocialCard(video.uploaderId);
+      // Fetch full user data and show unified social card
+      (async () => {
+        if (video.uploaderId) {
+          try {
+            const userSnap = await getDoc(doc(db, "users", video.uploaderId));
+            if (userSnap.exists()) {
+              showSocialCard(userSnap.data());
+            }
+          } catch (err) {
+            console.warn("Failed to load user for social card", err);
+          }
+        }
+      })();
     };
     uploader.appendChild(usernameSpan);
-    uploader.style.cssText = "opacity:0.9;";
+    uploader.style.opacity = "0.9";
 
     // Tags — clickable for search
     const tagsArray = video.tags || [];
@@ -4473,7 +4490,7 @@ function renderCards(videosToRender) {
     }
     tagsEl.style.cssText = "margin-top:4px;";
 
-    // Unlock button — same as original
+    // Unlock button
     const unlockBtn = document.createElement("button");
     unlockBtn.textContent = isUnlocked ? "Unlocked" : `Unlock ${video.highlightVideoPrice || 100} ⭐️`;
     Object.assign(unlockBtn.style, {
@@ -4508,7 +4525,7 @@ function renderCards(videosToRender) {
     content.appendChild(card);
   });
 
-  // Enhanced smart search — title, @username, location, tags
+  // Smart search — title, username, location, tags
   const searchInput = document.getElementById("highlightSearchInput");
   if (searchInput) {
     searchInput.oninput = (e) => {
@@ -4517,18 +4534,12 @@ function renderCards(videosToRender) {
         content.querySelectorAll(".videoCard").forEach(card => card.style.display = "flex");
         return;
       }
-      
       content.querySelectorAll(".videoCard").forEach(card => {
         const title = (card.getAttribute("data-title") || "").toLowerCase();
         const uploader = (card.getAttribute("data-uploader") || "").toLowerCase();
         const location = (card.getAttribute("data-location") || "").toLowerCase();
         const tags = (card.getAttribute("data-tags") || "").toLowerCase();
-        
-        const matches = title.includes(term) || 
-                       uploader.includes(term) || 
-                       location.includes(term) || 
-                       tags.includes(term);
-                       
+        const matches = title.includes(term) || uploader.includes(term) || location.includes(term) || tags.includes(term);
         card.style.display = matches ? "flex" : "none";
       });
     };

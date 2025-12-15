@@ -1455,11 +1455,10 @@ function sanitizeKey(email) {
   return email.toLowerCase().replace(/[@.]/g, "_").trim();
 }
 /* ======================================================
-  SOCIAL CARD SYSTEM — TRENDING STYLE FOR HOSTS (2025 FIXED)
-  • Exact trending design for isHost
-  • Original compact style for isVIP (no gift slider)
-  • Multi-video swipe support via socialcardvideoUrl array
-  • Gift slider only for isHost
+  SOCIAL CARD SYSTEM — OPTIMIZED HOST CARD (Dec 2025)
+  • Wider (260px) + shorter video (300px) for perfect fit
+  • Gift slider now spacious and clean
+  • VIP card unchanged — perfect as is
 ====================================================== */
 (async function initSocialCardSystem() {
   const allUsers = [];
@@ -1480,7 +1479,6 @@ function sanitizeKey(email) {
     console.error("Failed to load users:", err);
   }
 
-  // Main show function — decides which card to display
   function showSocialCard(user) {
     if (!user) return;
     document.getElementById('socialCard')?.remove();
@@ -1488,11 +1486,11 @@ function sanitizeKey(email) {
     if (user.isHost) {
       showTrendingStyleHostCard(user);
     } else {
-      showOriginalVIPCard(user); // Used for both isVIP and regular users
+      showOriginalVIPCard(user);
     }
   }
 
-  // ==================== TRENDING STYLE CARD FOR HOSTS ====================
+  // ==================== OPTIMIZED TRENDING CARD FOR HOSTS ====================
   function showTrendingStyleHostCard(user) {
     const card = document.createElement("div");
     card.id = "socialCard";
@@ -1502,8 +1500,8 @@ function sanitizeKey(email) {
       top: "50%",
       left: "50%",
       transform: "translate(-50%, -50%)",
-      minWidth: "220px",
-      maxWidth: "220px",
+      minWidth: "260px",       // Wider for better layout
+      maxWidth: "260px",
       background: "#0f0a1a",
       borderRadius: "16px",
       overflow: "hidden",
@@ -1516,7 +1514,7 @@ function sanitizeKey(email) {
       opacity: "0"
     });
 
-    // Hover effect
+    // Hover lift
     card.onmouseenter = () => {
       card.style.transform = "translate(-50%, -50%) translateY(-8px)";
       card.style.boxShadow = "0 16px 40px rgba(255,0,242,0.4)";
@@ -1535,7 +1533,7 @@ function sanitizeKey(email) {
     };
     setTimeout(() => document.addEventListener("click", closeOut), 100);
 
-    // Close X button
+    // Close X
     const closeBtn = document.createElement("div");
     closeBtn.innerHTML = "×";
     closeBtn.style.cssText = "position:absolute;top:8px;right:12px;font-size:20px;font-weight:700;cursor:pointer;z-index:10;opacity:0.7;color:#fff;";
@@ -1548,9 +1546,9 @@ function sanitizeKey(email) {
     };
     card.appendChild(closeBtn);
 
-    // ==================== MULTI-VIDEO SWIPE CONTAINER ====================
+    // ==================== VIDEO CONTAINER — SHORTER HEIGHT ====================
     const videoContainer = document.createElement("div");
-    videoContainer.style.cssText = "height:360px;overflow:hidden;position:relative;background:#000;border-radius:16px 16px 0 0;";
+    videoContainer.style.cssText = "height:300px;overflow:hidden;position:relative;background:#000;border-radius:16px 16px 0 0;"; // Reduced from 360px
 
     const videos = Array.isArray(user.socialcardvideoUrl) ? user.socialcardvideoUrl.filter(url => url) : [];
 
@@ -1571,7 +1569,6 @@ function sanitizeKey(email) {
 
       videoContainer.appendChild(swipeWrapper);
 
-      // Dots indicator
       if (videos.length > 1) {
         const dots = document.createElement("div");
         dots.style.cssText = "position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:5;";
@@ -1583,7 +1580,6 @@ function sanitizeKey(email) {
         });
         videoContainer.appendChild(dots);
 
-        // Swipe logic
         let currentIndex = 0;
         const updateDots = () => {
           dots.querySelectorAll("div").forEach((d, i) => {
@@ -1613,14 +1609,14 @@ function sanitizeKey(email) {
 
     card.appendChild(videoContainer);
 
-    // ==================== INFO PANEL ====================
+    // ==================== INFO PANEL — MORE SPACE ====================
     const infoPanel = document.createElement("div");
-    infoPanel.style.cssText = "background:linear-gradient(180deg,#1a0b2e,#0f0519);padding:14px;display:flex;flex-direction:column;gap:10px;border-radius:0 0 16px 16px;";
+    infoPanel.style.cssText = "background:linear-gradient(180deg,#1a0b2e,#0f0519);padding:16px 18px;display:flex;flex-direction:column;gap:12px;border-radius:0 0 16px 16px;"; // Slightly more padding
 
     // @chatId
     const chatIdEl = document.createElement("div");
     chatIdEl.textContent = `@${user.chatId || "Unknown"}`;
-    chatIdEl.style.cssText = "font-weight:800;color:#e0b0ff;font-size:15px;text-align:center;";
+    chatIdEl.style.cssText = "font-weight:800;color:#e0b0ff;font-size:16px;text-align:center;"; // Slightly larger
     infoPanel.appendChild(chatIdEl);
 
     // Legendary details
@@ -1635,13 +1631,13 @@ function sanitizeKey(email) {
 
     const detailsEl = document.createElement("p");
     detailsEl.textContent = `A ${fruit} ${nature} ${gender} in ${pronoun} ${ageGroup}, currently in ${city}, ${country}. ${flair}`;
-    detailsEl.style.cssText = "margin:0 0 10px;font-size:14px;line-height:1.4;color:#ccc;text-align:center;opacity:0.9;";
+    detailsEl.style.cssText = "margin:0 0 10px;font-size:14.5px;line-height:1.45;color:#ccc;text-align:center;opacity:0.9;";
     infoPanel.appendChild(detailsEl);
 
-    // Meet button (heart icon)
+    // Meet heart button
     const meetBtn = document.createElement("div");
-    meetBtn.style.cssText = "width:40px;height:40px;border-radius:50%;background:rgba(255,0,242,0.15);display:flex;align-items:center;justify-content:center;margin:0 auto;cursor:pointer;border:1px solid rgba(255,0,242,0.5);transition:all 0.3s ease;box-shadow:0 0 12px rgba(255,0,242,0.3);";
-    meetBtn.innerHTML = `<img src="https://cdn.shopify.com/s/files/1/0962/6648/6067/files/hearts__128_x_128_px.svg?v=1761809626" style="width:24px;height:24px;filter:drop-shadow(0 0 8px #ff00f2);"/>`;
+    meetBtn.style.cssText = "width:44px;height:44px;border-radius:50%;background:rgba(255,0,242,0.15);display:flex;align-items:center;justify-content:center;margin:0 auto;cursor:pointer;border:1px solid rgba(255,0,242,0.5);transition:all 0.3s ease;box-shadow:0 0 12px rgba(255,0,242,0.3);";
+    meetBtn.innerHTML = `<img src="https://cdn.shopify.com/s/files/1/0962/6648/6067/files/hearts__128_x_128_px.svg?v=1761809626" style="width:26px;height:26px;filter:drop-shadow(0 0 8px #ff00f2);"/>`;
     meetBtn.onclick = (e) => {
       e.stopPropagation();
       if (typeof showMeetModal === 'function') showMeetModal(user);
@@ -1658,20 +1654,20 @@ function sanitizeKey(email) {
     };
     infoPanel.appendChild(meetBtn);
 
-    // Gift slider + button (ONLY for hosts)
+    // Gift slider — now has perfect spacing
     const sliderPanel = document.createElement("div");
-    sliderPanel.style.cssText = "width:100%;padding:6px 8px;border-radius:8px;background:rgba(255,255,255,0.06);backdrop-filter:blur(8px);display:flex;align-items:center;gap:8px;margin-top:8px;";
+    sliderPanel.style.cssText = "width:100%;padding:8px 10px;border-radius:8px;background:rgba(255,255,255,0.06);backdrop-filter:blur(8px);display:flex;align-items:center;gap:10px;";
 
     const fieryColors = [["#ff0000","#ff8c00"],["#ff4500","#ffd700"],["#ff1493","#ff6347"],["#ff0055","#ff7a00"],["#ff5500","#ffcc00"],["#ff3300","#ff0066"]];
     const randomFieryGradient = () => `linear-gradient(90deg, ${fieryColors[Math.floor(Math.random()*fieryColors.length)].join(', ')})`;
 
     const slider = document.createElement("input");
     slider.type = "range"; slider.min = 100; slider.max = 999; slider.value = 100;
-    slider.style.cssText = `flex:1;height:5px;border-radius:5px;outline:none;cursor:pointer;-webkit-appearance:none;background:${randomFieryGradient()};`;
+    slider.style.cssText = `flex:1;height:6px;border-radius:5px;outline:none;cursor:pointer;-webkit-appearance:none;background:${randomFieryGradient()};`;
 
     const sliderLabel = document.createElement("span");
     sliderLabel.textContent = "100";
-    sliderLabel.style.cssText = "font-size:13px;font-weight:700;min-width:50px;text-align:right;color:#fff;";
+    sliderLabel.style.cssText = "font-size:14px;font-weight:700;min-width:56px;text-align:right;color:#fff;";
 
     slider.oninput = () => {
       sliderLabel.textContent = slider.value;
@@ -1681,9 +1677,10 @@ function sanitizeKey(email) {
     sliderPanel.append(slider, sliderLabel);
     infoPanel.appendChild(sliderPanel);
 
+    // Gift button
     const giftBtn = document.createElement("button");
     giftBtn.textContent = "Gift";
-    giftBtn.style.cssText = "padding:8px 16px;border-radius:10px;border:none;font-weight:700;font-size:14px;background:linear-gradient(90deg,#ff0099,#ff0066);color:#fff;cursor:pointer;box-shadow:0 4px 12px rgba(255,0,153,0.4);transition:all 0.2s;margin-top:6px;";
+    giftBtn.style.cssText = "padding:10px 18px;border-radius:10px;border:none;font-weight:700;font-size:15px;background:linear-gradient(90deg,#ff0099,#ff0066);color:#fff;cursor:pointer;box-shadow:0 4px 12px rgba(255,0,153,0.4);transition:all 0.2s;";
     giftBtn.onmouseenter = () => giftBtn.style.transform = "translateY(-3px)";
     giftBtn.onmouseleave = () => giftBtn.style.transform = "";
     giftBtn.onclick = async (e) => {
@@ -1716,11 +1713,10 @@ function sanitizeKey(email) {
     card.appendChild(infoPanel);
     document.body.appendChild(card);
 
-    // Fade in
     requestAnimationFrame(() => card.style.opacity = "1");
   }
 
-  // ==================== ORIGINAL COMPACT CARD FOR VIP & OTHERS ====================
+  // ==================== VIP CARD — UNCHANGED (PERFECT) ====================
   function showOriginalVIPCard(user) {
     const card = document.createElement("div");
     card.id = "socialCard";
@@ -1782,7 +1778,6 @@ function sanitizeKey(email) {
     setTimeout(() => document.addEventListener("click", closeOut), 10);
   }
 
-  // Typewriter effect
   function typeWriterEffect(el, text, speed = 40) {
     el.textContent = "";
     let i = 0;
@@ -1792,7 +1787,6 @@ function sanitizeKey(email) {
     }, speed);
   }
 
-  // Click to open social card
   document.addEventListener("pointerdown", e => {
     const el = e.target.closest("[data-user-id]") || e.target;
     if (!el.textContent) return;
@@ -1806,7 +1800,7 @@ function sanitizeKey(email) {
     showSocialCard(u);
   });
 
-  console.log("Social Card System READY — Trending for Hosts, Clean for VIPs ♡");
+  console.log("Social Card System UPDATED — Host cards now perfectly balanced ♡");
   window.showSocialCard = showSocialCard;
   window.typeWriterEffect = typeWriterEffect;
 })();

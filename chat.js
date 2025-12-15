@@ -1546,7 +1546,7 @@ function sanitizeKey(email) {
     };
     card.appendChild(closeBtn);
 
-  // ==================== VIDEO CONTAINER ====================
+// ==================== VIDEO CONTAINER ====================
 const videoContainer = document.createElement("div");
 videoContainer.style.cssText = `
   height:300px;
@@ -1561,9 +1561,10 @@ const videos = Array.isArray(user.socialcardvideoUrl)
   ? user.socialcardvideoUrl.filter(Boolean)
   : [];
 
+let activeVideo = null;
+
 if (videos.length) {
 
-  // ===== SWIPE WRAPPER =====
   const swipeWrapper = document.createElement("div");
   swipeWrapper.style.cssText = `
     display:flex;
@@ -1574,39 +1575,39 @@ if (videos.length) {
 
   let currentIndex = 0;
   let startX = 0;
+  const videoEls = [];
 
-  videos.forEach(src => {
+  videos.forEach((src, index) => {
 
-    // ===== VIDEO WRAPPER =====
-    const videoWrap = document.createElement("div");
-    videoWrap.style.cssText = `
+    const wrap = document.createElement("div");
+    wrap.style.cssText = `
       position:relative;
       width:100%;
       height:100%;
       flex-shrink:0;
-    `;
-
-    // ===== VIDEO ELEMENT =====
-    const video = document.createElement("video");
-    video.src = src;
-    video.muted = true;
-    video.autoplay = true;
-    video.loop = true;
-    video.preload = "metadata";
-
-    // 🔒 INLINE PLAYBACK (CRITICAL)
-    video.setAttribute("playsinline", "");
-    video.setAttribute("webkit-playsinline", "");
-
-    // 🎯 FULL FRAME (NO ZOOM)
-    video.style.cssText = `
-      width:100%;
-      height:100%;
-      object-fit:contain;
       background:#000;
     `;
 
-    // ===== MUTE ICON =====
+    const video = document.createElement("video");
+    video.src = src;
+    video.muted = true;
+    video.loop = true;
+    video.autoplay = true;
+    video.preload = "metadata";
+
+    // 🔒 iOS INLINE
+    video.setAttribute("playsinline", "");
+    video.setAttribute("webkit-playsinline", "");
+
+    // ✅ FILL WITHOUT BLACK BARS
+    video.style.cssText = `
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      object-position:center;
+    `;
+
+    // 🔇 ICON
     const muteIcon = document.createElement("div");
     muteIcon.textContent = "🔇";
     muteIcon.style.cssText = `
@@ -1618,29 +1619,36 @@ if (videos.length) {
       padding:6px;
       border-radius:50%;
       color:#fff;
-      pointer-events:none;
       opacity:0.6;
-      transition:opacity 0.25s;
+      transition:0.25s;
+      pointer-events:none;
       z-index:5;
     `;
 
-    // ▶️ Safe autoplay
+    // ▶️ play safely
     video.play().catch(() => {});
 
-    // 🔊 TAP TO MUTE / UNMUTE
+    // 🔊 TAP TO TOGGLE SOUND (ONLY ACTIVE VIDEO)
     video.addEventListener("click", e => {
       e.stopPropagation();
+
+      if (activeVideo && activeVideo !== video) {
+        activeVideo.muted = true;
+      }
+
       video.muted = !video.muted;
       muteIcon.style.opacity = video.muted ? "0.6" : "0";
+      activeVideo = video;
     });
 
-    videoWrap.append(video, muteIcon);
-    swipeWrapper.appendChild(videoWrap);
+    wrap.append(video, muteIcon);
+    swipeWrapper.appendChild(wrap);
+    videoEls.push({ video, muteIcon });
   });
 
   videoContainer.appendChild(swipeWrapper);
 
-  // ===== DOT INDICATORS =====
+  // ===== DOTS =====
   let dots;
   if (videos.length > 1) {
     dots = document.createElement("div");
@@ -1679,7 +1687,7 @@ if (videos.length) {
     });
   };
 
-  // ===== SWIPE HANDLERS =====
+  // ===== SWIPE =====
   videoContainer.addEventListener("pointerdown", e => {
     startX = e.clientX;
   });
@@ -1688,15 +1696,28 @@ if (videos.length) {
     const diff = startX - e.clientX;
     if (Math.abs(diff) < 50) return;
 
+    // 🔇 HARD STOP ALL AUDIO ON SWIPE
+    videoEls.forEach(v => {
+      v.video.muted = true;
+      v.video.pause();
+      v.muteIcon.style.opacity = "0.6";
+    });
+
+    activeVideo = null;
+
     if (diff > 0 && currentIndex < videos.length - 1) currentIndex++;
     if (diff < 0 && currentIndex > 0) currentIndex--;
 
     swipeWrapper.style.transform = `translateX(-${currentIndex * 100}%)`;
     updateDots();
+
+    // ▶️ PLAY ONLY CURRENT VIDEO (MUTED)
+    const current = videoEls[currentIndex].video;
+    current.currentTime = 0;
+    current.play().catch(() => {});
   });
 
 } else {
-  // ===== EMPTY STATE =====
   videoContainer.style.cssText += `
     display:flex;
     align-items:center;

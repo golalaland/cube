@@ -4296,7 +4296,7 @@ function renderCards(videosToRender) {
   // Collect all unique tags for filter chips
   const allTags = new Set();
   filtered.forEach(video => {
-    (video.tags || []).forEach(tag => allTags.add(tag));
+    (video.tags || []).forEach(tag => allTags.add(tag.trim().toLowerCase()));
   });
 
   filtered.forEach((video) => {
@@ -4419,7 +4419,7 @@ function renderCards(videosToRender) {
     uploader.appendChild(usernameSpan);
     uploader.style.opacity = "0.9";
 
-    // Tags display — visible on card
+    // Tags — visible on card (cute pink chips)
     const tagsArray = video.tags || [];
     const tagsEl = document.createElement("div");
     tagsEl.style.cssText = "margin-top:4px; display:flex; flex-wrap:wrap; gap:6px;";
@@ -4465,36 +4465,47 @@ function renderCards(videosToRender) {
     content.appendChild(card);
   });
 
-  // Smart search + cute filter chips
+  // Pornhub-style search + filter chips
   const searchInput = document.getElementById("highlightSearchInput");
   if (searchInput) {
+    // Clear old chips
+    const oldChips = searchInput.parentNode.parentNode.querySelector("#filterChips");
+    if (oldChips) oldChips.remove();
+
     const filterChips = document.createElement("div");
-    filterChips.style.cssText = "display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin:12px 0; max-width:360px;";
+    filterChips.id = "filterChips";
+    filterChips.style.cssText = "display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin:12px 0 20px; max-width:380px;";
+
+    // Add all unique tags as clickable chips
     allTags.forEach(tag => {
       const chip = document.createElement("div");
       chip.textContent = `#${tag}`;
       chip.style.cssText = `
-        padding:6px 12px; background:rgba(255,46,120,0.15); color:#ff2e78;
+        padding:8px 16px; background:rgba(255,46,120,0.15); color:#ff2e78;
         border:1px solid rgba(255,46,120,0.4); border-radius:20px;
-        font-size:13px; cursor:pointer; transition:all 0.3s;
+        font-size:13px; font-weight:600; cursor:pointer; transition:all 0.3s;
       `;
       chip.onclick = () => {
         searchInput.value = tag;
+        searchInput.focus();
         searchInput.dispatchEvent(new Event('input'));
       };
       chip.onmouseenter = () => chip.style.background = "rgba(255,46,120,0.3)";
       chip.onmouseleave = () => chip.style.background = "rgba(255,46,120,0.15)";
       filterChips.appendChild(chip);
     });
+
+    // Insert chips below search bar
     searchInput.parentNode.parentNode.appendChild(filterChips);
 
+    // Search logic
     searchInput.oninput = (e) => {
       const term = e.target.value.trim().toLowerCase();
       content.querySelectorAll(".videoCard").forEach(card => {
-        const title = card.getAttribute("data-title");
-        const uploader = card.getAttribute("data-uploader");
-        const location = card.getAttribute("data-location");
-        const tags = card.getAttribute("data-tags");
+        const title = card.getAttribute("data-title") || "";
+        const uploader = card.getAttribute("data-uploader") || "";
+        const location = card.getAttribute("data-location") || "";
+        const tags = card.getAttribute("data-tags") || "";
         const matches = title.includes(term) || uploader.includes(term) || location.includes(term) || tags.includes(term);
         card.style.display = matches ? "flex" : "none";
       });

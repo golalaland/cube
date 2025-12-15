@@ -1549,14 +1549,14 @@ function sanitizeKey(email) {
     };
     card.appendChild(closeBtn);
 
-// ==================== VIDEO CONTAINER — CENTERED + HIDDEN MUTE TOGGLE ====================
+// ==================== VIDEO CONTAINER — FINAL FIXED & CLEAN ====================
 const videoContainer = document.createElement("div");
 videoContainer.style.cssText = `
   width:100%;
   height:320px;
   position:relative;
   overflow:hidden;
-  background:#000; /* Full black cinematic backdrop */
+  background:#000;
   border-radius:16px 16px 0 0;
   touch-action:pan-y;
   cursor:pointer;
@@ -1567,10 +1567,12 @@ const videos = Array.isArray(user.socialcardvideoUrl)
   : [];
 
 let currentIndex = 0;
-const videoEls = []; // To keep track of all video elements
+const videoEls = [];
+let dots = null;
+let updateDots = () => {};  // ← Declare outside so it's always available
 
 if (videos.length > 0) {
-  // ===== SWIPE WRAPPER =====
+  // SWIPE WRAPPER
   const swipeWrapper = document.createElement("div");
   swipeWrapper.style.cssText = `
     display:flex;
@@ -1580,10 +1582,8 @@ if (videos.length > 0) {
   `;
 
   videos.forEach(src => {
-    // ===== CENTERED FRAME =====
     const frame = document.createElement("div");
     frame.style.cssText = `
-      position:relative;
       width:100%;
       height:100%;
       flex-shrink:0;
@@ -1594,10 +1594,9 @@ if (videos.length > 0) {
       overflow:hidden;
     `;
 
-    // ===== VIDEO ELEMENT =====
     const video = document.createElement("video");
     video.src = src;
-    video.muted = true;           // Starts muted
+    video.muted = true;
     video.loop = true;
     video.autoplay = true;
     video.preload = "metadata";
@@ -1611,11 +1610,9 @@ if (videos.length > 0) {
       height:auto;
       object-fit:contain;
       display:block;
-      background:transparent;
     `;
 
     video.play().catch(() => {});
-
     frame.appendChild(video);
     swipeWrapper.appendChild(frame);
     videoEls.push(video);
@@ -1623,39 +1620,7 @@ if (videos.length > 0) {
 
   videoContainer.appendChild(swipeWrapper);
 
-  // ===== TAP TO TOGGLE MUTE (hidden — no icon shown) =====
-  videoContainer.onclick = (e) => {
-    e.stopPropagation();
-    const currentVideo = videoEls[currentIndex];
-    if (currentVideo) {
-      // Mute all others, toggle current
-      videoEls.forEach(v => v.muted = true);
-      currentVideo.muted = !currentVideo.muted;
-      // No visual feedback — completely hidden as requested
-    }
-  };
-
-  // ===== SWIPE GESTURE =====
-  let startX = 0;
-  videoContainer.onpointerdown = (e) => {
-    startX = e.clientX;
-  };
-  videoContainer.onpointerup = (e) => {
-    const diff = startX - e.clientX;
-    if (Math.abs(diff) > 50) {
-      if (diff > 0 && currentIndex < videos.length - 1) {
-        currentIndex++;
-      } else if (diff < 0 && currentIndex > 0) {
-        currentIndex--;
-      }
-      swipeWrapper.style.transform = `translateX(-${currentIndex * 100}%)`;
-      if (dots) updateDots();
-    }
-  };
-
-  // ===== DOTS INDICATOR =====
-  let dots = null;
-  let updateDots = () => {};
+  // DOTS — only if multiple videos
   if (videos.length > 1) {
     dots = document.createElement("div");
     dots.style.cssText = `
@@ -1675,34 +1640,52 @@ if (videos.length > 0) {
         height:8px;
         border-radius:50%;
         background:${i === 0 ? "#ff00f2" : "rgba(255,0,242,0.4)"};
-        transition:background 0.3s, transform 0.3s;
+        transition:all 0.3s;
       `;
       dots.appendChild(dot);
     });
-
     videoContainer.appendChild(dots);
 
     updateDots = () => {
       dots.querySelectorAll("div").forEach((dot, i) => {
         dot.style.background = i === currentIndex ? "#ff00f2" : "rgba(255,0,242,0.4)";
-        dot.style.transform = i === currentIndex ? "scale(1.2)" : "scale(1)";
+        dot.style.transform = i === currentIndex ? "scale(1.3)" : "scale(1)";
       });
     };
-
-    updateDots(); // Initial
+    updateDots(); // Initial call
   }
 
+  // TAP TO TOGGLE SOUND (no icon)
+  videoContainer.onclick = (e) => {
+    e.stopPropagation();
+    const currentVideo = videoEls[currentIndex];
+    if (currentVideo) {
+      videoEls.forEach(v => v.muted = true);
+      currentVideo.muted = !currentVideo.muted;
+    }
+  };
+
+  // SWIPE
+  let startX = 0;
+  videoContainer.onpointerdown = e => startX = e.clientX;
+  videoContainer.onpointerup = e => {
+    const diff = startX - e.clientX;
+    if (Math.abs(diff) > 50) {
+      if (diff > 0 && currentIndex < videos.length - 1) currentIndex++;
+      else if (diff < 0 && currentIndex > 0) currentIndex--;
+      swipeWrapper.style.transform = `translateX(-${currentIndex * 100}%)`;
+      if (dots) updateDots();
+    }
+  };
+
 } else {
-  // No videos fallback
-  videoContainer.style.display = "flex";
-  videoContainer.style.justifyContent = "center";
-  videoContainer.style.alignItems = "center";
-  videoContainer.style.color = "#666";
-  videoContainer.style.fontSize = "15px";
+  // NO VIDEOS
+  videoContainer.style.cssText += "display:flex;justify-content:center;align-items:center;color:#666;font-size:15px;";
   videoContainer.innerHTML = "<div>No video yet~</div>";
 }
 
 card.appendChild(videoContainer);
+    
   // ===== DOTS UPDATE FUNCTION =====
   const updateDots = () => {
     if (!dots) return;

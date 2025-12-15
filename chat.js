@@ -1549,7 +1549,7 @@ function sanitizeKey(email) {
     };
     card.appendChild(closeBtn);
 
-// ==================== VIDEO CONTAINER — FINAL FIXED & CLEAN ====================
+// ==================== VIDEO CONTAINER — FINAL, NO ERRORS ====================
 const videoContainer = document.createElement("div");
 videoContainer.style.cssText = `
   width:100%;
@@ -1569,10 +1569,9 @@ const videos = Array.isArray(user.socialcardvideoUrl)
 let currentIndex = 0;
 const videoEls = [];
 let dots = null;
-let updateDots = () => {};  // ← Declare outside so it's always available
+let updateDots = () => {};  // ← Only declare once here
 
 if (videos.length > 0) {
-  // SWIPE WRAPPER
   const swipeWrapper = document.createElement("div");
   swipeWrapper.style.cssText = `
     display:flex;
@@ -1646,16 +1645,17 @@ if (videos.length > 0) {
     });
     videoContainer.appendChild(dots);
 
+    // ← NO 'let' HERE — just assign the function
     updateDots = () => {
       dots.querySelectorAll("div").forEach((dot, i) => {
         dot.style.background = i === currentIndex ? "#ff00f2" : "rgba(255,0,242,0.4)";
         dot.style.transform = i === currentIndex ? "scale(1.3)" : "scale(1)";
       });
     };
-    updateDots(); // Initial call
+    updateDots(); // Initial
   }
 
-  // TAP TO TOGGLE SOUND (no icon)
+  // TAP TO TOGGLE SOUND (hidden, no icon)
   videoContainer.onclick = (e) => {
     e.stopPropagation();
     const currentVideo = videoEls[currentIndex];
@@ -1679,7 +1679,6 @@ if (videos.length > 0) {
   };
 
 } else {
-  // NO VIDEOS
   videoContainer.style.cssText += "display:flex;justify-content:center;align-items:center;color:#666;font-size:15px;";
   videoContainer.innerHTML = "<div>No video yet~</div>";
 }

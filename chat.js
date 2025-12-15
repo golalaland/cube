@@ -1553,7 +1553,7 @@ videoContainer.style.cssText = `
   height:320px;
   position:relative;
   overflow:hidden;
-  background:#000;
+  background:transparent; /* side bars inherit parent */
   border-radius:16px 16px 0 0;
   touch-action:pan-y;
 `;
@@ -1566,6 +1566,7 @@ let activeVideo = null;
 
 if (videos.length) {
 
+  // ===== SWIPE WRAPPER =====
   const swipeWrapper = document.createElement("div");
   swipeWrapper.style.cssText = `
     display:flex;
@@ -1578,17 +1579,20 @@ if (videos.length) {
   let startX = 0;
   const videoEls = [];
 
-  videos.forEach((src) => {
+  videos.forEach(src => {
 
-    // ===== FRAME (IMPORTANT) =====
+    // ===== FRAME =====
     const wrap = document.createElement("div");
     wrap.style.cssText = `
       position:relative;
       width:100%;
       height:100%;
       flex-shrink:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:transparent;
       overflow:hidden;
-      background:#000;
     `;
 
     // ===== VIDEO =====
@@ -1603,13 +1607,15 @@ if (videos.length) {
     video.setAttribute("playsinline", "");
     video.setAttribute("webkit-playsinline", "");
 
-    // ✅ SAME FIT AS YOUR WORKING CARD
+    // ✅ TRUE FRAME — NO ZOOM
     video.style.cssText = `
-      width:100%;
-      height:100%;
-      object-fit:cover;
-      object-position:center;
-      background:#000;
+      max-width:100%;
+      max-height:100%;
+      width:auto;
+      height:auto;
+      object-fit:contain;
+      background:transparent;
+      display:block;
     `;
 
     // ===== MUTE ICON =====
@@ -1632,7 +1638,7 @@ if (videos.length) {
 
     video.play().catch(() => {});
 
-    // 🔊 TAP TO TOGGLE SOUND (ACTIVE ONLY)
+    // 🔊 TAP TO TOGGLE SOUND (ONE AT A TIME)
     video.addEventListener("click", e => {
       e.stopPropagation();
 
@@ -1700,7 +1706,7 @@ if (videos.length) {
     const diff = startX - e.clientX;
     if (Math.abs(diff) < 50) return;
 
-    // 🔇 HARD STOP EVERYTHING
+    // 🔇 HARD RESET AUDIO
     videoEls.forEach(v => {
       v.video.pause();
       v.video.currentTime = 0;
@@ -1716,7 +1722,6 @@ if (videos.length) {
     swipeWrapper.style.transform = `translateX(-${currentIndex * 100}%)`;
     updateDots();
 
-    // ▶️ PLAY CURRENT (MUTED)
     const current = videoEls[currentIndex].video;
     current.play().catch(() => {});
   });
@@ -1726,12 +1731,13 @@ if (videos.length) {
     display:flex;
     align-items:center;
     justify-content:center;
-    color:#555;
+    color:#777;
   `;
   videoContainer.textContent = "No video yet~";
 }
 
 card.appendChild(videoContainer);
+
 
 
     // ==================== INFO PANEL — MORE SPACE ====================

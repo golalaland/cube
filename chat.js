@@ -1458,10 +1458,11 @@ function sanitizeKey(email) {
   return email.toLowerCase().replace(/[@.]/g, "_").trim();
 }
 /* ======================================================
-  SOCIAL CARD SYSTEM — OPTIMIZED HOST CARD (Dec 2025)
-  • Wider (260px) + shorter video (300px) for perfect fit
-  • Gift slider now spacious and clean
-  • VIP card unchanged — perfect as is
+  SOCIAL CARD SYSTEM — UNIFIED HOST & VIP STYLE (Dec 2025)
+  • Hosts now use exact same compact VIP card style
+  • No video, no gift slider for Hosts
+  • Meet button centered
+  • bioPick + typewriter effect for both
 ====================================================== */
 (async function initSocialCardSystem() {
   const allUsers = [];
@@ -1486,15 +1487,12 @@ function sanitizeKey(email) {
     if (!user) return;
     document.getElementById('socialCard')?.remove();
 
-    if (user.isHost) {
-      showTrendingStyleHostCard(user);
-    } else {
-      showOriginalVIPCard(user);
-    }
+    // Both isHost and isVIP (and others) now use the same clean compact card
+    showUnifiedCard(user);
   }
 
-  // ==================== OPTIMIZED TRENDING CARD FOR HOSTS ====================
-  function showTrendingStyleHostCard(user) {
+  // ==================== UNIFIED CARD FOR HOSTS & VIPs ====================
+  function showUnifiedCard(user) {
     const card = document.createElement("div");
     card.id = "socialCard";
 
@@ -1503,247 +1501,44 @@ function sanitizeKey(email) {
       top: "50%",
       left: "50%",
       transform: "translate(-50%, -50%)",
-      minWidth: "260px",       // Wider for better layout
-      maxWidth: "260px",
-      background: "#0f0a1a",
-      borderRadius: "16px",
-      overflow: "hidden",
-      display: "flex",
-      flexDirection: "column",
-      boxShadow: "0 6px 24px rgba(138,43,226,0.35)",
-      transition: "transform 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease",
-      border: "1px solid rgba(138,43,226,0.5)",
+      background: "linear-gradient(135deg, rgba(20,20,22,0.9), rgba(25,25,27,0.9))",
+      backdropFilter: "blur(10px)",
+      borderRadius: "14px",
+      padding: "12px 16px",
+      color: "#fff",
+      width: "230px",
+      maxWidth: "90%",
       zIndex: "999999",
-      opacity: "0"
+      textAlign: "center",
+      boxShadow: "0 6px 24px rgba(0,0,0,0.5)",
+      fontFamily: "Poppins, sans-serif",
+      opacity: "0",
+      transition: "opacity .18s ease, transform .18s ease"
     });
-
-    // Hover lift
-    card.onmouseenter = () => {
-      card.style.transform = "translate(-50%, -50%) translateY(-8px)";
-      card.style.boxShadow = "0 16px 40px rgba(255,0,242,0.4)";
-    };
-    card.onmouseleave = () => {
-      card.style.transform = "translate(-50%, -50%)";
-      card.style.boxShadow = "0 6px 24px rgba(138,43,226,0.35)";
-    };
-
-    // Close on outside click
-    const closeOut = (e) => {
-      if (!card.contains(e.target)) {
-        card.remove();
-        document.removeEventListener("click", closeOut);
-      }
-    };
-    setTimeout(() => document.addEventListener("click", closeOut), 100);
 
     // Close X
     const closeBtn = document.createElement("div");
     closeBtn.innerHTML = "×";
-    closeBtn.style.cssText = "position:absolute;top:8px;right:12px;font-size:20px;font-weight:700;cursor:pointer;z-index:10;opacity:0.7;color:#fff;";
+    Object.assign(closeBtn.style, {
+      position: "absolute",
+      top: "6px",
+      right: "10px",
+      fontSize: "16px",
+      fontWeight: "700",
+      cursor: "pointer",
+      opacity: "0.6"
+    });
     closeBtn.onmouseenter = () => closeBtn.style.opacity = "1";
-    closeBtn.onmouseleave = () => closeBtn.style.opacity = "0.7";
-    closeBtn.onclick = (e) => {
-      e.stopPropagation();
-      card.remove();
-      document.removeEventListener("click", closeOut);
-    };
+    closeBtn.onmouseleave = () => closeBtn.style.opacity = "0.6";
+    closeBtn.onclick = () => card.remove();
     card.appendChild(closeBtn);
 
-// ==================== VIDEO CONTAINER ====================
-const videoContainer = document.createElement("div");
-videoContainer.style.cssText = `
-  width:100%;
-  height:320px;
-  position:relative;
-  overflow:hidden;
-  background:#000;      /* black backdrop */
-  border-radius:16px 16px 0 0;
-  touch-action:pan-y;
-`;
-
-const videos = Array.isArray(user.socialcardvideoUrl)
-  ? user.socialcardvideoUrl.filter(Boolean)
-  : [];
-
-let activeVideo = null;
-
-if (videos.length) {
-
-  // ===== SWIPE WRAPPER =====
-  const swipeWrapper = document.createElement("div");
-  swipeWrapper.style.cssText = `
-    display:flex;
-    width:${videos.length * 100}%;
-    height:100%;
-    transition:transform 0.35s ease;
-  `;
-
-  let currentIndex = 0;
-  let startX = 0;
-  const videoEls = [];
-
-  videos.forEach(src => {
-
-    // ===== OUTER FRAME (black backdrop per video) =====
-    const wrap = document.createElement("div");
-    wrap.style.cssText = `
-      position:relative;
-      width:100%;
-      height:100%;
-      flex-shrink:0;
-      overflow:hidden;
-      background:#000;
-      display:flex;
-      justify-content:flex-start;  /* push video left */
-      align-items:center;
-    `;
-
-    // ===== VIDEO =====
-    const video = document.createElement("video");
-    video.src = src;
-    video.muted = true;
-    video.loop = true;
-    video.autoplay = true;
-    video.preload = "metadata";
-    video.setAttribute("playsinline", "");
-    video.setAttribute("webkit-playsinline", "");
-
-    // ===== INNER FRAME STYLE =====
-    video.style.cssText = `
-      height:100%;
-      width:auto;
-      object-fit:contain;
-      object-position:left center;   /* push to left inside the frame */
-      background:transparent;
-      display:block;
-    `;
-
-    // ===== MUTE ICON =====
-    const muteIcon = document.createElement("div");
-    muteIcon.textContent = "🔇";
-    muteIcon.style.cssText = `
-      position:absolute;
-      bottom:12px;
-      right:12px;
-      font-size:16px;
-      background:rgba(0,0,0,0.55);
-      padding:6px;
-      border-radius:50%;
-      color:#fff;
-      opacity:0.6;
-      transition:0.25s;
-      pointer-events:none;
-      z-index:5;
-    `;
-
-    video.play().catch(() => {});
-
-    // 🔊 TAP TO TOGGLE SOUND
-    video.addEventListener("click", e => {
-      e.stopPropagation();
-      if (activeVideo && activeVideo !== video) {
-        activeVideo.muted = true;
-      }
-      video.muted = !video.muted;
-      muteIcon.style.opacity = video.muted ? "0.6" : "0";
-      activeVideo = video;
-    });
-
-    wrap.append(video, muteIcon);
-    swipeWrapper.appendChild(wrap);
-    videoEls.push({ video, muteIcon });
-  });
-
-  videoContainer.appendChild(swipeWrapper);
-
-  // ===== DOTS =====
-  let dots;
-  if (videos.length > 1) {
-    dots = document.createElement("div");
-    dots.style.cssText = `
-      position:absolute;
-      bottom:10px;
-      left:50%;
-      transform:translateX(-50%);
-      display:flex;
-      gap:6px;
-      z-index:6;
-    `;
-
-    videos.forEach((_, i) => {
-      const dot = document.createElement("div");
-      dot.style.cssText = `
-        width:7px;
-        height:7px;
-        border-radius:50%;
-        background:${i === 0 ? "#ff00f2" : "rgba(255,0,242,0.35)"};
-        transition:0.3s;
-      `;
-      dots.appendChild(dot);
-    });
-
-    videoContainer.appendChild(dots);
-  }
-
-  const updateDots = () => {
-    if (!dots) return;
-    [...dots.children].forEach((d, i) => {
-      d.style.background =
-        i === currentIndex
-          ? "#ff00f2"
-          : "rgba(255,0,242,0.35)";
-    });
-  };
-
-  // ===== SWIPE =====
-  videoContainer.addEventListener("pointerdown", e => {
-    startX = e.clientX;
-  });
-
-  videoContainer.addEventListener("pointerup", e => {
-    const diff = startX - e.clientX;
-    if (Math.abs(diff) < 50) return;
-
-    // 🔇 STOP ALL VIDEOS
-    videoEls.forEach(v => {
-      v.video.pause();
-      v.video.currentTime = 0;
-      v.video.muted = true;
-      v.muteIcon.style.opacity = "0.6";
-    });
-
-    activeVideo = null;
-
-    if (diff > 0 && currentIndex < videos.length - 1) currentIndex++;
-    if (diff < 0 && currentIndex > 0) currentIndex--;
-
-    swipeWrapper.style.transform = `translateX(-${currentIndex * 100}%)`;
-    updateDots();
-
-    videoEls[currentIndex].video.play().catch(() => {});
-  });
-
-} else {
-  videoContainer.style.cssText += `
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    color:#777;
-  `;
-  videoContainer.textContent = "No video yet~";
-}
-
-card.appendChild(videoContainer);
-
-    // ==================== INFO PANEL — MORE SPACE ====================
-    const infoPanel = document.createElement("div");
-    infoPanel.style.cssText = "background:linear-gradient(180deg,#1a0b2e,#0f0519);padding:16px 18px;display:flex;flex-direction:column;gap:12px;border-radius:0 0 16px 16px;"; // Slightly more padding
-
-    // @chatId
-    const chatIdEl = document.createElement("div");
-    chatIdEl.textContent = `@${user.chatId || "Unknown"}`;
-    chatIdEl.style.cssText = "font-weight:800;color:#e0b0ff;font-size:16px;text-align:center;"; // Slightly larger
-    infoPanel.appendChild(chatIdEl);
+    // Header @chatId
+    const header = document.createElement("h3");
+    header.textContent = user.chatId ? user.chatId.charAt(0).toUpperCase() + user.chatId.slice(1) : "Unknown";
+    const headerColor = user.isHost ? "#ff6600" : user.isVIP ? "#ff0099" : "#cccccc";
+    header.style.cssText = `margin:0 0 8px;font-size:18px;font-weight:700;background:linear-gradient(90deg,${headerColor},#ff33cc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;`;
+    card.appendChild(header);
 
     // Legendary details
     const gender = (user.gender || "person").toLowerCase();
@@ -1755,162 +1550,72 @@ card.appendChild(videoContainer);
     const city = user.location || user.city || "Lagos";
     const country = user.country || "Nigeria";
 
-    const detailsEl = document.createElement("p");
-    detailsEl.textContent = `A ${fruit} ${nature} ${gender} in ${pronoun} ${ageGroup}, currently in ${city}, ${country}. ${flair}`;
-    detailsEl.style.cssText = "margin:0 0 10px;font-size:14.5px;line-height:1.45;color:#ccc;text-align:center;opacity:0.9;";
-    infoPanel.appendChild(detailsEl);
-
-    // Meet heart button
-    const meetBtn = document.createElement("div");
-    meetBtn.style.cssText = "width:44px;height:44px;border-radius:50%;background:rgba(255,0,242,0.15);display:flex;align-items:center;justify-content:center;margin:0 auto;cursor:pointer;border:1px solid rgba(255,0,242,0.5);transition:all 0.3s ease;box-shadow:0 0 12px rgba(255,0,242,0.3);";
-    meetBtn.innerHTML = `<img src="https://cdn.shopify.com/s/files/1/0962/6648/6067/files/hearts__128_x_128_px.svg?v=1761809626" style="width:26px;height:26px;filter:drop-shadow(0 0 8px #ff00f2);"/>`;
-    meetBtn.onclick = (e) => {
-      e.stopPropagation();
-      if (typeof showMeetModal === 'function') showMeetModal(user);
-    };
-    meetBtn.onmouseenter = () => {
-      meetBtn.style.transform = "scale(1.15)";
-      meetBtn.style.background = "rgba(255,0,242,0.3)";
-      meetBtn.style.boxShadow = "0 0 20px rgba(255,0,242,0.6)";
-    };
-    meetBtn.onmouseleave = () => {
-      meetBtn.style.transform = "scale(1)";
-      meetBtn.style.background = "rgba(255,0,242,0.15)";
-      meetBtn.style.boxShadow = "0 0 12px rgba(255,0,242,0.3)";
-    };
-    infoPanel.appendChild(meetBtn);
-
-   // Gift slider — number now hugs the slider nicely, away from edge
-const sliderPanel = document.createElement("div");
-sliderPanel.style.cssText = "width:100%;padding:8px 14px;border-radius:8px;background:rgba(255,255,255,0.06);backdrop-filter:blur(8px);display:flex;align-items:center;gap:10px;box-sizing:border-box;";
-
-const fieryColors = [["#ff0000","#ff8c00"],["#ff4500","#ffd700"],["#ff1493","#ff6347"],["#ff0055","#ff7a00"],["#ff5500","#ffcc00"],["#ff3300","#ff0066"]];
-const randomFieryGradient = () => `linear-gradient(90deg, ${fieryColors[Math.floor(Math.random()*fieryColors.length)].join(', ')})`;
-
-const slider = document.createElement("input");
-slider.type = "range";
-slider.min = 100;
-slider.max = 999;
-slider.value = 100;
-slider.style.cssText = `flex:1;height:6px;border-radius:5px;outline:none;cursor:pointer;-webkit-appearance:none;background:${randomFieryGradient()};`;
-
-const sliderLabel = document.createElement("span");
-sliderLabel.textContent = "100";
-sliderLabel.style.cssText = "font-size:14.5px;font-weight:700;color:#fff;width:50px;text-align:center;";  
-// Key changes:
-// - Removed min-width + padding-right → now fixed width
-// - text-align:center → number sits neatly in its own space
-// - width:50px → perfect snug fit, no hugging the edge
-
-slider.oninput = () => {
-  sliderLabel.textContent = slider.value;
-  slider.style.background = randomFieryGradient();
-};
-
-sliderPanel.append(slider, sliderLabel);
-infoPanel.appendChild(sliderPanel);
-
-    // Gift button
-    const giftBtn = document.createElement("button");
-    giftBtn.textContent = "Gift";
-    giftBtn.style.cssText = "padding:10px 18px;border-radius:10px;border:none;font-weight:700;font-size:15px;background:linear-gradient(90deg,#ff0099,#ff0066);color:#fff;cursor:pointer;box-shadow:0 4px 12px rgba(255,0,153,0.4);transition:all 0.2s;";
-    giftBtn.onmouseenter = () => giftBtn.style.transform = "translateY(-3px)";
-    giftBtn.onmouseleave = () => giftBtn.style.transform = "";
-    giftBtn.onclick = async (e) => {
-      e.stopPropagation();
-      const amt = parseInt(slider.value);
-      if (amt < 100) return showStarPopup("Minimum 100 stars");
-      if ((currentUser?.stars || 0) < amt) return showStarPopup("Not enough stars");
-      if (user.chatId?.toLowerCase() === currentUser?.chatId?.toLowerCase()) return showStarPopup("You can't gift yourself silly!");
-
-      const orig = giftBtn.textContent;
-      giftBtn.textContent = "";
-      const spin = document.createElement("div");
-      spin.style.cssText = "width:18px;height:18px;border:3px solid #fff3;border-top:3px solid white;border-radius:50%;animation:spin 0.7s linear infinite;margin:0 auto;";
-      giftBtn.appendChild(spin);
-
-      try {
-        await sendStarsToUser(user, amt);
-        showStarPopup(`Sent ${amt} stars to ${user.chatId}!`);
-        slider.value = 100;
-        sliderLabel.textContent = "100";
-        setTimeout(() => card.remove(), 800);
-      } catch (e) {
-        showStarPopup("Failed — try again");
-      } finally {
-        giftBtn.textContent = orig;
-      }
-    };
-    infoPanel.appendChild(giftBtn);
-
-    card.appendChild(infoPanel);
-    document.body.appendChild(card);
-
-    requestAnimationFrame(() => card.style.opacity = "1");
-  }
-
-  // ==================== VIP CARD — UNCHANGED (PERFECT) ====================
-  function showOriginalVIPCard(user) {
-    const card = document.createElement("div");
-    card.id = "socialCard";
-    Object.assign(card.style, {
-      position: "fixed", top: "50%", left: "50%",
-      transform: "translate(-50%, -50%)",
-      background: "linear-gradient(135deg, rgba(20,20,22,0.9), rgba(25,25,27,0.9))",
-      backdropFilter: "blur(10px)", borderRadius: "14px",
-      padding: "12px 16px", color: "#fff", width: "230px", maxWidth: "90%",
-      zIndex: "999999", textAlign: "center",
-      boxShadow: "0 6px 24px rgba(0,0,0,0.5)",
-      fontFamily: "Poppins, sans-serif", opacity: "0",
-      transition: "opacity .18s ease, transform .18s ease"
-    });
-
-    const closeBtn = document.createElement("div");
-    closeBtn.innerHTML = "×";
-    Object.assign(closeBtn.style, { position: "absolute", top: "6px", right: "10px", fontSize: "16px", fontWeight: "700", cursor: "pointer", opacity: "0.6" });
-    closeBtn.onmouseenter = () => closeBtn.style.opacity = "1";
-    closeBtn.onmouseleave = () => closeBtn.style.opacity = "0.6";
-    closeBtn.onclick = () => card.remove();
-    card.appendChild(closeBtn);
-
-    const header = document.createElement("h3");
-    header.textContent = user.chatId ? user.chatId.charAt(0).toUpperCase() + user.chatId.slice(1) : "Unknown";
-    const color = user.isVIP ? "#ff0099" : "#cccccc";
-    header.style.cssText = `margin:0 0 8px;font-size:18px;font-weight:700;background:linear-gradient(90deg,${color},#ff33cc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;`;
-    card.appendChild(header);
+    let detailsText = `A ${gender} from ${city}, ${country}. ${flair}`;
+    if (user.isHost || user.isVIP) {
+      detailsText = `A ${fruit} ${nature} ${gender} in ${pronoun} ${ageGroup}, currently in ${city}, ${country}. ${flair}`;
+    }
 
     const detailsEl = document.createElement("p");
-    detailsEl.style.cssText = "margin:0 0 10px;font-size:14px;line-height:1.4";
-    const gender = (user.gender || "person").toLowerCase();
-    const pronoun = gender === "male" ? "his" : "her";
-    const ageGroup = !user.age ? "20s" : user.age >= 30 ? "30s" : "20s";
-    const flair = gender === "male" ? "😎" : "💋";
-    const fruit = user.fruitPick || "🍇";
-    const nature = user.naturePick || "cool";
-    const city = user.location || user.city || "Lagos";
-    const country = user.country || "Nigeria";
-
-    detailsEl.innerHTML = user.isVIP
-      ? `A ${gender} in ${pronoun} ${ageGroup}, currently in ${city}, ${country}. ${flair}`
-      : `A ${gender} from ${city}, ${country}. ${flair}`;
+    detailsEl.textContent = detailsText;
+    detailsEl.style.cssText = "margin:0 0 10px;font-size:14px;line-height:1.4;color:#ccc;";
     card.appendChild(detailsEl);
 
+    // Bio with typewriter effect
     const bioEl = document.createElement("div");
-    bioEl.style.cssText = "margin:6px 0 12px;font-style:italic;font-weight:600;font-size:13px";
+    bioEl.style.cssText = "margin:12px 0 16px;font-style:italic;font-weight:600;font-size:13px;";
     bioEl.style.color = ["#ff99cc","#ffcc33","#66ff99","#66ccff","#ff6699","#ff9966","#ccccff","#f8b500"][Math.floor(Math.random()*8)];
     card.appendChild(bioEl);
     typeWriterEffect(bioEl, user.bioPick || "Nothing shared yet...");
 
+    // Meet button — centered (only for Hosts)
+    if (user.isHost) {
+      const meetBtn = document.createElement("div");
+      meetBtn.style.cssText = `
+        width:50px;height:50px;border-radius:50%;
+        background:rgba(255,102,0,0.15);
+        display:flex;align-items:center;justify-content:center;
+        margin:0 auto;cursor:pointer;
+        border:2px solid rgba(255,102,0,0.6);
+        transition:all 0.3s ease;
+        box-shadow:0 0 15px rgba(255,102,0,0.4);
+      `;
+      meetBtn.innerHTML = `<img src="https://cdn.shopify.com/s/files/1/0962/6648/6067/files/hearts__128_x_128_px.svg?v=1761809626" style="width:28px;height:28px;filter:drop-shadow(0 0 8px #ff6600);"/>`;
+      meetBtn.onclick = (e) => {
+        e.stopPropagation();
+        if (typeof showMeetModal === 'function') showMeetModal(user);
+      };
+      meetBtn.onmouseenter = () => {
+        meetBtn.style.transform = "scale(1.15)";
+        meetBtn.style.background = "rgba(255,102,0,0.3)";
+        meetBtn.style.boxShadow = "0 0 25px rgba(255,102,0,0.7)";
+      };
+      meetBtn.onmouseleave = () => {
+        meetBtn.style.transform = "scale(1)";
+        meetBtn.style.background = "rgba(255,102,0,0.15)";
+        meetBtn.style.boxShadow = "0 0 15px rgba(255,102,0,0.4)";
+      };
+      card.appendChild(meetBtn);
+    }
+
     document.body.appendChild(card);
+
+    // Fade in
     requestAnimationFrame(() => {
       card.style.opacity = "1";
       card.style.transform = "translate(-50%, -50%) scale(1)";
     });
 
-    const closeOut = (e) => { if (!card.contains(e.target)) card.remove(); };
+    // Close on outside click
+    const closeOut = (e) => {
+      if (!card.contains(e.target)) {
+        card.remove();
+        document.removeEventListener("click", closeOut);
+      }
+    };
     setTimeout(() => document.addEventListener("click", closeOut), 10);
   }
 
+  // Typewriter effect
   function typeWriterEffect(el, text, speed = 40) {
     el.textContent = "";
     let i = 0;
@@ -1920,6 +1625,7 @@ infoPanel.appendChild(sliderPanel);
     }, speed);
   }
 
+  // Click listener to open card
   document.addEventListener("pointerdown", e => {
     const el = e.target.closest("[data-user-id]") || e.target;
     if (!el.textContent) return;
@@ -1933,7 +1639,7 @@ infoPanel.appendChild(sliderPanel);
     showSocialCard(u);
   });
 
-  console.log("Social Card System UPDATED — Host cards now perfectly balanced ♡");
+  console.log("Social Card System — Unified clean style for Hosts & VIPs ♡");
   window.showSocialCard = showSocialCard;
   window.typeWriterEffect = typeWriterEffect;
 })();

@@ -225,6 +225,22 @@ Object.assign(refs, {
 if (refs.chatIDInput) refs.chatIDInput.maxLength = 12;
 
 
+function revealHostTabs() {
+  if (!currentUser || currentUser.isHost !== true) return;
+
+  const hostEls = document.querySelectorAll(".host-only");
+  if (!hostEls.length) return;
+
+  hostEls.forEach(el => {
+    // buttons need inline-flex, panels need block
+    el.style.display = el.tagName === "BUTTON" ? "inline-flex" : "block";
+  });
+
+  console.log("[HOST UI] revealed");
+}
+
+
+
 
 /* ===============================
    FINAL 2025 BULLETPROOF AUTH + NOTIFICATIONS + UTILS
@@ -331,6 +347,16 @@ onAuthStateChanged(auth, async (firebaseUser) => {
     };
 
     console.log("WELCOME BACK:", currentUser.chatId.toUpperCase());
+    console.log("[HOST CHECK]", {
+  uid: currentUser?.uid,
+  isHost: currentUser?.isHost,
+  isVIP: currentUser?.isVIP
+});
+
+    // after currentUser is created
+revealHostTabs();
+
+
 
     // ——— UI STATE ———
     document.querySelectorAll(".after-login-only").forEach(el => el.style.display = "block");

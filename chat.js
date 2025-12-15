@@ -4296,22 +4296,25 @@ function renderCards(videosToRender) {
   if (filterMode === "trending" && filtered.length === 0) {
     const emptyMsg = document.createElement("div");
     emptyMsg.textContent = "No one is trending right now.";
-    emptyMsg.style.cssText = `
-      width:100%; text-align:center; padding:60px 20px; color:#888;
-      font-size:16px; font-weight:600; opacity:0.8;
-    `;
+    emptyMsg.style.cssText = "width:100%; text-align:center; padding:60px 20px; color:#888; font-size:16px; font-weight:600; opacity:0.8;";
     content.appendChild(emptyMsg);
     return;
   }
 
-  filtered.forEach(async (video) => {
+  // Collect all unique tags for filter chips
+  const allTags = new Set();
+  filtered.forEach(video => {
+    (video.tags || []).forEach(tag => allTags.add(tag));
+  });
+
+  filtered.forEach((video) => {
     const isUnlocked = unlockedVideos.includes(video.id);
 
     const card = document.createElement("div");
     card.className = "videoCard";
-    card.setAttribute("data-uploader", video.uploaderName || "Anonymous");
-    card.setAttribute("data-title", video.title || "");
-    card.setAttribute("data-location", video.location || "");
+    card.setAttribute("data-uploader", (video.uploaderName || "Anonymous").toLowerCase());
+    card.setAttribute("data-title", (video.title || "").toLowerCase());
+    card.setAttribute("data-location", (video.location || "").toLowerCase());
     card.setAttribute("data-tags", (video.tags || []).join(" ").toLowerCase());
 
     Object.assign(card.style, {
@@ -4324,14 +4327,14 @@ function renderCards(videosToRender) {
 
     card.onmouseenter = () => {
       card.style.transform = "scale(1.03)";
-      card.style.boxShadow = "0 12px 32px rgba(255,0,242,0.4)";
+      card.style.boxShadow = "0 12px 32px rgba(255,0,242,0.6)";
     };
     card.onmouseleave = () => {
       card.style.transform = "scale(1)";
       card.style.boxShadow = "0 4px 20px rgba(138,43,226,0.4)";
     };
 
-    // Video container — restored exactly from your favorite version
+    // Video container — your exact favorite
     const videoContainer = document.createElement("div");
     videoContainer.style.cssText = `
       height: 320px;
@@ -4351,7 +4354,6 @@ function renderCards(videosToRender) {
     if (isUnlocked) {
       videoEl.src = video.previewClip || video.highlightVideo || video.videoUrl || "";
       videoEl.load();
-
       videoContainer.onmouseenter = () => videoEl.play().catch(() => {});
       videoContainer.onmouseleave = () => {
         videoEl.pause();
@@ -4359,7 +4361,6 @@ function renderCards(videosToRender) {
       };
     } else {
       videoEl.src = "";
-
       const lockedOverlay = document.createElement("div");
       lockedOverlay.innerHTML = `
         <div style="
@@ -4375,12 +4376,12 @@ function renderCards(videosToRender) {
             <svg width="80" height="80" viewBox="0 0 24 24" fill="none">
               <path d="M12 2C9.2 2 7 4.2 7 7V11H6C4.9 11 4 11.9 4 13V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V13C20 11.9 19.1 11 18 11H17V7C17 4.2 14.8 2 12 2ZM12 4C13.7 4 15 5.3 15 7V11H9V7C9 5.3 10.3 4 12 4Z" fill="#ff00f2"/>
             </svg>
+            ${video.highlightVideoPrice > 0 ? `<div style="margin-top:12px;font-size:18px;font-weight:800;color:#ff00f2;">${video.highlightVideoPrice} STRZ</div>` : ''}
           </div>
         </div>`;
       videoContainer.appendChild(lockedOverlay);
     }
 
-    // Video click — unlock or play full (no disappearing cards)
     videoContainer.onclick = (e) => {
       e.stopPropagation();
       if (!isUnlocked) {
@@ -4388,83 +4389,54 @@ function renderCards(videosToRender) {
         return;
       }
       const fullVideo = document.createElement("video");
-      fullVideo.src = video.videoUrl || video.highlightVideo || video.previewClip || "";
-      fullVideo.muted = false;
-      fullVideo.playsInline = false;
+      fullVideo.src = video.videoUrl || "";
       fullVideo.controls = true;
-      fullVideo.style.cssText = `
-        position: fixed;
-        top: 0; left: 0;
-        width: 100vw;
-        height: 100vh;
-        object-fit: contain;
-        background: #000;
-        z-index: 99999;
-      `;
+      fullVideo.playsInline = false;
+      fullVideo.style.cssText = "position:fixed;top:0;left:0;width:100vw;height:100vh;object-fit:contain;background:#000;z-index:99999;";
       fullVideo.onclick = () => fullVideo.remove();
-      fullVideo.onended = () => fullVideo.remove();
       document.body.appendChild(fullVideo);
       fullVideo.play();
       if (fullVideo.requestFullscreen) fullVideo.requestFullscreen();
-      else if (fullVideo.webkitRequestFullscreen) fullVideo.webkitRequestFullscreen();
-      else if (fullVideo.msRequestFullscreen) fullVideo.msRequestFullscreen();
     };
 
     videoContainer.appendChild(videoEl);
 
     // Info panel
     const infoPanel = document.createElement("div");
-    infoPanel.style.cssText = "background: linear-gradient(180deg, #1a0b2e, #0f0519);padding:12px;display:flex;flex-direction:column;gap:6px;border-top: 1px solid #8a2be2;";
+    infoPanel.style.cssText = "background:linear-gradient(180deg,#1a0b2e,#0f0519);padding:12px;display:flex;flex-direction:column;gap:6px;border-top:1px solid #8a2be2;";
 
-    // Title
     const title = document.createElement("div");
     title.textContent = video.title || "Untitled";
-   title.style.cssText = "font-weight:800;color:#e0b0ff;font-size:15px;";
+    title.style.cssText = "font-weight:800;color:#e0b0ff;font-size:15px;";
 
-    // Clickable @username — opens social card directly (no unlock requirement)
     const uploader = document.createElement("div");
     const usernameSpan = document.createElement("span");
-    usernameSpan.textContent = `@${video.uploaderName || "Cutie"}`;
+    usernameSpan.textContent = `@${video.uploaderName || "Anonymous"}`;
     usernameSpan.style.cssText = "color:#00ffea; font-size:12px; cursor:pointer; font-weight:600;";
     usernameSpan.onclick = (e) => {
       e.stopPropagation();
-      // Fetch full user data and show unified social card
       (async () => {
         if (video.uploaderId) {
           try {
             const userSnap = await getDoc(doc(db, "users", video.uploaderId));
-            if (userSnap.exists()) {
-              showSocialCard(userSnap.data());
-            }
-          } catch (err) {
-            console.warn("Failed to load user for social card", err);
-          }
+            if (userSnap.exists()) showSocialCard(userSnap.data());
+          } catch (err) {}
         }
       })();
     };
     uploader.appendChild(usernameSpan);
     uploader.style.opacity = "0.9";
 
-    // Tags — clickable for search
+    // Tags display — visible on card
     const tagsArray = video.tags || [];
     const tagsEl = document.createElement("div");
-    if (tagsArray.length > 0) {
-      tagsArray.forEach(tag => {
-        const tagSpan = document.createElement("span");
-        tagSpan.textContent = `#${tag}`;
-        tagSpan.style.cssText = "font-size:11px; color:#888; opacity:0.8; margin-right:8px; cursor:pointer;";
-        tagSpan.onclick = (e) => {
-          e.stopPropagation();
-          const searchInput = document.getElementById("highlightSearchInput");
-          if (searchInput) {
-            searchInput.value = tag;
-            searchInput.dispatchEvent(new Event('input'));
-          }
-        };
-        tagsEl.appendChild(tagSpan);
-      });
-    }
-    tagsEl.style.cssText = "margin-top:4px;";
+    tagsEl.style.cssText = "margin-top:4px; display:flex; flex-wrap:wrap; gap:6px;";
+    tagsArray.forEach(tag => {
+      const tagSpan = document.createElement("span");
+      tagSpan.textContent = `#${tag}`;
+      tagSpan.style.cssText = "font-size:11px; color:#ff2e78; background:rgba(255,46,120,0.15); padding:2px 8px; border-radius:8px; opacity:0.9;";
+      tagsEl.appendChild(tagSpan);
+    });
 
     // Unlock button
     const unlockBtn = document.createElement("button");
@@ -4501,20 +4473,36 @@ function renderCards(videosToRender) {
     content.appendChild(card);
   });
 
-  // Smart search — title, username, location, tags
+  // Smart search + cute filter chips
   const searchInput = document.getElementById("highlightSearchInput");
   if (searchInput) {
+    const filterChips = document.createElement("div");
+    filterChips.style.cssText = "display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin:12px 0; max-width:360px;";
+    allTags.forEach(tag => {
+      const chip = document.createElement("div");
+      chip.textContent = `#${tag}`;
+      chip.style.cssText = `
+        padding:6px 12px; background:rgba(255,46,120,0.15); color:#ff2e78;
+        border:1px solid rgba(255,46,120,0.4); border-radius:20px;
+        font-size:13px; cursor:pointer; transition:all 0.3s;
+      `;
+      chip.onclick = () => {
+        searchInput.value = tag;
+        searchInput.dispatchEvent(new Event('input'));
+      };
+      chip.onmouseenter = () => chip.style.background = "rgba(255,46,120,0.3)";
+      chip.onmouseleave = () => chip.style.background = "rgba(255,46,120,0.15)";
+      filterChips.appendChild(chip);
+    });
+    searchInput.parentNode.parentNode.appendChild(filterChips);
+
     searchInput.oninput = (e) => {
       const term = e.target.value.trim().toLowerCase();
-      if (!term) {
-        content.querySelectorAll(".videoCard").forEach(card => card.style.display = "flex");
-        return;
-      }
       content.querySelectorAll(".videoCard").forEach(card => {
-        const title = (card.getAttribute("data-title") || "").toLowerCase();
-        const uploader = (card.getAttribute("data-uploader") || "").toLowerCase();
-        const location = (card.getAttribute("data-location") || "").toLowerCase();
-        const tags = (card.getAttribute("data-tags") || "").toLowerCase();
+        const title = card.getAttribute("data-title");
+        const uploader = card.getAttribute("data-uploader");
+        const location = card.getAttribute("data-location");
+        const tags = card.getAttribute("data-tags");
         const matches = title.includes(term) || uploader.includes(term) || location.includes(term) || tags.includes(term);
         card.style.display = matches ? "flex" : "none";
       });

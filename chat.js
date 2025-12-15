@@ -3257,6 +3257,32 @@ if (!window.verifyHandlersInitialized) {
     setTimeout(() => alertEl.remove(), duration);
   };
 
+
+  // Define your host check (replace with real logic, e.g., from auth or URL param)
+const isHost = true;  // Set to false for non-hosts
+
+const toolsTabBtn = document.getElementById('toolsTabBtn');
+const toolsTabContent = document.getElementById('infoTab');
+
+if (!isHost) {
+  // Hide the Tools button
+  toolsTabBtn.style.display = 'none';
+  
+  // Hide the Tools content (in case someone accesses it directly)
+  toolsTabContent.style.display = 'none';
+}
+
+// Basic tab switching logic (you probably already have something similar)
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const tabId = btn.getAttribute('data-tab');
+    document.querySelectorAll('.tab-content').forEach(content => {
+      content.style.display = 'none';
+    });
+    document.getElementById(tabId).style.display = 'block';
+  });
+});
+  
   // ---------- PHONE NORMALIZER (for backend matching) ----------
   function normalizePhone(number) {
     return number.replace(/\D/g, "").slice(-10); // last 10 digits

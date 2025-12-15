@@ -1523,17 +1523,6 @@ function sanitizeKey(email) {
       card.style.transform = "translate(-50%, -50%)";
       card.style.boxShadow = "0 6px 24px rgba(138,43,226,0.35)";
     };
-
-    // Close on outside click
-    const closeOut = (e) => {
-      if (!card.contains(e.target)) {
-        card.remove();
-        document.removeEventListener("click", closeOut);
-      }
-    };
-    setTimeout(() => document.addEventListener("click", closeOut), 100);
-
-    // Close X
      // === CINEMATIC BACKDROP BLUR OVERLAY ===
     const backdrop = document.createElement("div");
     backdrop.id = "socialCardBackdrop";

@@ -1652,7 +1652,7 @@ function sanitizeKey(email) {
         transition:all 0.3s ease;
         box-shadow:0 0 15px rgba(255,0,242,0.4);
       `;
-      meetBtn.innerHTML = `<img src="https://cdn.shopify.com/s/files/1/0962/6648/6067/files/hearts__128_x_128_px.svg?v=1761809626" style="width:28px;height:28px;filter:drop-shadow(0 0 10px #ff00f2);"/>`;
+      meetBtn.innerHTML = `<img src="https://cdn.shopify.com/s/files/1/0962/6648/6067/files/128_x_128_px_1.png?v=1765845334" style="width:28px;height:28px;filter:drop-shadow(0 0 10px #ff00f2);"/>`;
       
       meetBtn.onclick = (e) => {
         e.stopPropagation();

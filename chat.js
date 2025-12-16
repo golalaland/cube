@@ -356,6 +356,17 @@ onAuthStateChanged(auth, async (firebaseUser) => {
     // after currentUser is created
 revealHostTabs();
 
+ // Block Cheaters!
+    document.addEventListener("click", (e) => {
+  const btn = e.target.closest('.tab-btn[data-tab="infoTab"]');
+  if (!btn) return;
+
+  if (!currentUser || currentUser.isHost !== true) {
+    e.preventDefault();
+    console.warn("[BLOCKED] non-host tried to open Tools");
+  }
+});
+
 
 
     // ——— UI STATE ———

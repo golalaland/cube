@@ -612,8 +612,88 @@ async function showGiftModal(targetUid, targetData) {
   });
 }
 
+// UPDATE BALANCES (call this after any change)
+function updateInfoTab() {
+  document.getElementById("starCount").textContent = currentUser.stars.toLocaleString();
+  document.getElementById("cashCount").textContent = currentUser.cash.toLocaleString();
+  document.getElementById("lastEarnings").textContent = "₦" + (currentUser.lastEarnings || 0).toLocaleString();
+}
 
+// CONVERT PREVIEW
+document.getElementById("convertStarsInput")?.addEventListener("input", e => {
+  const stars = Number(e.target.value) || 0;
+  document.getElementById("convertPreview").textContent = (stars * 0.25).toLocaleString();
+});
 
+// CONVERT STARS TO CASH
+document.getElementById("convertStarsBtn")?.addEventListener("click", async () => {
+  const stars = Number(document.getElementById("convertStarsInput").value);
+  if (!stars || stars <= 0) return showGoldAlert("Enter valid amount");
+  if (stars > currentUser.stars) return showGoldAlert("Not enough STRZ");
+
+  const cash = stars * 0.25;
+  const ok = await showConfirm("Convert", `Convert ${stars.toLocaleString()} STRZ to ₦${cash.toLocaleString()}?`);
+  if (!ok) return;
+
+  showLoader("Converting...");
+  try {
+    await updateDoc(doc(db, "users", currentUser.uid), {
+      stars: increment(-stars),
+      cash: increment(cash)
+    });
+    currentUser.stars -= stars;
+    currentUser.cash += cash;
+    updateInfoTab();
+    document.getElementById("convertStarsInput").value = "";
+    document.getElementById("convertPreview").textContent = "0";
+    hideLoader();
+    showGoldAlert(`Converted! +₦${cash.toLocaleString()}`);
+  } catch (e) {
+    hideLoader();
+    showGoldAlert("Conversion failed");
+  }
+});
+
+// WITHDRAW CASH
+document.getElementById("withdrawCashBtn")?.addEventListener("click", () => {
+  if (currentUser.cash < 5000) return showGoldAlert("Minimum ₦5,000");
+  const amount = prompt("Enter amount to withdraw (max ₦" + currentUser.cash.toLocaleString() + "):", currentUser.cash);
+  if (!amount || Number(amount) < 5000 || Number(amount) > currentUser.cash) return showGoldAlert("Invalid amount");
+  withdrawRequest(Number(amount), "cash");
+});
+
+// WITHDRAW STARS
+document.getElementById("withdrawStarsBtn")?.addEventListener("click", () => {
+  if (currentUser.stars < 10000) return showGoldAlert("Minimum 10,000 STRZ");
+  const amount = prompt("Enter STRZ to withdraw (max " + currentUser.stars.toLocaleString() + "):", currentUser.stars);
+  if (!amount || Number(amount) < 10000 || Number(amount) > currentUser.stars) return showGoldAlert("Invalid amount");
+  withdrawRequest(Number(amount), "stars");
+});
+
+// WITHDRAW REQUEST
+async function withdrawRequest(amount, type) {
+  const ok = await showConfirm("Withdraw", `Request ${type === "cash" ? "₦" : ""}${amount.toLocaleString()} ${type === "stars" ? "STRZ" : ""}?`);
+  if (!ok) return;
+  showLoader("Submitting...");
+  try {
+    await addDoc(collection(db, "hostWithdrawal"), {
+      uid: currentUser.uid,
+      username: currentUser.chatId || currentUser.email.split('@')[0],
+      amount,
+      type,
+      status: "pending",
+      requestedAt: serverTimestamp()
+    });
+    hideLoader();
+    showGoldAlert("Withdrawal requested!\nAdmin will process soon.");
+  } catch (e) {
+    hideLoader();
+    showGoldAlert("Request failed");
+  }
+}
+
+// Call on load
+document.addEventListener("DOMContentLoaded", updateInfoTab);
 
 
 // ==============================

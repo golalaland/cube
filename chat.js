@@ -3901,7 +3901,102 @@ document.querySelectorAll(".tag-btn").forEach(btn => {
 
 document.addEventListener("DOMContentLoaded", () => {
 
+// Modal logic
+const modal = document.getElementById('liveModal');
+const openBtn = document.getElementById('openHostsBtn');
+const closeBtn = document.querySelector('.live-close');
+const playerContainer = document.getElementById('livePlayerContainer');
 
+openBtn.onclick = () => {
+  modal.style.display = 'block';
+  startLiveStream('agora'); // default to Agora, or 'mux'
+};
+
+closeBtn.onclick = () => {
+  modal.style.display = 'none';
+  stopLiveStream();
+};
+
+window.onclick = (e) => {
+  if (e.target === modal) {
+    modal.style.display = 'none';
+    stopLiveStream();
+  }
+};
+
+// Optional switcher
+document.querySelectorAll('.live-switcher button').forEach(btn => {
+  btn.onclick = () => {
+    document.querySelectorAll('.live-switcher button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    stopLiveStream();
+    startLiveStream(btn.dataset.type);
+  };
+});
+
+// Placeholder functions - replace with your real config
+async function startLiveStream(type) {
+  playerContainer.innerHTML = ''; // clear
+
+  if (type === 'mux') {
+    // Mux Live (super simple - replace with your playback ID)
+    const playbackId = 'YOUR_MUX_PLAYBACK_ID_HERE'; // e.g. 'EcHgOK9coz5K4rjSwOkoE7Y7O01201YMIC200RI6lNxnhs'
+    const muxPlayer = document.createElement('mux-player');
+    muxPlayer.setAttribute('playback-id', playbackId);
+    muxPlayer.setAttribute('stream-type', 'live');
+    muxPlayer.setAttribute('autoplay', 'true');
+    muxPlayer.setAttribute('muted', 'true'); // required for autoplay in most browsers
+    muxPlayer.style.width = '100%';
+    muxPlayer.style.height = '100%';
+    playerContainer.appendChild(muxPlayer);
+
+    // Or use iframe embed:
+    // playerContainer.innerHTML = `<iframe src="https://player.mux.com/${playbackId}?autoplay=true" allowfullscreen></iframe>`;
+
+  } else if (type === 'agora') {
+    // Agora RTC Live (audience mode - replace with your App ID, Channel, Token)
+    const appId = 'YOUR_AGORA_APP_ID';
+    const channel = 'your-channel-name';
+    const token = 'YOUR_TOKEN_OR_NULL_FOR_TOKENLESS';
+
+    // Load Agora SDK if not already
+    if (!window.AgoraRTC) {
+      const script = document.createElement('script');
+      script.src = 'https://cdn.jsdelivr.net/npm/agora-rtc-sdk-ng@4';
+      document.head.appendChild(script);
+      script.onload = initAgora;
+    } else {
+      initAgora();
+    }
+
+    async function initAgora() {
+      const client = AgoraRTC.createClient({ mode: 'live', codec: 'vp8' });
+      client.setClientRole('audience');
+
+      await client.join(appId, channel, token || null, null);
+
+      // Container for remote streams
+      const remoteDiv = document.createElement('div');
+      remoteDiv.id = 'agora-remote';
+      playerContainer.appendChild(remoteDiv);
+
+      client.on('user-published', async (user, mediaType) => {
+        await client.subscribe(user, mediaType);
+        if (mediaType === 'video') {
+          user.videoTrack.play(remoteDiv);
+        }
+        if (mediaType === 'audio') {
+          user.audioTrack.play();
+        }
+      });
+    }
+  }
+}
+
+function stopLiveStream() {
+  playerContainer.innerHTML = '';
+  // Add Agora leave logic if needed
+}
 
 // ---------- DEBUGGABLE HOST INIT (drop-in) ----------
 (function () {

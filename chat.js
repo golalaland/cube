@@ -664,30 +664,55 @@ document.getElementById("convertBtn")?.addEventListener("click", async () => {
 
 document.getElementById("withdrawCashBtn")?.addEventListener("click", async () => {
   const cash = currentUser?.cash || 0;
-  if (cash < 5000) return showGoldAlert("Minimum ₦5,000 required");
+  if (cash < 5000) return showNiceAlert("Minimum ₦5,000 required");
 
   const amountStr = prompt(`Enter amount to withdraw (₦5,000 - ₦${cash.toLocaleString()}):`, cash);
   const amount = Number(amountStr);
-  if (isNaN(amount) || amount < 5000 || amount > cash) return showGoldAlert("Invalid amount");
+  if (isNaN(amount) || amount < 5000 || amount > cash) return showNiceAlert("Invalid amount");
 
-  const ok = await showConfirm("Withdraw Cash", `Request ₦${amount.toLocaleString()} withdrawal?`);
+  const ok = await showConfirm("Withdraw Cash", `Request ₦${amount.toLocaleString()}?\nCash will be deducted now.`);
   if (!ok) return;
 
-  showLoader("Submitting request...");
+  showLoader("Processing withdrawal...");
+
   try {
-    await addDoc(collection(db, "hostWithdrawal"), {
-      uid: currentUser.uid,
-      username: currentUser.chatId || currentUser.email.split('@')[0],
-      amount,
-      type: "cash",
-      status: "pending",
-      requestedAt: serverTimestamp()
+    // DEDUCT CASH + CREATE REQUEST IN ONE TRANSACTION
+    await runTransaction(db, async (transaction) => {
+      const userRef = doc(db, "users", currentUser.uid);
+      const snap = await transaction.get(userRef);
+      if (!snap.exists()) throw "User not found";
+      const currentCash = snap.data().cash || 0;
+      if (currentCash < amount) throw "Not enough cash";
+
+      // Deduct cash
+      transaction.update(userRef, { cash: currentCash - amount });
+
+      // Create withdrawal request
+      const withdrawalRef = doc(collection(db, "hostWithdrawal"));
+      transaction.set(withdrawalRef, {
+        uid: currentUser.uid,
+        username: currentUser.chatId || currentUser.email.split('@')[0],
+        amount,
+        type: "cash",
+        status: "pending",
+        requestedAt: serverTimestamp(),
+        deducted: true
+      });
     });
+
+    // Update local balance
+    currentUser.cash -= amount;
+    updateInfoTab();  // refresh info tab
+    // Also update any other balance displays
+    document.getElementById("cashCount") && (document.getElementById("cashCount").textContent = currentUser.cash.toLocaleString());
+
     hideLoader();
-    showGoldAlert("Withdrawal requested!\nAdmin will process soon.");
+    showGoldAlert("Withdrawal requested!\n₦" + amount.toLocaleString() + " deducted from balance.\nAdmin will transfer soon.");
+
   } catch (e) {
+    console.error("Withdraw failed:", e);
     hideLoader();
-    showGoldAlert("Request failed");
+    showGoldAlert("Request failed — try again");
   }
 });
 

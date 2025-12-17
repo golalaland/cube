@@ -356,6 +356,9 @@ onAuthStateChanged(auth, async (firebaseUser) => {
     // after currentUser is created
 revealHostTabs();
 
+// ADD THIS LINE — THIS MAKES INFO TAB SHOW CORRECT BALANCE
+updateInfoTab();
+
  // Block Cheaters!
     document.addEventListener("click", (e) => {
   const btn = e.target.closest('.tab-btn[data-tab="infoTab"]');
@@ -612,15 +615,16 @@ async function showGiftModal(targetUid, targetData) {
   });
 }
 
-// UPDATE INFO TAB BALANCES — SAFE
 function updateInfoTab() {
   const cashEl = document.getElementById("infoCashBalance");
   const starsEl = document.getElementById("infoStarBalance");
   const lastEl = document.getElementById("infoLastEarnings");
 
-  if (cashEl) cashEl.textContent = currentUser?.cash?.toLocaleString() || "0";
-  if (starsEl) starsEl.textContent = currentUser?.stars?.toLocaleString() || "0";
-  if (lastEl) lastEl.textContent = (currentUser?.lastEarnings || 0).toLocaleString();
+  if (currentUser) {
+    if (cashEl) cashEl.textContent = currentUser.cash.toLocaleString();
+    if (starsEl) starsEl.textContent = currentUser.stars.toLocaleString();
+    if (lastEl) lastEl.textContent = (currentUser.lastEarnings || 0).toLocaleString();
+  }
 }
 
 // CONVERT PREVIEW
@@ -658,16 +662,15 @@ document.getElementById("convertBtn")?.addEventListener("click", async () => {
   }
 });
 
-// WITHDRAW CASH ONLY
 document.getElementById("withdrawCashBtn")?.addEventListener("click", async () => {
   const cash = currentUser?.cash || 0;
   if (cash < 5000) return showGoldAlert("Minimum ₦5,000 required");
 
-  const amountStr = prompt(`Enter amount (₦5,000 - ₦${cash.toLocaleString()}):`, cash);
+  const amountStr = prompt(`Enter amount to withdraw (₦5,000 - ₦${cash.toLocaleString()}):`, cash);
   const amount = Number(amountStr);
-  if (!amount || amount < 5000 || amount > cash) return showGoldAlert("Invalid amount");
+  if (isNaN(amount) || amount < 5000 || amount > cash) return showGoldAlert("Invalid amount");
 
-  const ok = await showConfirm("Withdraw", `Request ₦${amount.toLocaleString()} withdrawal?`);
+  const ok = await showConfirm("Withdraw Cash", `Request ₦${amount.toLocaleString()} withdrawal?`);
   if (!ok) return;
 
   showLoader("Submitting request...");
@@ -690,6 +693,27 @@ document.getElementById("withdrawCashBtn")?.addEventListener("click", async () =
 
 // CALL ON LOAD & AFTER ANY UPDATE
 document.addEventListener("DOMContentLoaded", updateInfoTab);
+
+
+// SIMPLE CONFIRM MODAL — WORKS EVERYWHERE
+async function showConfirm(title, msg) {
+  return new Promise(resolve => {
+    const overlay = document.createElement("div");
+    overlay.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.95);display:flex;align-items:center;justify-content:center;z-index:999999;backdrop-filter:blur(12px);";
+    overlay.innerHTML = `
+      <div style="background:#111;padding:32px;border-radius:18px;text-align:center;max-width:380px;width:90%;box-shadow:0 0 60px rgba(255,0,110,0.5);border:1px solid #444;">
+        <h3 style="color:#fff;margin:0 0 16px;font-size:22px;">${title}</h3>
+        <p style="color:#ccc;margin:0 0 24px;line-height:1.6;">${msg}</p>
+        <div style="display:flex;gap:16px;justify-content:center;">
+          <button id="no" style="padding:12px 28px;background:#333;color:#ccc;border:none;border-radius:12px;font-weight:600;cursor:pointer;">Cancel</button>
+          <button id="yes" style="padding:12px 28px;background:linear-gradient(90deg,#ff006e,#ff4500);color:#fff;border:none;border-radius:12px;font-weight:700;cursor:pointer;">Confirm</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    overlay.querySelector("#no").onclick = () => { overlay.remove(); resolve(false); };
+    overlay.querySelector("#yes").onclick = () => { overlay.remove(); resolve(true); };
+  });
+}
 
 // ==============================
 // CHAT.JS — CLEAN FULL VERSION

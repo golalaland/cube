@@ -612,15 +612,15 @@ async function showGiftModal(targetUid, targetData) {
   });
 }
 
-// INFO TAB — UPDATE BALANCES SAFELY
+// UPDATE INFO TAB BALANCES — SAFE
 function updateInfoTab() {
   const cashEl = document.getElementById("infoCashBalance");
   const starsEl = document.getElementById("infoStarBalance");
   const lastEl = document.getElementById("infoLastEarnings");
 
-  if (cashEl) cashEl.textContent = currentUser.cash.toLocaleString();
-  if (starsEl) starsEl.textContent = currentUser.stars.toLocaleString();
-  if (lastEl) lastEl.textContent = (currentUser.lastEarnings || 0).toLocaleString();
+  if (cashEl) cashEl.textContent = currentUser?.cash?.toLocaleString() || "0";
+  if (starsEl) starsEl.textContent = currentUser?.stars?.toLocaleString() || "0";
+  if (lastEl) lastEl.textContent = (currentUser?.lastEarnings || 0).toLocaleString();
 }
 
 // CONVERT PREVIEW
@@ -629,11 +629,11 @@ document.getElementById("convertAmount")?.addEventListener("input", e => {
   document.getElementById("convertResult").textContent = (stars * 0.25).toLocaleString();
 });
 
-// CONVERT STARS TO CASH
+// CONVERT STRZ TO CASH
 document.getElementById("convertBtn")?.addEventListener("click", async () => {
   const stars = Number(document.getElementById("convertAmount").value);
-  if (!stars || stars <= 0) return showNiceAlert("Enter amount");
-  if (stars > currentUser.stars) return showNiceAlert("Not enough STRZ");
+  if (!stars || stars <= 0) return showGoldAlert("Enter valid amount");
+  if (stars > (currentUser?.stars || 0)) return showGoldAlert("Not enough STRZ");
 
   const cash = stars * 0.25;
   const ok = await showConfirm("Convert", `Convert ${stars.toLocaleString()} STRZ → ₦${cash.toLocaleString()}?`);
@@ -651,52 +651,45 @@ document.getElementById("convertBtn")?.addEventListener("click", async () => {
     document.getElementById("convertAmount").value = "";
     document.getElementById("convertResult").textContent = "0";
     hideLoader();
-    showNiceAlert(`+₦${cash.toLocaleString()} added!`);
+    showGoldAlert(`Success! +₦${cash.toLocaleString()}`);
   } catch (e) {
     hideLoader();
-    showNiceAlert("Failed");
+    showGoldAlert("Conversion failed");
   }
 });
 
-// WITHDRAW REQUESTS
-async function hostWithdraw(amount, type) {
-  const ok = await showConfirm("Withdraw", `Request ${type === "cash" ? "₦" : ""}${amount.toLocaleString()} ${type}?`);
+// WITHDRAW CASH ONLY
+document.getElementById("withdrawCashBtn")?.addEventListener("click", async () => {
+  const cash = currentUser?.cash || 0;
+  if (cash < 5000) return showGoldAlert("Minimum ₦5,000 required");
+
+  const amountStr = prompt(`Enter amount (₦5,000 - ₦${cash.toLocaleString()}):`, cash);
+  const amount = Number(amountStr);
+  if (!amount || amount < 5000 || amount > cash) return showGoldAlert("Invalid amount");
+
+  const ok = await showConfirm("Withdraw", `Request ₦${amount.toLocaleString()} withdrawal?`);
   if (!ok) return;
-  showLoader("Requesting...");
+
+  showLoader("Submitting request...");
   try {
     await addDoc(collection(db, "hostWithdrawal"), {
       uid: currentUser.uid,
-      username: currentUser.chatId,
+      username: currentUser.chatId || currentUser.email.split('@')[0],
       amount,
-      type, // "cash" or "stars"
+      type: "cash",
       status: "pending",
       requestedAt: serverTimestamp()
     });
     hideLoader();
-    showNiceAlert("Request sent!");
+    showGoldAlert("Withdrawal requested!\nAdmin will process soon.");
   } catch (e) {
     hideLoader();
-    showNiceAlert("Failed");
+    showGoldAlert("Request failed");
   }
-}
-
-document.getElementById("withdrawCashBtn")?.addEventListener("click", () => {
-  if (currentUser.cash < 5000) return showNiceAlert("Min ₦5,000");
-  const amt = prompt("Amount (max ₦" + currentUser.cash.toLocaleString() + "):", currentUser.cash);
-  if (amt && Number(amt) >= 5000 && Number(amt) <= currentUser.cash) hostWithdraw(Number(amt), "cash");
 });
 
-document.getElementById("withdrawStarsBtn")?.addEventListener("click", () => {
-  if (currentUser.stars < 10000) return showNiceAlert("Min 10,000 STRZ");
-  const amt = prompt("STRZ amount (max " + currentUser.stars.toLocaleString() + "):", currentUser.stars);
-  if (amt && Number(amt) >= 10000 && Number(amt) <= currentUser.stars) hostWithdraw(Number(amt), "stars");
-});
-
-// Call on load & after any update
+// CALL ON LOAD & AFTER ANY UPDATE
 document.addEventListener("DOMContentLoaded", updateInfoTab);
-
-
-
 
 // ==============================
 // CHAT.JS — CLEAN FULL VERSION

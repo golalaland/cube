@@ -695,6 +695,20 @@ document.getElementById("withdrawCashBtn")?.addEventListener("click", async () =
 document.addEventListener("DOMContentLoaded", updateInfoTab);
 
 
+// LOADER FUNCTIONS — BULLETPROOF
+const loaderOverlay = document.getElementById("loaderOverlay");
+const loaderText = document.getElementById("loaderText");
+
+function showLoader(text = "Working...") {
+  if (loaderText) loaderText.textContent = text;
+  if (loaderOverlay) loaderOverlay.style.display = "flex";
+}
+
+function hideLoader() {
+  if (loaderOverlay) loaderOverlay.style.display = "none";
+}
+
+
 // SIMPLE CONFIRM MODAL — WORKS EVERYWHERE
 async function showConfirm(title, msg) {
   return new Promise(resolve => {

@@ -818,7 +818,7 @@ document.addEventListener('DOMContentLoaded', () => {
 ----------------------------- */
 function updateRedeemLink() {
   if (!refs.redeemBtn || !currentUser?.uid) return;
-  refs.redeemBtn.href = `menu.html?uid=${currentUser.uid}`;
+  refs.redeemBtn.href = `tapmaster.html?uid=${currentUser.uid}`;
   refs.redeemBtn.style.display = "inline-block";
 }
 function updateTipLink() {

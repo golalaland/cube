@@ -2311,95 +2311,84 @@ could you have broken something?  i only asked for color change:
     Your safety is our priority. This helps you verify that numbers here belong to real, verified users.
   </p>
 
-  <!-- REVENUE & BALANCE SECTION — GLASSY & BEAUTIFUL -->
-  <div class="revenue-section" style="
-    background: rgba(20,20,30,0.7);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 16px;
-    padding: 20px;
-    margin-bottom: 20px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+<!-- REVENUE DASHBOARD — SIMPLE & DOPE -->
+<div style="margin:20px 0;">
+  <h4 style="
+    text-align:center;
+    margin-bottom:16px;
+    font-weight:700;
+    font-size:20px;
+    background:linear-gradient(90deg,#ff006e,#ff8c00);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
   ">
-    <h4 style="
-      text-align:center;
-      margin-bottom:20px;
-      font-weight:700;
-      font-size:20px;
-      color:#fff;
-    ">
-      Revenue & Balance
-    </h4>
+    Revenue Dashboard
+  </h4>
 
-    <!-- Balances Grid -->
-    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:20px;">
-      <div style="text-align:center;">
-        <div style="color:#aaa;font-size:13px;">Total Earnings</div>
-        <div style="color:#00ff9d;font-weight:800;font-size:24px;margin-top:6px;">
-          ₦<span id="totalEarnings">0</span>
-        </div>
-      </div>
-      <div style="text-align:center;">
-        <div style="color:#aaa;font-size:13px;">Stars Balance</div>
-        <div style="color:#ff006e;font-weight:800;font-size:24px;margin-top:6px;">
-          <span id="starBalance">0</span>⭐
-        </div>
-      </div>
-    </div>
-
-    <!-- Convert Stars to Cash -->
-    <div style="text-align:center;margin-bottom:20px;">
-      <div style="color:#aaa;font-size:13px;margin-bottom:8px;">Convert Stars to Cash (1 STRZ = ₦0.25)</div>
-      <div style="display:flex;gap:12px;justify-content:center;align-items:center;">
-        <input type="number" id="convertStarsInput" min="0" placeholder="Stars to convert" style="
-          width:120px;padding:12px;border:none;border-radius:12px;background:#1a1a1a;color:#fff;text-align:center;
-        ">
-        <button id="convertBtn" style="
-          padding:12px 24px;background:linear-gradient(90deg,#ff006e,#ff4500);color:#fff;border:none;border-radius:12px;
-          font-weight:700;cursor:pointer;
-        ">Convert</button>
-      </div>
-      <div id="convertResult" style="margin-top:8px;color:#00ff9d;font-weight:600;"></div>
-    </div>
-
-    <!-- Withdraw Button -->
-    <div style="text-align:center;">
-      <button id="withdrawBtn" style="
-        width:100%;padding:14px;border:none;border-radius:12px;
-        background:#c42c2c;color:#fff;font-weight:700;font-size:16px;cursor:pointer;
-      ">Withdraw Cash</button>
-    </div>
-  </div>
-
-  <!-- COMPREHENSIVE REPORT — LAST EARNINGS / MONTHLY -->
-  <div class="report-section" style="
-    background: rgba(20,20,30,0.7);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 16px;
-    padding: 20px;
+  <div style="
+    background:rgba(20,20,35,0.8);
+    backdrop-filter:blur(12px);
+    border:1px solid rgba(255,0,110,0.2);
+    border-radius:16px;
+    padding:20px;
+    text-align:center;
+    box-shadow:0 8px 32px rgba(0,0,0,0.5);
   ">
-    <h4 style="text-align:center;margin-bottom:20px;font-weight:700;font-size:20px;color:#fff;">
-      Earnings Report
-    </h4>
-
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-      <div style="text-align:center;">
-        <div style="color:#aaa;font-size:13px;">Last Earnings</div>
-        <div style="color:#00ff9d;font-weight:800;font-size:20px;margin-top:6px;">
-          ₦<span id="lastEarnings">0</span>
-        </div>
-      </div>
-      <div style="text-align:center;">
-        <div style="color:#aaa;font-size:13px;">Monthly Earnings</div>
-        <div style="color:#00ff9d;font-weight:800;font-size:20px;margin-top:6px;">
-          ₦<span id="monthlyEarnings">0</span>
-        </div>
-      </div>
+    <div style="font-size:28px;font-weight:800;color:#00ff9d;margin:10px 0;">
+      ₦<span id="infoCashBalance">0</span>
+    </div>
+    <div style="font-size:22px;color:#fff;margin:10px 0;">
+      <span id="infoStarBalance">0</span>⭐️
+    </div>
+    <div style="color:#888;font-size:14px;">
+      Last earnings: ₦<span id="infoLastEarnings">0</span>
     </div>
   </div>
 </div>
 
+<!-- CONVERT & WITHDRAW — CLEAN -->
+<div style="margin:20px 0;">
+  <h4 style="
+    text-align:center;
+    margin-bottom:16px;
+    font-weight:700;
+    font-size:18px;
+    background:linear-gradient(90deg,#00ff9d,#00ffa3);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+  ">
+    Convert & Withdraw
+  </h4>
+
+  <div style="
+    background:rgba(20,35,20,0.7);
+    backdrop-filter:blur(12px);
+    border:1px solid rgba(0,255,157,0.3);
+    border-radius:16px;
+    padding:20px;
+  ">
+    <p style="color:#ccc;text-align:center;margin-bottom:12px;">
+      Convert STRZ → Cash (1 STRZ = ₦0.25)
+    </p>
+    <input type="number" id="convertAmount" placeholder="Enter STRZ amount" style="width:100%;padding:12px;border-radius:12px;background:#222;color:#fff;border:1px solid #444;margin-bottom:12px;">
+    <div style="color:#00ff9d;font-weight:700;text-align:center;margin-bottom:16px;">
+      → ₦<span id="convertResult">0</span>
+    </div>
+    <button id="convertBtn" style="width:100%;padding:12px;background:linear-gradient(90deg,#00ff9d,#00ffa3);color:#000;border:none;border-radius:12px;font-weight:700;cursor:pointer;">
+      Convert to Cash
+    </button>
+
+    <div style="margin-top:20px;display:flex;gap:12px;">
+      <button id="withdrawCashBtn" style="flex:1;padding:12px;background:linear-gradient(90deg,#ff6600,#ff0099);color:#fff;border:none;border-radius:12px;font-weight:700;">
+        Withdraw Cash
+      </button>
+      <button id="withdrawStarsBtn" style="flex:1;padding:12px;background:linear-gradient(90deg,#ff0099,#ff6600);color:#fff;border:none;border-radius:12px;font-weight:700;">
+        Withdraw STRZ
+      </button>
+    </div>
+  </div>
+</div>
+  
 <!-- HIGHLIGHTS ($ELL CONTENT) — FINAL POLISHED VERSION -->
 <div id="sellContentBar" style="margin:40px auto 0; max-width:440px; font-family:'Inter', system-ui, -apple-system, sans-serif;">
   <div style="text-align:center; margin-bottom:28px;">

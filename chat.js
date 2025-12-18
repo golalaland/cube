@@ -3903,7 +3903,7 @@ const liveModal = document.getElementById('liveModal');
 const liveConsentModal = document.getElementById('adultConsentModal');
 const livePlayerContainer = document.getElementById('livePlayerContainer');
 const livePostersSection = document.getElementById('upcomingPosters');
-const liveTabBtns = document.querySelectorAll('.tab-btn');
+let liveTabBtns = document.querySelectorAll('.tab-btn'); // only ONE declaration here
 const liveCloseBtn = document.querySelector('.live-close');
 const liveAgreeBtn = document.getElementById('consentAgree');
 const liveCancelBtn = document.getElementById('consentCancel');
@@ -3922,11 +3922,9 @@ const STREAM_ORIENTATION = 'portrait'; // or 'landscape'
 function switchContent(type) {
   currentContent = type;
 
-  // Update active tab button
   liveTabBtns.forEach(btn => btn.classList.remove('active'));
   document.querySelector(`.tab-btn[data-content="${type}"]`).classList.add('active');
 
-  // Load stream
   startStream(type);
 }
 
@@ -3958,17 +3956,16 @@ function closeAllLiveModal() {
   livePlayerContainer.classList.remove('portrait', 'landscape');
   livePostersSection.classList.remove('fading');
   clearTimeout(fadeTimer);
-  liveCloseBtn.classList.remove('hidden'); // always make sure X is visible when closed
+  liveCloseBtn.classList.remove('hidden');
 }
 
 // === EVENT LISTENERS ===
-// === TAB SWITCHING & CONSENT LOGIC (fixed for premature active) ===
 document.getElementById('openHostsBtn').onclick = () => {
   liveModal.style.display = 'block';
   livePostersSection.classList.remove('fading');
   liveCloseBtn.classList.remove('hidden');
 
-  // FORCE clean state on open
+  // Force clean tab state
   liveTabBtns.forEach(b => b.classList.remove('active'));
   document.querySelector('.tab-btn[data-content="regular"]').classList.add('active');
 
@@ -3980,16 +3977,15 @@ document.getElementById('openHostsBtn').onclick = () => {
   }, 8000);
 };
 
-// Remove any old listeners by re-querying (prevents duplicates)
-const tabButtons = document.querySelectorAll('.tab-btn');
-tabButtons.forEach(btn => {
-  // Clone to remove old listeners
+// Remove old listeners by cloning buttons
+const oldTabBtns = document.querySelectorAll('.tab-btn');
+oldTabBtns.forEach(btn => {
   const newBtn = btn.cloneNode(true);
   btn.parentNode.replaceChild(newBtn, btn);
 });
 
-// Re-query after clone
-const liveTabBtns = document.querySelectorAll('.tab-btn');
+// Re-query fresh buttons and attach new listeners
+liveTabBtns = document.querySelectorAll('.tab-btn'); // reassign (not redeclare const)
 
 liveTabBtns.forEach(btn => {
   btn.onclick = () => {
@@ -3997,7 +3993,7 @@ liveTabBtns.forEach(btn => {
 
     const target = btn.dataset.content;
 
-    // Reset active
+    // Reset active state
     liveTabBtns.forEach(b => b.classList.remove('active'));
 
     if (target === 'regular') {
@@ -4014,7 +4010,6 @@ liveTabBtns.forEach(btn => {
       btn.classList.add('active');
       switchContent('adult');
     } else {
-      // Force Regular active while asking for consent
       document.querySelector('.tab-btn[data-content="regular"]').classList.add('active');
       liveConsentModal.style.display = 'flex';
       liveCloseBtn.classList.add('hidden');
@@ -4054,16 +4049,11 @@ liveConsentModal.onclick = (e) => {
   }
 };
 
-// Main modal close button (×)
-liveCloseBtn.onclick = () => {
-  closeAllLiveModal();
-};
+// Close button and backdrop
+liveCloseBtn.onclick = () => closeAllLiveModal();
 
-// Click outside main modal to close
 liveModal.onclick = (e) => {
-  if (e.target === liveModal) {
-    closeAllLiveModal();
-  }
+  if (e.target === liveModal) closeAllLiveModal();
 };
 
 // ---------- DEBUGGABLE HOST INIT (drop-in) ----------

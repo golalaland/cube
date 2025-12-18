@@ -2202,7 +2202,7 @@ could you have broken something?  i only asked for color change:
   <div class="live-modal-content">
     <span class="live-close">&times;</span>
 
-    <!-- Livestream Tab Switcher (unique classes - no conflict with other .content-tabs or .tab-btn) -->
+    <!-- Livestream Tab Switcher (unique classes) -->
     <div class="live-content-tabs">
       <button class="live-tab-btn active" data-content="regular">Regular</button>
       <button class="live-tab-btn" data-content="adult">Adult 🔞</button>
@@ -2230,10 +2230,8 @@ could you have broken something?  i only asked for color change:
       </div>
     </div>
   </div>
-</div>
 
-<!-- Adult Content Consent Modal - now properly nested inside live-modal for scoping -->
-<div class="live-modal">
+  <!-- Adult Content Consent Modal - nested inside the live-modal for proper scoping and no bleed -->
   <div id="adultConsentModal" class="consent-modal">
     <div class="consent-content">
       <h2>Adult Content Warning</h2>

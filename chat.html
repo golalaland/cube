@@ -2605,121 +2605,149 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
   </div>
 </div>
   
-  <!-- CONVERT STRZ TO CASH -->
-  <div style="margin: 32px 0;">
-    <h4 style="
-      text-align: center;
-      margin-bottom: 20px;
-      font-weight: 700;
-      font-size: 20px;
-      background: linear-gradient(90deg, #00ff9d, #00ffa3);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    ">
+<!-- CONVERT STRZ TO CASH -->
+<div style="margin: 32px 0;">
+  <h4 style="
+    text-align: center;
+    margin-bottom: 20px;
+    font-weight: 700;
+    font-size: 20px;
+    background: linear-gradient(90deg, #c3f60c, #e8ff6a);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  ">
     SWAP SHOP
-    </h4>
-    <div style="
-      background: rgba(20,35,20,0.88);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(0,255,157,0.35);
-      border-radius: 16px;
-      padding: 22px;
-      max-width: 380px;
-      margin: 0 auto;
-      text-align: center;
-    ">
-      <p style="color: #ddd; margin: 0 0 22px; font-size: 14.5px; font-weight: 500;">
-        STRZ ⇄ CASH
-      </p>
-      
-      <input
-        type="number"
-        id="convertAmount"
-        placeholder="Enter STRZ amount"
-        style="
-          width: 100%;
-          max-width: 300px;
-          padding: 15px;
-          border-radius: 12px;
-          background: #1a1a1a;
-          color: #fff;
-          border: 1px solid #444;
-          font-size: 17px;
-          text-align: center;
-          box-sizing: border-box;
-          margin: 0 auto 24px;
-          display: block;
-        "
-      />
-      
-      <div style="color: #00ff9d; font-size: 23px; font-weight: 800; margin: 24px 0;">
-        → ₦<span id="convertResult">0</span>
-      </div>
-      
-      <button id="convertBtn" style="
+  </h4>
+  <div style="
+    background: #000000;
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(195, 246, 12, 0.4);
+    border-radius: 16px;
+    padding: 22px;
+    max-width: 380px;
+    margin: 0 auto;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5),
+                0 0 15px rgba(195, 246, 12, 0.12);
+  ">
+    <p style="color: #cccccc; margin: 0 0 22px; font-size: 14.5px; font-weight: 500;">
+      STRZ ⇄ CASH
+    </p>
+    
+    <input
+      type="number"
+      id="convertAmount"
+      placeholder="Enter STRZ amount"
+      style="
         width: 100%;
         max-width: 300px;
         padding: 15px;
-        border: none;
         border-radius: 12px;
-        background: linear-gradient(90deg, #00ff9d, #00ffa3);
-        color: #000;
-        font-weight: 700;
-        font-size: 17px;
-        cursor: pointer;
-        margin: 0 auto;
-        display: block;
-      ">
-        SWAP
-      </button>
-    </div>
-  </div>
-
-  <!-- WITHDRAW CASH ONLY -->
-  <div style="margin: 32px 0;">
-    <h4 style="
-      text-align: center;
-      margin-bottom: 20px;
-      font-weight: 700;
-      font-size: 20px;
-      background: linear-gradient(90deg, #ff6600, #ff0099);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    ">
-      WITHDRAW CASH
-    </h4>
-    <div style="
-      background: rgba(35,20,20,0.88);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255,0,153,0.35);
-      border-radius: 16px;
-      padding: 22px;
-      max-width: 380px;
-      margin: 0 auto;
-      text-align: center;
-    ">
-      <p style="color: #ddd; margin-bottom: 24px; font-size: 14.5px;">
-        Minimum withdrawal: ₦5,000
-      </p>
-      
-      <button id="withdrawCashBtn" style="
-        width: 100%;
-        max-width: 300px;
-        padding: 15px;
-        border: none;
-        border-radius: 12px;
-        background: linear-gradient(90deg, #ff6600, #ff0099);
+        background: #1a1a1a;
         color: #fff;
-        font-weight: 700;
+        border: 1px solid #444;
         font-size: 17px;
-        cursor: pointer;
-        margin: 0 auto;
+        text-align: center;
+        box-sizing: border-box;
+        margin: 0 auto 24px;
         display: block;
-      ">
-        WITHDRAW
-      </button>
+      "
+    />
+    
+    <div style="color: #c3f60c; font-size: 23px; font-weight: 800; margin: 24px 0;">
+      → ₦<span id="convertResult">0</span>
     </div>
-
+    
+    <button id="convertBtn" style="
+      width: 100%;
+      max-width: 300px;
+      padding: 15px;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(90deg, #c3f60c, #e8ff6a);
+      color: #000;
+      font-weight: 700;
+      font-size: 17px;
+      cursor: pointer;
+      margin: 0 auto;
+      display: block;
+    ">
+      SWAP
+    </button>
+  </div>
+</div>
+  
+ <!-- WITHDRAW CASH -->
+<div style="margin: 32px 0;">
+  <h4 style="
+    text-align: center;
+    margin-bottom: 20px;
+    font-weight: 700;
+    font-size: 20px;
+    background: linear-gradient(90deg, #c3f60c, #e8ff6a);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  ">
+    WITHDRAW CASH
+  </h4>
+  <div style="
+    background: #000000;
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(195, 246, 12, 0.4);
+    border-radius: 16px;
+    padding: 22px;
+    max-width: 380px;
+    margin: 0 auto;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5),
+                0 0 15px rgba(195, 246, 12, 0.12);
+  ">
+    <p style="color: #cccccc; margin: 0 0 18px; font-size: 14.5px; font-weight: 500;">
+      Minimum withdrawal: ₦5,000
+    </p>
+    
+    <input
+      type="number"
+      id="withdrawAmount"
+      placeholder="Enter amount to withdraw"
+      style="
+        width: 100%;
+        max-width: 300px;
+        padding: 15px;
+        border-radius: 12px;
+        background: #1a1a1a;
+        color: #fff;
+        border: 1px solid #444;
+        font-size: 17px;
+        text-align: center;
+        box-sizing: border-box;
+        margin: 0 auto 24px;
+        display: block;
+      "
+    />
+    
+    <div style="color: #c3f60c; font-size: 23px; font-weight: 800; margin: 24px 0;">
+      → ₦<span id="withdrawPreview">0</span>
+    </div>
+    
+    <button id="withdrawCashBtn" style="
+      width: 100%;
+      max-width: 300px;
+      padding: 15px;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(90deg, #c3f60c, #e8ff6a);
+      color: #000;
+      font-weight: 700;
+      font-size: 17px;
+      cursor: pointer;
+      margin: 0 auto;
+      display: block;
+    ">
+      WITHDRAW
+    </button>
+  </div>
+</div>
     
 <!-- HIGHLIGHTS ($ELL CONTENT) — FINAL POLISHED VERSION -->
 <div id="sellContentBar" style="margin:40px auto 0; max-width:440px; font-family:'Inter', system-ui, -apple-system, sans-serif;">

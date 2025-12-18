@@ -3925,23 +3925,24 @@ function switchContent(type) {
 
   // Update active tab
   liveTabBtns.forEach(btn => btn.classList.remove('active'));
-  document.querySelector(`.tab-btn[data-content="${type}"]`).classList.add('active');
+  document.querySelector(`.tab-btn[data-content="${type}"]`)?.classList.add('active');
 
-  // Switch mode for CSS hide/show
-  const playerArea = document.getElementById('tabContentArea'); // or livePlayerArea if you use that ID
+  // Mode class (safe)
+  const playerArea = document.getElementById('tabContentArea') || liveModal;
   playerArea.classList.remove('regular-mode', 'adult-mode');
   playerArea.classList.add(type + '-mode');
 
-  // Reset adult video slide to closed
+  // Reset video slide safely (only if elements exist)
   const toggleBtn = document.getElementById('toggleVideoBtn');
   const videoContainer = document.getElementById('videoContainer');
-  if (toggleBtn && videoContainer) {
+  const videoFrame = document.getElementById('adultVideoFrame');
+
+  if (toggleBtn && videoContainer && videoFrame) {
     toggleBtn.textContent = '▲ Open Video';
     videoContainer.classList.remove('open');
-    document.getElementById('adultVideoFrame').src = '';
+    videoFrame.src = '';
   }
 
-  // Load the livestream
   startStream(type);
 }
 
@@ -4001,20 +4002,25 @@ document.getElementById('openHostsBtn').onclick = () => {
 };
 
 // Toggle Adult Video Slide
-document.getElementById('toggleVideoBtn').onclick = () => {
-  const container = document.getElementById('videoContainer');
-  const btn = document.getElementById('toggleVideoBtn');
+const toggleVideoBtn = document.getElementById('toggleVideoBtn');
+if (toggleVideoBtn) {
+  toggleVideoBtn.onclick = () => {
+    const container = document.getElementById('videoContainer');
+    const frame = document.getElementById('adultVideoFrame');
 
-  if (container.classList.contains('open')) {
-    container.classList.remove('open');
-    btn.textContent = '▲ Open Video';
-    document.getElementById('adultVideoFrame').src = '';
-  } else {
-    container.classList.add('open');
-    btn.textContent = '▼ Close Video';
-    document.getElementById('adultVideoFrame').src = adultVideoUrl;
-  }
-};
+    if (!container || !frame) return;
+
+    if (container.classList.contains('open')) {
+      container.classList.remove('open');
+      toggleVideoBtn.textContent = '▲ Open Video';
+      frame.src = '';
+    } else {
+      container.classList.add('open');
+      toggleVideoBtn.textContent = '▼ Close Video';
+      frame.src = adultVideoUrl;
+    }
+  };
+}
 
 // Remove old tab listeners (prevents duplicates)
 const oldTabBtns = document.querySelectorAll('.tab-btn');

@@ -2000,14 +2000,14 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
 }
 
 /* Live modal tab switcher only */
-.live-modal .content-tabs {
+.live-modal .live-content-tabs {
   display: flex;
   justify-content: center;
   gap: 16px;
   margin-bottom: 20px;
   flex-wrap: wrap;
 }
-.live-modal .tab-btn {
+.live-modal .live-tab-btn {
   min-width: 140px;
   padding: 14px 24px;
   background: rgba(255, 255, 255, 0.1);
@@ -2020,16 +2020,15 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
   transition: all 0.3s;
   backdrop-filter: blur(10px);
 }
-.live-modal .tab-btn.active,
-.live-modal .tab-btn:hover,
-.live-modal .tab-btn:active {
+.live-modal .live-tab-btn.active,
+.live-modal .live-tab-btn:hover,
+.live-modal .live-tab-btn:active {
   background: rgba(255, 255, 255, 0.25);
 }
-.live-modal .tab-btn[data-content="adult"] {
+.live-modal .live-tab-btn[data-content="adult"] {
   font-weight: 600;
 }
 
-/* Player */
 /* Player - controlled height so it doesn't push posters off */
 .live-modal .live-player {
   width: 100%;
@@ -2170,7 +2169,7 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
   .live-modal .live-modal-content {
     padding: 60px 12px 20px;
   }
-  .live-modal .tab-btn {
+  .live-modal .live-tab-btn {
     min-width: 120px;
     padding: 12px 20px;
     font-size: 16px;

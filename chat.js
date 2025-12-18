@@ -3908,12 +3908,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const liveConsentModal = document.getElementById('adultConsentModal');
   const livePlayerContainer = document.getElementById('livePlayerContainer');
   const livePostersSection = document.getElementById('upcomingPosters');
+  let liveTabBtns = document.querySelectorAll('.live-tab-btn'); // unique livestream tabs
   const liveCloseBtn = document.querySelector('.live-close');
   const liveAgreeBtn = document.getElementById('consentAgree');
   const liveCancelBtn = document.getElementById('consentCancel');
-
-  // Only tabs INSIDE the livestream modal — no conflict with other .tab-btn on page
-  let liveTabBtns = liveModal.querySelectorAll('.tab-btn');
 
   let currentContent = 'regular';
   let fadeTimer;
@@ -3929,8 +3927,9 @@ document.addEventListener('DOMContentLoaded', () => {
   function switchContent(type) {
     currentContent = type;
 
+    // Update active tab safely
     liveTabBtns.forEach(btn => btn.classList.remove('active'));
-    const targetBtn = liveModal.querySelector(`.tab-btn[data-content="${type}"]`);
+    const targetBtn = document.querySelector(`.live-tab-btn[data-content="${type}"]`);
     if (targetBtn) targetBtn.classList.add('active');
 
     startStream(type);
@@ -3968,31 +3967,36 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // === EVENT LISTENERS ===
-document.getElementById('openHostsBtn').onclick = () => {
-  liveModal.style.display = 'block';
-  livePostersSection.classList.remove('fading');
-  liveCloseBtn.classList.remove('hidden');
+  const openBtn = document.getElementById('openHostsBtn');
+  if (openBtn) {
+    openBtn.onclick = () => {
+      liveModal.style.display = 'block';
+      livePostersSection.classList.remove('fading');
+      liveCloseBtn.classList.remove('hidden');
 
-  // Force Regular tab
-  const regularBtn = liveModal.querySelector('.tab-btn[data-content="regular"]');
-  liveModal.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  if (regularBtn) regularBtn.classList.add('active');
+      // Force Regular tab
+      liveTabBtns.forEach(b => b.classList.remove('active'));
+      const regularBtn = document.querySelector('.live-tab-btn[data-content="regular"]');
+      if (regularBtn) regularBtn.classList.add('active');
 
-  switchContent('regular');
+      switchContent('regular');
 
-  clearTimeout(fadeTimer);
-  fadeTimer = setTimeout(() => {
-    livePostersSection.classList.add('fading');
-  }, 8000);
+      clearTimeout(fadeTimer);
+      fadeTimer = setTimeout(() => {
+        livePostersSection.classList.add('fading');
+      }, 8000);
+    };
+  }
 
-  // === ATTACH TAB LISTENERS ONLY WHEN MODAL IS OPEN ===
-  const currentTabBtns = liveModal.querySelectorAll('.tab-btn');
+  // Re-query tabs and attach listeners safely
+  liveTabBtns = document.querySelectorAll('.live-tab-btn');
 
-  currentTabBtns.forEach(btn => {
+  liveTabBtns.forEach(btn => {
     btn.onclick = () => {
       const target = btn.dataset.content;
 
-      currentTabBtns.forEach(b => b.classList.remove('active'));
+      // Reset active
+      liveTabBtns.forEach(b => b.classList.remove('active'));
 
       if (target === 'regular') {
         btn.classList.add('active');
@@ -4000,51 +4004,69 @@ document.getElementById('openHostsBtn').onclick = () => {
         return;
       }
 
-      // Adult — show consent
+      // Adult tab — always show consent
+      const regularBtn = document.querySelector('.live-tab-btn[data-content="regular"]');
       if (regularBtn) regularBtn.classList.add('active');
+
       liveConsentModal.style.display = 'flex';
       liveCloseBtn.classList.add('hidden');
       console.log('Adult consent modal shown');
     };
   });
-};
 
-// I Agree — proceed to Adult
-liveAgreeBtn.onclick = () => {
-  liveConsentModal.style.display = 'none';
-  liveCloseBtn.classList.remove('hidden');
+  // I Agree
+  if (liveAgreeBtn) {
+    liveAgreeBtn.onclick = () => {
+      liveConsentModal.style.display = 'none';
+      liveCloseBtn.classList.remove('hidden');
 
-  const adultBtn = liveModal.querySelector('.tab-btn[data-content="adult"]');
-  liveModal.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  if (adultBtn) adultBtn.classList.add('active');
+      liveTabBtns.forEach(b => b.classList.remove('active'));
+      const adultBtn = document.querySelector('.live-tab-btn[data-content="adult"]');
+      if (adultBtn) adultBtn.classList.add('active');
 
-  switchContent('adult');
-};
+      switchContent('adult');
+    };
+  }
 
-// Cancel / backdrop
-const cancelAdultConsent = () => {
-  liveConsentModal.style.display = 'none';
-  liveCloseBtn.classList.remove('hidden');
+  // Cancel
+  if (liveCancelBtn) {
+    liveCancelBtn.onclick = () => {
+      liveConsentModal.style.display = 'none';
+      liveCloseBtn.classList.remove('hidden');
 
-  const regularBtn = liveModal.querySelector('.tab-btn[data-content="regular"]');
-  liveModal.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  if (regularBtn) regularBtn.classList.add('active');
+      liveTabBtns.forEach(b => b.classList.remove('active'));
+      const regularBtn = document.querySelector('.live-tab-btn[data-content="regular"]');
+      if (regularBtn) regularBtn.classList.add('active');
 
-  switchContent('regular');
-};
+      switchContent('regular');
+    };
+  }
 
-liveCancelBtn.onclick = cancelAdultConsent;
+  // Backdrop click on consent
+  if (liveConsentModal) {
+    liveConsentModal.onclick = (e) => {
+      if (e.target === liveConsentModal) {
+        liveConsentModal.style.display = 'none';
+        liveCloseBtn.classList.remove('hidden');
 
-liveConsentModal.onclick = (e) => {
-  if (e.target === liveConsentModal) cancelAdultConsent();
-};
+        liveTabBtns.forEach(b => b.classList.remove('active'));
+        const regularBtn = document.querySelector('.live-tab-btn[data-content="regular"]');
+        if (regularBtn) regularBtn.classList.add('active');
 
-// Close
-liveCloseBtn.onclick = closeAllLiveModal;
+        switchContent('regular');
+      }
+    };
+  }
 
-liveModal.onclick = (e) => {
-  if (e.target === liveModal) closeAllLiveModal();
-};
+  // Close button and backdrop
+  if (liveCloseBtn) liveCloseBtn.onclick = closeAllLiveModal;
+
+  if (liveModal) {
+    liveModal.onclick = (e) => {
+      if (e.target === liveModal) closeAllLiveModal();
+    };
+  }
+});
 
 // ---------- DEBUGGABLE HOST INIT (drop-in) ----------
 (function () {

@@ -1982,43 +1982,36 @@ could you have broken something?  i only asked for color change:
   position: relative;
 }
 
-/* Close button - ensure it's always visible and tappable */
 .live-close {
   position: absolute;
-  top: 20px;          /* Stays high in the safe top area */
+  top: 20px;
   right: 30px;
   color: #fff;
   font-size: 48px;
   font-weight: 300;
   cursor: pointer;
-  z-index: 15;        /* Higher than tabs */
+  z-index: 20;                  /* Higher than tabs (10) and posters */
   opacity: 0.7;
   transition: opacity 0.3s;
-  pointer-events: auto; /* Always tappable */
-}
-.live-close:hover { opacity: 1; }
-  
-.live-player {
-  flex: 1;
-  width: 100%;
-  background: #000;
-  border-radius: 12px;
-  overflow: hidden;
-  position: relative;
+  pointer-events: auto !important;  /* Force clickable */
+  user-select: none;
+  line-height: 1;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* Ensure close button can be hidden */
-.live-close {
-  /* your existing styles */
-  transition: opacity 0.3s;
+.live-close:hover {
+  opacity: 1;
 }
 
-/* New class to hide it when consent is open */
+/* When hidden during consent */
 .live-close.hidden {
   opacity: 0;
-  pointer-events: none; /* prevents any accidental clicks */
+  pointer-events: none;  /* Safe to disable when hidden */
 }
-
 /* Force orientation */
 .live-player.portrait { aspect-ratio: 9 / 16; }
 .live-player.landscape { aspect-ratio: 16 / 9; }

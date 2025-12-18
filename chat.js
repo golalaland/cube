@@ -3981,13 +3981,15 @@ liveTabBtns.forEach(btn => {
     const target = btn.dataset.content;
 
     if (target === 'adult') {
+      // Check if user has NOT consented yet
       if (localStorage.getItem('adultConsent') !== 'true') {
-        liveConsentModal.style.display = 'flex';
-        document.querySelector('.live-close').classList.add('hidden');
-        return;
+        liveConsentModal.style.display = 'flex';        // Show consent modal
+        liveCloseBtn.classList.add('hidden');          // Hide the X button
+        return;                                        // Stop here, don't switch yet
       }
     }
 
+    // If no consent needed (or already given), switch normally
     switchContent(target);
   };
 });

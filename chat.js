@@ -361,7 +361,7 @@ updateInfoTab();
 
  // Block Cheaters!
     document.addEventListener("click", (e) => {
-  const btn = e.target.closest('.tab-btnz[data-tab="infoTab"]');
+  const btn = e.target.closest('.tab-btn[data-tab="infoTab"]');
   if (!btn) return;
 
   if (!currentUser || currentUser.isHost !== true) {
@@ -1392,10 +1392,10 @@ async function setupNotifications() {
 }
 
 // === TAB SWITCHING — CLEAN & LAZY (only once) ===
-document.querySelectorAll(".tab-btnz").forEach(btn => {
+document.querySelectorAll(".tab-btn").forEach(btn => {
   btn.addEventListener("click", () => {
     // Visual switch
-    document.querySelectorAll(".tab-btnz").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
     document.querySelectorAll(".tab-content").forEach(t => t.style.display = "none");
 
     btn.classList.add("active");
@@ -1425,7 +1425,7 @@ document.getElementById("notificationsTabBtn")?.addEventListener("click", () => 
   });
   
   // Remove active class from all buttons
-  document.querySelectorAll(".tab-btnz").forEach(btn => {
+  document.querySelectorAll(".tab-btn").forEach(btn => {
     btn.classList.remove("active");
   });
 
@@ -4117,9 +4117,9 @@ liveModal.onclick = (e) => {
 
       // --- attach tab init (shared across modals)
       function initTabsForModal(modalEl) {
-        modalEl.querySelectorAll(".tab-btnz").forEach((btn) => {
+        modalEl.querySelectorAll(".tab-btn").forEach((btn) => {
           btn.addEventListener("click", () => {
-            modalEl.querySelectorAll(".tab-btnz").forEach((b) => b.classList.remove("active"));
+            modalEl.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
             // Hide only tab-content referenced by dataset or global shared notifications
             document.querySelectorAll(".tab-content").forEach((tab) => (tab.style.display = "none"));
             btn.classList.add("active");

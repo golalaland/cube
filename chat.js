@@ -3908,25 +3908,25 @@ const liveCloseBtn = document.querySelector('.live-close');
 const liveAgreeBtn = document.getElementById('consentAgree');
 const liveCancelBtn = document.getElementById('consentCancel');
 
-let currentContent = 'regular';       // tracks current tab (regular or adult)
-let fadeTimer;                        // for posters fade-out
+let currentContent = 'regular';
+let fadeTimer;
 
 const PLAYBACK_IDS = {
   regular: 'YOUR_REGULAR_MUX_PLAYBACK_ID',
   adult:   'YOUR_ADULT_MUX_PLAYBACK_ID'
 };
 
-const STREAM_ORIENTATION = 'portrait'; // change to 'landscape' if needed
+const STREAM_ORIENTATION = 'portrait'; // or 'landscape'
 
-// === LIVESTREAM MODAL: FUNCTIONS ===
+// === FUNCTIONS ===
 function switchContent(type) {
   currentContent = type;
 
-  // Update tab active state
-  liveTabBtns.forEach(b => b.classList.remove('active'));
+  // Update active tab button
+  liveTabBtns.forEach(btn => btn.classList.remove('active'));
   document.querySelector(`.tab-btn[data-content="${type}"]`).classList.add('active');
 
-  // Load the corresponding stream
+  // Load stream
   startStream(type);
 }
 
@@ -3937,7 +3937,7 @@ function startStream(type) {
   const playbackId = PLAYBACK_IDS[type];
 
   if (!playbackId || playbackId.includes('YOUR_')) {
-    livePlayerContainer.innerHTML = '<div style="color:#aaa; text-align:center; padding:40px;">No stream configured</div>';
+    livePlayerContainer.innerHTML = '<div style="color:#ccc;text-align:center;padding:60px;font-size:18px;">No stream configured yet</div>';
     return;
   }
 
@@ -3958,73 +3958,76 @@ function closeAllLiveModal() {
   livePlayerContainer.classList.remove('portrait', 'landscape');
   livePostersSection.classList.remove('fading');
   clearTimeout(fadeTimer);
-
-  // Ensure close button is visible again
-  document.querySelector('.live-close').classList.remove('hidden');
+  liveCloseBtn.classList.remove('hidden'); // always make sure X is visible when closed
 }
 
-// === LIVESTREAM MODAL: EVENT LISTENERS ===
+// === EVENT LISTENERS ===
 document.getElementById('openHostsBtn').onclick = () => {
   liveModal.style.display = 'block';
   livePostersSection.classList.remove('fading');
-  switchContent('regular'); // always start on safe content
+  liveCloseBtn.classList.remove('hidden'); // ensure X is visible
 
-  // Fade out posters after 8 seconds for full immersion
+  switchContent('regular'); // always open on Regular
+
   clearTimeout(fadeTimer);
   fadeTimer = setTimeout(() => {
     livePostersSection.classList.add('fading');
   }, 8000);
 };
 
+// TAB SWITCHING – the most important part
 liveTabBtns.forEach(btn => {
   btn.onclick = () => {
     const target = btn.dataset.content;
 
     if (target === 'adult') {
-      // Check if user has NOT consented yet
       if (localStorage.getItem('adultConsent') !== 'true') {
-        liveConsentModal.style.display = 'flex';        // Show consent modal
-        liveCloseBtn.classList.add('hidden');          // Hide the X button
-        return;                                        // Stop here, don't switch yet
+        // Show consent modal and hide the X
+        liveConsentModal.style.display = 'flex';
+        liveCloseBtn.classList.add('hidden');
+        return; // do NOT switch yet
       }
     }
 
-    // If no consent needed (or already given), switch normally
+    // Safe to switch (either regular or already consented adult)
     switchContent(target);
   };
 });
 
+// Consent buttons
 liveAgreeBtn.onclick = () => {
   localStorage.setItem('adultConsent', 'true');
   liveConsentModal.style.display = 'none';
-  document.querySelector('.live-close').classList.remove('hidden');
+  liveCloseBtn.classList.remove('hidden');
   switchContent('adult');
 };
 
 liveCancelBtn.onclick = () => {
   liveConsentModal.style.display = 'none';
-  document.querySelector('.live-close').classList.remove('hidden');
+  liveCloseBtn.classList.remove('hidden');
   switchContent('regular');
 };
 
+// Click outside consent modal to cancel
 liveConsentModal.onclick = (e) => {
   if (e.target === liveConsentModal) {
     liveConsentModal.style.display = 'none';
-    document.querySelector('.live-close').classList.remove('hidden');
+    liveCloseBtn.classList.remove('hidden');
     switchContent('regular');
   }
 };
 
+// Close button (X)
 liveCloseBtn.onclick = () => {
   closeAllLiveModal();
 };
 
+// Click outside main modal to close
 liveModal.onclick = (e) => {
   if (e.target === liveModal) {
     closeAllLiveModal();
   }
 };
-
 // ---------- DEBUGGABLE HOST INIT (drop-in) ----------
 (function () {
   // Toggle this dynamically in your app

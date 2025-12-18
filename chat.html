@@ -1952,98 +1952,104 @@ could you have broken something?  i only asked for color change:
   justify-content: center;
   text-align: center;
 }
-/* Modal Styles - Fullscreen & Responsive */
 .live-modal {
   display: none;
   position: fixed;
   z-index: 9999;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
+  left: 0; top: 0;
+  width: 100%; height: 100%;
+  background-color: #000;
   overflow: hidden;
-  background-color: rgba(0,0,0,0.95);
 }
 
 .live-modal-content {
-  position: relative;
-  width: 100%;
-  height: 100%;
+  width: 100%; height: 100%;
   display: flex;
   flex-direction: column;
-  align-items: center;
   padding: 20px;
   box-sizing: border-box;
+  position: relative;
 }
 
 .live-close {
   position: absolute;
-  top: 20px;
-  right: 30px;
+  top: 20px; right: 30px;
   color: #fff;
-  font-size: 50px;
-  font-weight: bold;
+  font-size: 48px;
+  font-weight: 300;
   cursor: pointer;
   z-index: 10;
+  opacity: 0.7;
+  transition: opacity 0.3s;
 }
-
-.live-switcher {
-  margin: 10px 0;
-  z-index: 10;
-}
-.live-switcher button {
-  padding: 10px 20px;
-  margin: 0 5px;
-  background: #333;
-  color: #fff;
-  border: none;
-  cursor: pointer;
-}
-.live-switcher button.active {
-  background: #ff006e;
-}
+.live-close:hover { opacity: 1; }
 
 .live-player {
   flex: 1;
   width: 100%;
-  max-height: 70vh;
   background: #000;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
 }
 
-/* Responsive video/iframe - adapts to portrait or landscape */
-.live-player iframe,
-.live-player video,
-.live-player #agora-local,
-.live-player #agora-remote {
-  width: 100%;
-  height: 100%;
-  object-fit: contain; /* Change to 'cover' if you want full fill (may crop) */
-  background: #000;
+/* Force orientation */
+.live-player.portrait { aspect-ratio: 9 / 16; }
+.live-player.landscape { aspect-ratio: 16 / 9; }
+
+.live-player mux-player {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover;
+  border-radius: 12px;
 }
 
-/* Upcoming events posters */
-.upcoming-events {
+/* Classy Upcoming Posters */
+.upcoming-posters {
   width: 100%;
-  color: #fff;
+  padding: 20px 0 10px;
   text-align: center;
-  margin-top: 20px;
+  color: #aaa;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  transition: opacity 1s ease-out, transform 1s ease-out;
+  z-index: 5;
 }
+
+.upcoming-posters.fading {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
 .poster-grid {
   display: flex;
   overflow-x: auto;
-  gap: 15px;
-  padding: 10px 0;
+  gap: 20px;
+  padding: 0 10px;
+  scrollbar-width: none;
 }
+.poster-grid::-webkit-scrollbar { display: none; }
+
 .poster {
-  flex: 0 0 200px;
+  flex: 0 0 180px;
+  text-align: center;
 }
 .poster img {
   width: 100%;
-  border-radius: 10px;
-  box-shadow: 0 4px 15px rgba(255,0,110,0.4);
+  height: auto;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  transition: transform 0.3s;
+}
+.poster:hover img {
+  transform: scale(1.05);
+}
+.poster-title {
+  margin-top: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #ccc;
 }
 </style>
 </head>
@@ -2095,20 +2101,38 @@ could you have broken something?  i only asked for color change:
   <button class="session-btn" id="openHostsBtn">Livestreams</button>
 </div>
 
-  <!-- Fullscreen Live Stream Modal -->
+ <!-- Live Stream Modal -->
 <div id="liveModal" class="live-modal">
   <div class="live-modal-content">
     <span class="live-close">&times;</span>
     
-    <!-- Option Switcher (optional, for testing both) -->
-    <div class="live-switcher">
-      <button data-type="agora" class="active">Agora Live</button>
-      <button data-type="mux">Mux Live</button>
-    </div>
-    
     <!-- Player Container -->
     <div id="livePlayerContainer" class="live-player"></div>
     
+    <!-- Upcoming Events Posters (classy, fade out after delay) -->
+    <div id="upcomingPosters" class="upcoming-posters">
+      <div class="poster-grid">
+        <!-- Replace these src with your actual poster URLs -->
+        <div class="poster">
+          <img src="https://cdn.shopify.com/s/files/1/0962/6648/6067/files/128_x_128_px_Instagram_Post_45.jpg?v=1765857356" alt="Upcoming Event">
+          <p class="poster-title">Midnight Vibes</p>
+        </div>
+        <div class="poster">
+          <img src="https://cdn.shopify.com/s/files/1/0962/6648/6067/files/128_x_128_px_Instagram_Post_45.jpg?v=1765857356" alt="Upcoming Event">
+          <p class="poster-title">Late Night Stories</p>
+        </div>
+        <div class="poster">
+          <img src="https://cdn.shopify.com/s/files/1/0962/6648/6067/files/128_x_128_px_Instagram_Post_45.jpg?v=1765857356" alt="Upcoming Event">
+          <p class="poster-title">Exclusive Drop</p>
+        </div>
+        <div class="poster">
+          <img src="https://cdn.shopify.com/s/files/1/0962/6648/6067/files/128_x_128_px_Instagram_Post_45.jpg?v=1765857356" alt="Upcoming Event">
+          <p class="poster-title">Guest Session</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
     <!-- Upcoming Events Posters (example placeholders) -->
     <div class="upcoming-events">
       <h3>Upcoming 🔥</h3>

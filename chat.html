@@ -499,7 +499,28 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
 .profile-actions{display:flex;gap:8px;align-items:center;justify-content:flex-end;}
 .smalla-btn{padding:4px 10px;border-radius:8px;background: var(--accent);border: 0;color: #000;cursor: pointer;font-weight:700;font-size:12px;text-decoration: none;transition: transform .15s, box-shadow .15s;}
 .smalla-btn:hover{transform: translateY(-2px);box-shadow: 0 4px 10px rgba(255,20,147,0.3);}
-.star-popup{position:fixed;left:50%;top:18%;transform:translateX(-50%);background:var(--card);padding:8px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.05);display:none;z-index:1000;color:var(--accent);font-size:13px;white-space:nowrap;text-align:center;}
+.star-popup {
+  position: fixed;
+  left: 50%;
+  top: 18%;
+  transform: translateX(-50%);
+  background: var(--card);
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.05);
+  display: none; /* hidden by default */
+  z-index: 10000; /* very high to stay above modals */
+  color: var(--accent);
+  font-size: 13px;
+  white-space: nowrap;
+  text-align: center;
+  pointer-events: none; /* optional: so it doesn't block clicks below */
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+}
+
+#starPopup {
+  z-index: 10000 !important; /* ensure it's above everything */
+}
 .onlineCount{font-size:11px;color:var(--muted);}
 #authBox{display:flex;justify-content:center;margin:12px 0;}
   .send-area input{padding:10px;font-size:13px;}
@@ -576,11 +597,6 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
   from { transform: translateY(0) scale(1); opacity: 1; }
   to { transform: translateY(-100px) scale(1.5); opacity: 0; }
 }
-#starPopup {
-  z-index: 5000 !important; /* always above modal blur */
-  position: fixed;
-}
-
 .modal {
   display:none; 
   position:fixed; 
@@ -2149,7 +2165,12 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
 </style>
 </head>
 <body>
-  
+
+<div class="star-popup" id="starPopup">
+  <div id="starText">You've just earned +1 STRZ! ⭐</div>
+</div>
+
+
   <!-- Loading Overlay (hidden by default) -->
 <div id="postLoginLoader" style="display:none;">
   <div id="loadingBarWrapper">

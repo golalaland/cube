@@ -485,14 +485,28 @@ document.getElementById("markAllRead")?.addEventListener("click", async () => {
 
 
 
-// HELPERS — ALL INCLUDED
 function showStarPopup(text) {
   const popup = document.getElementById("starPopup");
   const starText = document.getElementById("starText");
   if (!popup || !starText) return;
+
   starText.innerHTML = text;
-  popup.style.display = "block";
-  setTimeout(() => popup.style.display = "none", 2000);
+  
+  // Remove any previous classes/timers
+  popup.classList.remove("show");
+  popup.style.display = "none";
+  void popup.offsetWidth; // force reflow
+
+  // Show it
+  popup.style.display = "flex";
+  popup.classList.add("show");
+
+  // Auto-hide after 2 seconds
+  clearTimeout(popup._hideTimeout);
+  popup._hideTimeout = setTimeout(() => {
+    popup.style.display = "none";
+    popup.classList.remove("show");
+  }, 2000);
 }
 
 function formatNumberWithCommas(n) {

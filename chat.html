@@ -1952,37 +1952,28 @@ could you have broken something?  i only asked for color change:
   justify-content: center;
   text-align: center;
 }
+/* LIVE MODAL ONLY - all selectors prefixed to avoid conflicts with other .tab-btn, .content-tabs, etc. */
 .live-modal {
   display: none;
   position: fixed;
   z-index: 9999;
-  left: 0; top: 0;
-  width: 100%; height: 100%;
+  inset: 0;
   background-color: #000;
-  overflow: hidden;
+  overflow-y: auto; /* allow scrolling if content is tall */
+  overflow-x: hidden;
 }
 
-/* Main modal content - add more top padding to make space */
-.live-modal-content {
-  width: 100%; height: 100%;
+.live-modal .live-modal-content {
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  padding: 60px 20px 20px;  /* Increased top padding from 20px → 60px */
+  padding: 60px 20px 40px;
   box-sizing: border-box;
   position: relative;
 }
 
-/* Tab Switcher - now naturally sits lower, centered */
-.content-tabs {
-  display: flex;
-  justify-content: center;
-  gap: 24px;
-  margin: 0 0 20px 0;  /* Removed top margin, relies on container padding */
-  z-index: 10;
-  position: relative;
-}
-
-.live-close {
+/* Close button */
+.live-modal .live-close {
   position: absolute;
   top: 20px;
   right: 30px;
@@ -1990,95 +1981,36 @@ could you have broken something?  i only asked for color change:
   font-size: 48px;
   font-weight: 300;
   cursor: pointer;
-  z-index: 20;                  /* Higher than tabs (10) and posters */
+  z-index: 20;
   opacity: 0.7;
   transition: opacity 0.3s;
-  pointer-events: auto !important;  /* Force clickable */
-  user-select: none;
-  line-height: 1;
   width: 60px;
   height: 60px;
   display: flex;
   align-items: center;
   justify-content: center;
+  pointer-events: auto !important;
+  user-select: none;
+  line-height: 1;
 }
-
-.live-close:hover {
+.live-modal .live-close:hover {
   opacity: 1;
 }
-
-/* When hidden during consent */
-.live-close.hidden {
+.live-modal .live-close.hidden {
   opacity: 0;
-  pointer-events: none;  /* Safe to disable when hidden */
-}
-/* Force orientation */
-.live-player.portrait { aspect-ratio: 9 / 16; }
-.live-player.landscape { aspect-ratio: 16 / 9; }
-
-.live-player mux-player {
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: cover;
-  border-radius: 12px;
+  pointer-events: none;
 }
 
-/* Classy Upcoming Posters */
-.upcoming-posters {
-  width: 100%;
-  padding: 20px 0 10px;
-  text-align: center;
-  color: #aaa;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  transition: opacity 1s ease-out, transform 1s ease-out;
-  z-index: 5;
-}
-
-.upcoming-posters.fading {
-  opacity: 0;
-  transform: translateY(20px);
-}
-
-.poster-grid {
-  display: flex;
-  overflow-x: auto;
-  gap: 20px;
-  padding: 0 10px;
-  scrollbar-width: none;
-}
-.poster-grid::-webkit-scrollbar { display: none; }
-
-.poster {
-  flex: 0 0 180px;
-  text-align: center;
-}
-.poster img {
-  width: 100%;
-  height: auto;
-  aspect-ratio: 2 / 3;
-  object-fit: cover;
-  border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-  transition: transform 0.3s;
-}
-.poster:hover img {
-  transform: scale(1.05);
-}
-.poster-title {
-  margin-top: 12px;
-  font-size: 14px;
-  font-weight: 500;
-  color: #ccc;
-}
-/* Tab Switcher */
-.content-tabs {
+/* Livestream Tab Switcher (unique classes) */
+.live-modal .live-content-tabs {
   display: flex;
   justify-content: center;
-  gap: 20px;
-  margin: 20px 0 10px;
+  gap: 24px;
+  margin: 0 0 20px 0;
   z-index: 10;
+  flex-wrap: wrap; /* mobile friendly */
 }
-.tab-btn {
+.live-modal .live-tab-btn {
   padding: 12px 28px;
   background: rgba(255,255,255,0.1);
   color: #fff;
@@ -2090,26 +2022,87 @@ could you have broken something?  i only asked for color change:
   transition: all 0.3s;
   backdrop-filter: blur(10px);
 }
-.tab-btn.active,
-.tab-btn:hover {
+.live-modal .live-tab-btn.active,
+.live-modal .live-tab-btn:hover {
   background: rgba(255,255,255,0.25);
 }
-.tab-btn[data-content="adult"] {
+.live-modal .live-tab-btn[data-content="adult"] {
   font-weight: 600;
 }
 
+/* Player */
+.live-modal .live-player {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto 20px;
+  background: #000;
+  border-radius: 12px;
+  overflow: hidden;
+}
+.live-modal .live-player.portrait { aspect-ratio: 9 / 16; }
+.live-modal .live-player.landscape { aspect-ratio: 16 / 9; }
+.live-modal .live-player mux-player {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover;
+}
+
+/* Upcoming Posters */
+.live-modal .upcoming-posters {
+  width: 100%;
+  padding: 20px 0 10px;
+  text-align: center;
+  color: #aaa;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  transition: opacity 1s ease-out, transform 1s ease-out;
+  z-index: 5;
+}
+.live-modal .upcoming-posters.fading {
+  opacity: 0;
+  transform: translateY(20px);
+}
+.live-modal .poster-grid {
+  display: flex;
+  overflow-x: auto;
+  gap: 20px;
+  padding: 0 10px;
+  scrollbar-width: none;
+}
+.live-modal .poster-grid::-webkit-scrollbar { display: none; }
+.live-modal .poster {
+  flex: 0 0 180px;
+  text-align: center;
+}
+.live-modal .poster img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  transition: transform 0.3s;
+}
+.live-modal .poster:hover img {
+  transform: scale(1.05);
+}
+.live-modal .poster-title {
+  margin-top: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #ccc;
+}
+
 /* Consent Modal */
-.consent-modal {
+.live-modal .consent-modal {
   display: none;
   position: fixed;
   z-index: 10000;
-  left: 0; top: 0;
-  width: 100%; height: 100%;
+  inset: 0;
   background-color: rgba(0,0,0,0.9);
   align-items: center;
   justify-content: center;
 }
-.consent-content {
+.live-modal .consent-content {
   background: #111;
   padding: 40px;
   border-radius: 20px;
@@ -2119,24 +2112,24 @@ could you have broken something?  i only asked for color change:
   color: #eee;
   box-shadow: 0 10px 40px rgba(0,0,0,0.6);
 }
-.consent-content h2 {
+.live-modal .consent-content h2 {
   margin-bottom: 20px;
   font-size: 28px;
   color: #fff;
 }
-.consent-content ul {
+.live-modal .consent-content ul {
   text-align: left;
   margin: 20px 0;
   padding-left: 20px;
   line-height: 1.8;
 }
-.consent-buttons {
+.live-modal .consent-buttons {
   margin-top: 30px;
   display: flex;
   gap: 20px;
   justify-content: center;
 }
-.consent-buttons button {
+.live-modal .consent-buttons button {
   padding: 14px 32px;
   border: none;
   border-radius: 30px;
@@ -2145,16 +2138,16 @@ could you have broken something?  i only asked for color change:
   cursor: pointer;
   transition: 0.3s;
 }
-#consentAgree {
+.live-modal #consentAgree {
   background: #ff3366;
   color: white;
 }
-#consentAgree:hover { background: #ff1744; }
-#consentCancel {
+.live-modal #consentAgree:hover { background: #ff1744; }
+.live-modal #consentCancel {
   background: rgba(255,255,255,0.15);
   color: white;
 }
-#consentCancel:hover { background: rgba(255,255,255,0.3); }
+.live-modal #consentCancel:hover { background: rgba(255,255,255,0.3); }
 </style>
 </head>
 <body>

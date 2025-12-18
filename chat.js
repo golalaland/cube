@@ -3986,11 +3986,9 @@ oldTabBtns.forEach(btn => {
 
 // Re-query fresh buttons and attach new listeners
 liveTabBtns = document.querySelectorAll('.tab-btn'); // reassign (not redeclare const)
-
+// === TAB SWITCHING & CONSENT LOGIC (warning EVERY time) ===
 liveTabBtns.forEach(btn => {
   btn.onclick = () => {
-    console.log('Tab clicked:', btn.dataset.content);
-
     const target = btn.dataset.content;
 
     // Reset active state
@@ -4002,26 +4000,17 @@ liveTabBtns.forEach(btn => {
       return;
     }
 
-    // Adult tab
-    const hasConsent = localStorage.getItem('adultConsent') === 'true';
-    console.log('Has consent?', hasConsent);
-
-    if (hasConsent) {
-      btn.classList.add('active');
-      switchContent('adult');
-    } else {
-      document.querySelector('.tab-btn[data-content="regular"]').classList.add('active');
-      liveConsentModal.style.display = 'flex';
-      liveCloseBtn.classList.add('hidden');
-      console.log('Consent modal displayed');
-    }
+    // Adult tab clicked — ALWAYS show consent modal
+    document.querySelector('.tab-btn[data-content="regular"]').classList.add('active');
+    liveConsentModal.style.display = 'flex';
+    liveCloseBtn.classList.add('hidden');
+    console.log('Adult consent modal shown — every time');
   };
 });
 
-// I Agree
+// I Agree — proceed to Adult
 liveAgreeBtn.onclick = () => {
-  console.log('User clicked I Agree');
-  localStorage.setItem('adultConsent', 'true');
+  console.log('User agreed — loading Adult content');
   liveConsentModal.style.display = 'none';
   liveCloseBtn.classList.remove('hidden');
 
@@ -4030,9 +4019,9 @@ liveAgreeBtn.onclick = () => {
   switchContent('adult');
 };
 
-// Cancel or backdrop
+// Cancel or backdrop click — stay on Regular
 const cancelAdultConsent = () => {
-  console.log('Consent cancelled');
+  console.log('Consent cancelled — staying on Regular');
   liveConsentModal.style.display = 'none';
   liveCloseBtn.classList.remove('hidden');
 

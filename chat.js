@@ -3908,10 +3908,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const liveConsentModal = document.getElementById('adultConsentModal');
   const livePlayerContainer = document.getElementById('livePlayerContainer');
   const livePostersSection = document.getElementById('upcomingPosters');
-  let liveTabBtns = document.querySelectorAll('.live-tab-btn'); // unique livestream tabs
   const liveCloseBtn = document.querySelector('.live-close');
   const liveAgreeBtn = document.getElementById('consentAgree');
   const liveCancelBtn = document.getElementById('consentCancel');
+
+  // Only tabs INSIDE the livestream modal — no conflict with other .tab-btn on page
+  let liveTabBtns = liveModal.querySelectorAll('.tab-btn');
 
   let currentContent = 'regular';
   let fadeTimer;
@@ -3927,9 +3929,8 @@ document.addEventListener('DOMContentLoaded', () => {
   function switchContent(type) {
     currentContent = type;
 
-    // Update active tab safely
     liveTabBtns.forEach(btn => btn.classList.remove('active'));
-    const targetBtn = document.querySelector(`.live-tab-btn[data-content="${type}"]`);
+    const targetBtn = liveModal.querySelector(`.tab-btn[data-content="${type}"]`);
     if (targetBtn) targetBtn.classList.add('active');
 
     startStream(type);
@@ -3967,35 +3968,31 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // === EVENT LISTENERS ===
-  const openBtn = document.getElementById('openHostsBtn');
-  if (openBtn) {
-    openBtn.onclick = () => {
-      liveModal.style.display = 'block';
-      livePostersSection.classList.remove('fading');
-      liveCloseBtn.classList.remove('hidden');
+  document.getElementById('openHostsBtn').onclick = () => {
+    liveModal.style.display = 'block';
+    livePostersSection.classList.remove('fading');
+    liveCloseBtn.classList.remove('hidden');
 
-      // Force Regular tab
-      liveTabBtns.forEach(b => b.classList.remove('active'));
-      const regularBtn = document.querySelector('.live-tab-btn[data-content="regular"]');
-      if (regularBtn) regularBtn.classList.add('active');
+    liveTabBtns.forEach(b => b.classList.remove('active'));
+    const regularBtn = liveModal.querySelector('.tab-btn[data-content="regular"]');
+    if (regularBtn) regularBtn.classList.add('active');
 
-      switchContent('regular');
+    switchContent('regular');
 
-      clearTimeout(fadeTimer);
-      fadeTimer = setTimeout(() => {
-        livePostersSection.classList.add('fading');
-      }, 8000);
-    };
-  }
+    clearTimeout(fadeTimer);
+    fadeTimer = setTimeout(() => {
+      livePostersSection.classList.add('fading');
+    }, 8000);
+  };
 
-  // Re-query tabs and attach listeners safely
-  liveTabBtns = document.querySelectorAll('.live-tab-btn');
+  // Re-query tabs inside modal (safe after open)
+  liveTabBtns = liveModal.querySelectorAll('.tab-btn');
 
+  // TAB SWITCHING & CONSENT (every time)
   liveTabBtns.forEach(btn => {
     btn.onclick = () => {
       const target = btn.dataset.content;
 
-      // Reset active
       liveTabBtns.forEach(b => b.classList.remove('active'));
 
       if (target === 'regular') {
@@ -4004,69 +4001,52 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      // Adult tab — always show consent
-      const regularBtn = document.querySelector('.live-tab-btn[data-content="regular"]');
+      // Adult — show consent
+      const regularBtn = liveModal.querySelector('.tab-btn[data-content="regular"]');
       if (regularBtn) regularBtn.classList.add('active');
 
       liveConsentModal.style.display = 'flex';
       liveCloseBtn.classList.add('hidden');
-      console.log('Adult consent modal shown');
     };
   });
 
   // I Agree
-  if (liveAgreeBtn) {
-    liveAgreeBtn.onclick = () => {
-      liveConsentModal.style.display = 'none';
-      liveCloseBtn.classList.remove('hidden');
+  liveAgreeBtn.onclick = () => {
+    liveConsentModal.style.display = 'none';
+    liveCloseBtn.classList.remove('hidden');
 
-      liveTabBtns.forEach(b => b.classList.remove('active'));
-      const adultBtn = document.querySelector('.live-tab-btn[data-content="adult"]');
-      if (adultBtn) adultBtn.classList.add('active');
+    liveTabBtns.forEach(b => b.classList.remove('active'));
+    const adultBtn = liveModal.querySelector('.tab-btn[data-content="adult"]');
+    if (adultBtn) adultBtn.classList.add('active');
 
-      switchContent('adult');
-    };
-  }
+    switchContent('adult');
+  };
 
-  // Cancel
-  if (liveCancelBtn) {
-    liveCancelBtn.onclick = () => {
-      liveConsentModal.style.display = 'none';
-      liveCloseBtn.classList.remove('hidden');
+  // Cancel / backdrop
+  const cancelAdultConsent = () => {
+    liveConsentModal.style.display = 'none';
+    liveCloseBtn.classList.remove('hidden');
 
-      liveTabBtns.forEach(b => b.classList.remove('active'));
-      const regularBtn = document.querySelector('.live-tab-btn[data-content="regular"]');
-      if (regularBtn) regularBtn.classList.add('active');
+    liveTabBtns.forEach(b => b.classList.remove('active'));
+    const regularBtn = liveModal.querySelector('.tab-btn[data-content="regular"]');
+    if (regularBtn) regularBtn.classList.add('active');
 
-      switchContent('regular');
-    };
-  }
+    switchContent('regular');
+  };
 
-  // Backdrop click on consent
-  if (liveConsentModal) {
-    liveConsentModal.onclick = (e) => {
-      if (e.target === liveConsentModal) {
-        liveConsentModal.style.display = 'none';
-        liveCloseBtn.classList.remove('hidden');
+  liveCancelBtn.onclick = cancelAdultConsent;
 
-        liveTabBtns.forEach(b => b.classList.remove('active'));
-        const regularBtn = document.querySelector('.live-tab-btn[data-content="regular"]');
-        if (regularBtn) regularBtn.classList.add('active');
+  liveConsentModal.onclick = (e) => {
+    if (e.target === liveConsentModal) cancelAdultConsent();
+  };
 
-        switchContent('regular');
-      }
-    };
-  }
-
-  // Close button and backdrop
-  if (liveCloseBtn) liveCloseBtn.onclick = closeAllLiveModal;
-
-  if (liveModal) {
-    liveModal.onclick = (e) => {
-      if (e.target === liveModal) closeAllLiveModal();
-    };
-  }
+  // Close
+  liveCloseBtn.onclick = closeAllLiveModal;
+  liveModal.onclick = (e) => {
+    if (e.target === liveModal) closeAllLiveModal();
+  };
 });
+
 // ---------- DEBUGGABLE HOST INIT (drop-in) ----------
 (function () {
   // Toggle this dynamically in your app

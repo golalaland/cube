@@ -1952,209 +1952,262 @@ could you have broken something?  i only asked for color change:
   justify-content: center;
   text-align: center;
 }
+/* Live Modal - Fullscreen, mobile-first, scrollable if needed */
 .live-modal {
   display: none;
   position: fixed;
   z-index: 9999;
-  left: 0; top: 0;
-  width: 100%; height: 100%;
+  inset: 0; /* modern shorthand for top/right/bottom/left: 0 */
   background-color: #000;
-  overflow: hidden;
+  overflow-y: auto; /* allow scroll on tall content (mobile safe) */
+  overflow-x: hidden;
 }
 
-/* Main modal content - add more top padding to make space */
+/* Main content - flex column, mobile optimized */
 .live-modal-content {
-  width: 100%; height: 100%;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  padding: 60px 20px 20px;  /* Increased top padding from 20px → 60px */
+  padding: 70px 16px 30px; /* more top space for close button, generous bottom */
   box-sizing: border-box;
-  position: relative;
 }
 
-/* Tab Switcher - now naturally sits lower, centered */
-.content-tabs {
-  display: flex;
-  justify-content: center;
-  gap: 24px;
-  margin: 0 0 20px 0;  /* Removed top margin, relies on container padding */
-  z-index: 10;
-  position: relative;
-}
-
+/* Close button - larger tap area on mobile */
 .live-close {
   position: absolute;
   top: 20px;
-  right: 30px;
+  right: 20px;
   color: #fff;
   font-size: 48px;
   font-weight: 300;
   cursor: pointer;
-  z-index: 20;                  /* Higher than tabs (10) and posters */
+  z-index: 20;
   opacity: 0.7;
   transition: opacity 0.3s;
-  pointer-events: auto !important;  /* Force clickable */
-  user-select: none;
-  line-height: 1;
-  width: 60px;
-  height: 60px;
+  width: 70px;
+  height: 70px;
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
 }
-
-.live-close:hover {
+.live-close:hover,
+.live-close:active {
   opacity: 1;
 }
-
-/* When hidden during consent */
 .live-close.hidden {
   opacity: 0;
-  pointer-events: none;  /* Safe to disable when hidden */
-}
-/* Force orientation */
-.live-player.portrait { aspect-ratio: 9 / 16; }
-.live-player.landscape { aspect-ratio: 16 / 9; }
-
-.live-player mux-player {
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: cover;
-  border-radius: 12px;
+  pointer-events: none;
 }
 
-/* Classy Upcoming Posters */
-.upcoming-posters {
-  width: 100%;
-  padding: 20px 0 10px;
-  text-align: center;
-  color: #aaa;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  transition: opacity 1s ease-out, transform 1s ease-out;
-  z-index: 5;
-}
-
-.upcoming-posters.fading {
-  opacity: 0;
-  transform: translateY(20px);
-}
-
-.poster-grid {
-  display: flex;
-  overflow-x: auto;
-  gap: 20px;
-  padding: 0 10px;
-  scrollbar-width: none;
-}
-.poster-grid::-webkit-scrollbar { display: none; }
-
-.poster {
-  flex: 0 0 180px;
-  text-align: center;
-}
-.poster img {
-  width: 100%;
-  height: auto;
-  aspect-ratio: 2 / 3;
-  object-fit: cover;
-  border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-  transition: transform 0.3s;
-}
-.poster:hover img {
-  transform: scale(1.05);
-}
-.poster-title {
-  margin-top: 12px;
-  font-size: 14px;
-  font-weight: 500;
-  color: #ccc;
-}
-/* Tab Switcher */
+/* Tab Switcher - responsive, touch-friendly */
 .content-tabs {
   display: flex;
   justify-content: center;
-  gap: 20px;
-  margin: 20px 0 10px;
-  z-index: 10;
+  gap: 16px;
+  margin-bottom: 20px;
+  flex-wrap: wrap; /* wrap on very small screens */
 }
 .tab-btn {
-  padding: 12px 28px;
-  background: rgba(255,255,255,0.1);
+  min-width: 140px;
+  padding: 14px 24px;
+  background: rgba(255, 255, 255, 0.1);
   color: #fff;
   border: none;
   border-radius: 30px;
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s;
   backdrop-filter: blur(10px);
 }
 .tab-btn.active,
-.tab-btn:hover {
-  background: rgba(255,255,255,0.25);
+.tab-btn:hover,
+.tab-btn:active {
+  background: rgba(255, 255, 255, 0.25);
 }
 .tab-btn[data-content="adult"] {
   font-weight: 600;
 }
 
-/* Consent Modal */
+/* Player - responsive landscape or portrait */
+.live-player {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto 20px;
+  background: #000;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+}
+.live-player.portrait { aspect-ratio: 9 / 16; }
+.live-player.landscape { aspect-ratio: 16 / 9; }
+.live-player mux-player {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover;
+}
+
+/* Upcoming Posters - mobile-optimized horizontal scroll */
+.upcoming-posters {
+  width: 100%;
+  padding: 20px 0;
+  text-align: center;
+  transition: opacity 1s ease-out, transform 1s ease-out;
+}
+.upcoming-posters.fading {
+  opacity: 0;
+  transform: translateY(20px);
+}
+.poster-grid {
+  display: flex;
+  overflow-x: auto;
+  gap: 16px;
+  padding: 0 10px 10px;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch; /* smooth scroll on iOS */
+}
+.poster-grid::-webkit-scrollbar { display: none; }
+
+.poster {
+  flex: 0 0 160px; /* smaller on mobile */
+  text-align: center;
+}
+.poster img {
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+  transition: transform 0.3s;
+}
+.poster:active img {
+  transform: scale(1.05);
+}
+.poster-title {
+  margin-top: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #ccc;
+}
+
+/* Adult Video Slide - mobile friendly collapsible */
+.adult-video-slide {
+  width: 100%;
+  max-width: 900px;
+  margin: 20px auto 30px;
+}
+.toggle-video-btn {
+  width: 100%;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border: none;
+  border-radius: 16px;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  text-align: center;
+}
+.video-container {
+  margin-top: 12px;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 16px;
+  overflow: hidden;
+  height: 0;
+  transition: height 0.6s ease;
+}
+.video-container.open {
+  height: auto;
+}
+#adultVideoFrame {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+/* Consent Modal - mobile optimized */
 .consent-modal {
   display: none;
   position: fixed;
   z-index: 10000;
-  left: 0; top: 0;
-  width: 100%; height: 100%;
-  background-color: rgba(0,0,0,0.9);
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.95);
   align-items: center;
   justify-content: center;
+  padding: 20px;
 }
 .consent-content {
   background: #111;
-  padding: 40px;
+  padding: 30px 24px;
   border-radius: 20px;
-  max-width: 90%;
-  width: 500px;
+  width: 100%;
+  max-width: 420px;
   text-align: center;
   color: #eee;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
 }
 .consent-content h2 {
-  margin-bottom: 20px;
-  font-size: 28px;
-  color: #fff;
+  font-size: 26px;
+  margin-bottom: 16px;
+}
+.consent-content p, .consent-content ul {
+  font-size: 16px;
+  line-height: 1.6;
 }
 .consent-content ul {
   text-align: left;
-  margin: 20px 0;
   padding-left: 20px;
-  line-height: 1.8;
 }
 .consent-buttons {
   margin-top: 30px;
   display: flex;
-  gap: 20px;
-  justify-content: center;
+  flex-direction: column;
+  gap: 14px;
 }
 .consent-buttons button {
-  padding: 14px 32px;
+  padding: 16px;
   border: none;
   border-radius: 30px;
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 600;
   cursor: pointer;
-  transition: 0.3s;
 }
 #consentAgree {
   background: #ff3366;
   color: white;
 }
-#consentAgree:hover { background: #ff1744; }
+#consentAgree:hover, #consentAgree:active { background: #ff1744; }
 #consentCancel {
-  background: rgba(255,255,255,0.15);
+  background: rgba(255, 255, 255, 0.15);
   color: white;
 }
-#consentCancel:hover { background: rgba(255,255,255,0.3); }
+#consentCancel:hover, #consentCancel:active { background: rgba(255, 255, 255, 0.3); }
+
+/* Mobile-specific tweaks */
+@media (max-width: 480px) {
+  .live-modal-content {
+    padding: 60px 12px 20px;
+  }
+  .tab-btn {
+    min-width: 120px;
+    padding: 12px 20px;
+    font-size: 16px;
+  }
+  .poster {
+    flex: 0 0 140px;
+  }
+  .consent-content {
+    padding: 24px 20px;
+  }
+  .consent-buttons button {
+    padding: 14px;
+  }
+}
 </style>
 </head>
 <body>
@@ -2198,46 +2251,49 @@ could you have broken something?  i only asked for color change:
         <span>people are interacting in chatrooms</span>
     </div>
     
-   <!-- Buttons (keep aligned) -->
-<div id="sessionBar">
-  <button class="session-btn" id="topBallersBtn">Win $STRZ</button>
-  <button id="highlightsBtn" class="session-btn star-hosts-btn">🌟 Cuties 🌟</button>
-  <button class="session-btn" id="openHostsBtn">Livestreams</button>
+<!-- Tab Switcher -->
+<div class="content-tabs">
+  <button class="tab-btn active" data-content="regular">Regular</button>
+  <button class="tab-btn" data-content="adult">Adult 🔞</button>
 </div>
 
-<!-- Live Stream Modal -->
-<div id="liveModal" class="live-modal">
-  <div class="live-modal-content">
-    <span class="live-close">&times;</span>
-   
-    <!-- Tab Switcher -->
-    <div class="content-tabs">
-      <button class="tab-btn active" data-content="regular">Regular</button>
-      <button class="tab-btn" data-content="adult">Adult 🔞</button>
-    </div>
-   
-    <!-- Player Container -->
-    <div id="livePlayerContainer" class="live-player"></div>
-   
-    <!-- Upcoming Posters – fades out after 8s – now with your real images -->
-    <div id="upcomingPosters" class="upcoming-posters">
-      <div class="poster-grid">
-        <div class="poster">
-          <img src="https://cdn.shopify.com/s/files/1/0962/6648/6067/files/128_x_128_px_Instagram_Post_45.jpg?v=1765857356" alt="Upcoming Event 1">
-          <p class="poster-title">Chill Vibes</p>
-        </div>
-        <div class="poster">
-          <img src="https://cdn.shopify.com/s/files/1/0962/6648/6067/files/128_x_128_px_Instagram_Post_45.jpg?v=1765857356" alt="Upcoming Event 2">
-          <p class="poster-title">Late Night Talk</p>
-        </div>
-        <div class="poster">
-          <img src="https://cdn.shopify.com/s/files/1/0962/6648/6067/files/Beige_Minimal_Romantic_Love_Questions_Card_Game_Document_1080_x_1920_px_5.jpg?v=1765500400" alt="Upcoming Event 3">
-          <p class="poster-title">Exclusive Drop</p>
-        </div>
-        <!-- Add more if you want -->
+<!-- Dynamic Content Area -->
+<div id="tabContentArea">
+  <!-- Posters Section (different image for Adult) -->
+  <div id="upcomingPosters" class="upcoming-posters">
+    <div class="poster-grid">
+      <!-- Regular posters (shown on Regular tab) -->
+      <div class="poster regular-poster">
+        <img src="https://cdn.shopify.com/s/files/1/0962/6648/6067/files/128_x_128_px_Instagram_Post_45.jpg?v=1765857356" alt="Chill Vibes">
+        <p class="poster-title">Chill Vibes</p>
+      </div>
+      <div class="poster regular-poster">
+        <img src="https://cdn.shopify.com/s/files/1/0962/6648/6067/files/128_x_128_px_Instagram_Post_45.jpg?v=1765857356" alt="Late Night Talk">
+        <p class="poster-title">Late Night Talk</p>
+      </div>
+      <div class="poster regular-poster">
+        <img src="https://cdn.shopify.com/s/files/1/0962/6648/6067/files/Beige_Minimal_Romantic_Love_Questions_Card_Game_Document_1080_x_1920_px_5.jpg?v=1765500400" alt="Exclusive Drop">
+        <p class="poster-title">Exclusive Drop</p>
+      </div>
+
+      <!-- Adult custom teaser photo (shown only on Adult tab) -->
+      <div class="poster adult-poster" style="display:none;">
+        <img src="YOUR_ADULT_TEASER_IMAGE_URL_HERE" alt="Adult Teaser"> <!-- CHANGE THIS LINK -->
+        <p class="poster-title">Exclusive Adult Session</p>
       </div>
     </div>
   </div>
+
+  <!-- Collapsible Video Slide (Adult only) -->
+  <div id="adultVideoSlide" class="adult-video-slide" style="display:none;">
+    <button id="toggleVideoBtn" class="toggle-video-btn">▲ Open Video</button>
+    <div id="videoContainer" class="video-container collapsed">
+      <iframe id="adultVideoFrame" src="" allowfullscreen allow="autoplay"></iframe>
+    </div>
+  </div>
+
+  <!-- Main Livestream Player (shared) -->
+  <div id="livePlayerContainer" class="live-player"></div>
 </div>
 
 <!-- Adult Content Consent Modal -->

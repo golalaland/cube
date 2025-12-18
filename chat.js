@@ -3903,36 +3903,40 @@ const adultVideoUrl = 'https://www.youtube.com/embed/YourVideoID?autoplay=1&mute
 // Or Vimeo: 'https://player.vimeo.com/video/123456789'
 
 // ----------LIVESTREAM MODAL----------
-// === LIVESTREAM MODAL: VARIABLES & CONSTANTS ===
-const liveModal = document.getElementById('liveModal');
-const liveConsentModal = document.getElementById('adultConsentModal');
-const livePlayerContainer = document.getElementById('livePlayerContainer');
-const livePostersSection = document.getElementById('upcomingPosters');
-let liveTabBtns = document.querySelectorAll('.live-tab-btn'); // matches the unique livestream tabs
-const liveCloseBtn = document.querySelector('.live-close');
-const liveAgreeBtn = document.getElementById('consentAgree');
-const liveCancelBtn = document.getElementById('consentCancel');
+document.addEventListener('DOMContentLoaded', () => {
+  // === LIVESTREAM MODAL: VARIABLES & CONSTANTS ===
+  const liveModal = document.getElementById('liveModal');
+  const liveConsentModal = document.getElementById('adultConsentModal');
+  const livePlayerContainer = document.getElementById('livePlayerContainer');
+  const livePostersSection = document.getElementById('upcomingPosters');
+  let liveTabBtns = document.querySelectorAll('.live-tab-btn'); // matches the unique livestream tabs
+  const liveCloseBtn = document.querySelector('.live-close');
+  const liveAgreeBtn = document.getElementById('consentAgree');
+  const liveCancelBtn = document.getElementById('consentCancel');
 
-let currentContent = 'regular';
-let fadeTimer;
+  let currentContent = 'regular';
+  let fadeTimer;
 
-const PLAYBACK_IDS = {
-  regular: 'YOUR_REGULAR_MUX_PLAYBACK_ID',
-  adult:   'YOUR_ADULT_MUX_PLAYBACK_ID'
-};
+  const PLAYBACK_IDS = {
+    regular: 'YOUR_REGULAR_MUX_PLAYBACK_ID',
+    adult: 'YOUR_ADULT_MUX_PLAYBACK_ID'
+  };
 
-const STREAM_ORIENTATION = 'portrait'; // or 'landscape'
+  const STREAM_ORIENTATION = 'portrait'; // or 'landscape'
 
-// === FUNCTIONS ===
-function switchContent(type) {
-  currentContent = type;
+  // === FUNCTIONS ===
+  function switchContent(type) {
+    currentContent = type;
 
-  // Update active tab (using prefixed class)
-  liveTabBtns.forEach(btn => btn.classList.remove('active'));
-  document.querySelector(`.live-tab-btn[data-content="${type}"]`).classList.add('active');
+    // Update active tab (using prefixed class)
+    liveTabBtns.forEach(btn => btn.classList.remove('active'));
+    const targetBtn = document.querySelector(`.live-tab-btn[data-content="${type}"]`);
+    if (targetBtn) targetBtn.classList.add('active');
 
-  startStream(type);
-}
+    startStream(type);
+  }
+
+  // ... rest of your functions and event listeners go here
 
 function startStream(type) {
   livePlayerContainer.innerHTML = '';
@@ -4051,7 +4055,7 @@ liveCloseBtn.onclick = () => closeAllLiveModal();
 liveModal.onclick = (e) => {
   if (e.target === liveModal) closeAllLiveModal();
 };
-
+});
 // ---------- DEBUGGABLE HOST INIT (drop-in) ----------
 (function () {
   // Toggle this dynamically in your app

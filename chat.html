@@ -2251,49 +2251,46 @@ could you have broken something?  i only asked for color change:
         <span>people are interacting in chatrooms</span>
     </div>
     
-<!-- Tab Switcher -->
-<div class="content-tabs">
-  <button class="tab-btn active" data-content="regular">Regular</button>
-  <button class="tab-btn" data-content="adult">Adult 🔞</button>
+   <!-- Buttons (keep aligned) -->
+<div id="sessionBar">
+  <button class="session-btn" id="topBallersBtn">Win $STRZ</button>
+  <button id="highlightsBtn" class="session-btn star-hosts-btn">🌟 Cuties 🌟</button>
+  <button class="session-btn" id="openHostsBtn">Livestreams</button>
 </div>
 
-<!-- Dynamic Content Area -->
-<div id="tabContentArea">
-  <!-- Posters Section (different image for Adult) -->
-  <div id="upcomingPosters" class="upcoming-posters">
-    <div class="poster-grid">
-      <!-- Regular posters (shown on Regular tab) -->
-      <div class="poster regular-poster">
-        <img src="https://cdn.shopify.com/s/files/1/0962/6648/6067/files/128_x_128_px_Instagram_Post_45.jpg?v=1765857356" alt="Chill Vibes">
-        <p class="poster-title">Chill Vibes</p>
-      </div>
-      <div class="poster regular-poster">
-        <img src="https://cdn.shopify.com/s/files/1/0962/6648/6067/files/128_x_128_px_Instagram_Post_45.jpg?v=1765857356" alt="Late Night Talk">
-        <p class="poster-title">Late Night Talk</p>
-      </div>
-      <div class="poster regular-poster">
-        <img src="https://cdn.shopify.com/s/files/1/0962/6648/6067/files/Beige_Minimal_Romantic_Love_Questions_Card_Game_Document_1080_x_1920_px_5.jpg?v=1765500400" alt="Exclusive Drop">
-        <p class="poster-title">Exclusive Drop</p>
-      </div>
-
-      <!-- Adult custom teaser photo (shown only on Adult tab) -->
-      <div class="poster adult-poster" style="display:none;">
-        <img src="YOUR_ADULT_TEASER_IMAGE_URL_HERE" alt="Adult Teaser"> <!-- CHANGE THIS LINK -->
-        <p class="poster-title">Exclusive Adult Session</p>
+<!-- Live Stream Modal -->
+<div id="liveModal" class="live-modal">
+  <div class="live-modal-content">
+    <span class="live-close">&times;</span>
+   
+    <!-- Tab Switcher -->
+    <div class="content-tabs">
+      <button class="tab-btn active" data-content="regular">Regular</button>
+      <button class="tab-btn" data-content="adult">Adult 🔞</button>
+    </div>
+   
+    <!-- Player Container -->
+    <div id="livePlayerContainer" class="live-player"></div>
+   
+    <!-- Upcoming Posters – fades out after 8s – now with your real images -->
+    <div id="upcomingPosters" class="upcoming-posters">
+      <div class="poster-grid">
+        <div class="poster">
+          <img src="https://cdn.shopify.com/s/files/1/0962/6648/6067/files/128_x_128_px_Instagram_Post_45.jpg?v=1765857356" alt="Upcoming Event 1">
+          <p class="poster-title">Chill Vibes</p>
+        </div>
+        <div class="poster">
+          <img src="https://cdn.shopify.com/s/files/1/0962/6648/6067/files/128_x_128_px_Instagram_Post_45.jpg?v=1765857356" alt="Upcoming Event 2">
+          <p class="poster-title">Late Night Talk</p>
+        </div>
+        <div class="poster">
+          <img src="https://cdn.shopify.com/s/files/1/0962/6648/6067/files/Beige_Minimal_Romantic_Love_Questions_Card_Game_Document_1080_x_1920_px_5.jpg?v=1765500400" alt="Upcoming Event 3">
+          <p class="poster-title">Exclusive Drop</p>
+        </div>
+        <!-- Add more if you want -->
       </div>
     </div>
   </div>
-
-  <!-- Collapsible Video Slide (Adult only) -->
-  <div id="adultVideoSlide" class="adult-video-slide" style="display:none;">
-    <button id="toggleVideoBtn" class="toggle-video-btn">▲ Open Video</button>
-    <div id="videoContainer" class="video-container collapsed">
-      <iframe id="adultVideoFrame" src="" allowfullscreen allow="autoplay"></iframe>
-    </div>
-  </div>
-
-  <!-- Main Livestream Player (shared) -->
-  <div id="livePlayerContainer" class="live-player"></div>
 </div>
 
 <!-- Adult Content Consent Modal -->

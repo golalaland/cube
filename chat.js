@@ -4801,6 +4801,71 @@ unlockBtn.style.marginTop = "10px";
     }
   }
 
+// Tag selection logic for Highlights upload
+const tagSelector = document.getElementById('tagSelector');
+const selectedTags = new Set(); // Use Set to avoid duplicates
+
+// Toggle tag selection
+tagSelector.addEventListener('click', (e) => {
+  const tagBtn = e.target.closest('.tag-btn');
+  if (!tagBtn) return;
+
+  const tag = tagBtn.dataset.tag;
+
+  if (selectedTags.has(tag)) {
+    selectedTags.delete(tag);
+    tagBtn.style.background = '#222';
+    tagBtn.style.color = '#ccc';
+    tagBtn.style.border = '1px solid #444';
+  } else {
+    selectedTags.add(tag);
+    tagBtn.style.background = 'linear-gradient(90deg, #ff2e78, #ff8c2e)';
+    tagBtn.style.color = 'white';
+    tagBtn.style.border = 'none';
+    tagBtn.style.boxShadow = '0 4px 15px rgba(255,46,120,0.4)';
+  }
+});
+
+// Helper: Get current selected tags as array
+function getSelectedTags() {
+  return Array.from(selectedTags);
+}
+
+// Example: When uploading, include tags
+document.getElementById('uploadHighlightBtn')?.addEventListener('click', async () => {
+  const tags = getSelectedTags();
+  console.log('Rendering tags for video:', videoId, tags); // ← this is where your log comes from
+
+  if (tags.length === 0) {
+    showStarPopup('Please select at least one tag!');
+    return;
+  }
+
+  // Now proceed with upload, and send tags to backend or render them
+  // e.g. renderHashtags(tags);
+});
+
+function renderHashtags(tags) {
+  if (tags.length === 0) return '';
+
+  return tags
+    .map(tag => `<span style="
+      display:inline-block;
+      background:#ff2e7822;
+      color:#ff2e78;
+      padding:4px 12px;
+      margin:4px;
+      border-radius:20px;
+      font-size:13px;
+      font-weight:600;
+      border:1px solid #ff2e7833;
+    ">#${tag}</span>`)
+    .join('');
+}
+
+// Example usage after upload success:
+someElement.innerHTML += '<div style="margin-top:12px;">' + renderHashtags(tags) + '</div>';
+
   // === BUTTON STATES ===
   function updateButtonStates() {
     toggleBtn.textContent = filterMode === "unlocked" ? "All Videos" : "Show Unlocked";

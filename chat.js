@@ -4426,10 +4426,9 @@ highlightsBtn.onclick = async () => {
   }
 };
 
-/* ---------- Highlights Modal (SLUTTY MORPHINE EDITION – FULLY FIXED & ENHANCED) ---------- */
+/* ---------- Highlights Modal (SLUTTY MORPHINE EDITION – FIXED & READY) ---------- */
 function showHighlightsModal(videos) {
   document.getElementById("highlightsModal")?.remove();
-
   const modal = document.createElement("div");
   modal.id = "highlightsModal";
   Object.assign(modal.style, {
@@ -4442,34 +4441,65 @@ function showHighlightsModal(videos) {
     fontFamily: "system-ui, sans-serif"
   });
 
-  // === STICKY INTRO (unchanged – perfect as is) ===
-  const intro = document.createElement("div");
-  intro.innerHTML = `
-    <div style="
-      text-align:center; color:#e0b0ff; max-width:640px; margin:0 auto; line-height:1.6; font-size:14px;
-      background:linear-gradient(135deg,rgba(255,0,242,0.15),rgba(138,43,226,0.12));
-      padding:14px 32px; border:1px solid rgba(138,43,226,0.5); box-shadow:0 0 16px rgba(255,0,242,0.25);
-      border-radius:12px; position:relative;
-    ">
-      <div style="margin-bottom:6px;">
-        <span style="
-          background:linear-gradient(90deg,#00ffea,#ff00f2,#8a2be2);
-          -webkit-background-clip:text; -webkit-text-fill-color:transparent;
-          font-weight:700; display:inline-block; transform:translateX(2px); letter-spacing:0.2px;
-        ">Cuties💕</span>
-      </div>
-      <p style="margin:0 0 3px;">Cam-worthy moments from girls on cube.</p>
-      <p style="margin:0;">Unlock a cutie’s clip with STRZ and get closer.</p>
+// === STICKY INTRO ===
+const intro = document.createElement("div");
+intro.innerHTML = `
+  <div style="
+    text-align:center;
+    color:#e0b0ff;
+    max-width:640px;
+    margin:0 auto;
+    line-height:1.6;
+    font-size:14px;
+    background:linear-gradient(135deg,rgba(255,0,242,0.15),rgba(138,43,226,0.12));
+    padding:14px 32px;
+    border:1px solid rgba(138,43,226,0.5);
+    box-shadow:0 0 16px rgba(255,0,242,0.25);
+    border-radius:12px;
+    position:relative;
+  ">
+
+    <!-- Header -->
+    <div style="margin-bottom:6px;">
+      <span style="
+        background:linear-gradient(90deg,#00ffea,#ff00f2,#8a2be2);
+        -webkit-background-clip:text;
+        -webkit-text-fill-color:transparent;
+        font-weight:700;
+        display:inline-block;
+        transform:translateX(2px);
+        letter-spacing:0.2px;
+      ">
+        Cuties💕
+      </span>
     </div>
-  `;
-  Object.assign(intro.style, { position: "sticky", top: "10px", zIndex: "1001", marginBottom: "12px" });
-  modal.appendChild(intro);
 
-  modal.addEventListener("scroll", () => {
-    intro.style.opacity = modal.scrollTop > 50 ? "0.7" : "1";
-  });
 
-  // === CLOSE BUTTON (your dope X – untouched) ===
+    <!-- Body text -->
+    <p style="margin:0 0 3px;">
+      Cam-worthy moments from girls on cube.
+    </p>
+    <p style="margin:0;">
+      Unlock a cutie’s clip with STRZ and get closer.
+    </p>
+
+  </div>
+`;
+
+Object.assign(intro.style, {
+  position: "sticky",
+  top: "10px",
+  zIndex: "1001",
+  marginBottom: "12px"
+});
+
+modal.appendChild(intro);
+
+modal.addEventListener("scroll", () => {
+  intro.style.opacity = modal.scrollTop > 50 ? "0.7" : "1";
+});
+
+   // === CLOSE BUTTON (YOUR DOPE X – MORPHINE EDITION) ===
   const closeBtn = document.createElement("div");
   closeBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M18 6L6 18M6 6L18 18" stroke="#00ffea" stroke-width="2.5" stroke-linecap="round"/>
@@ -4488,19 +4518,18 @@ function showHighlightsModal(videos) {
   };
   intro.firstElementChild.appendChild(closeBtn);
 
-  // === SEARCH + FILTERS WRAPPER ===
+   // === SEARCH + FILTER BUTTONS ===
   const searchWrap = document.createElement("div");
   Object.assign(searchWrap.style, {
     position: "sticky", top: "84px", zIndex: "1001", marginBottom: "20px",
-    display: "flex", flexDirection: "column", alignItems: "center", gap: "6px", width: "100%"
+    display: "flex", flexDirection: "column", alignItems: "center", gap: "6px"
   });
-
   const searchInputWrap = document.createElement("div");
   searchInputWrap.style.cssText = `
-    display:flex; align-items:center;
+    display:flex;align-items:center;
     background:linear-gradient(135deg,rgba(255,0,242,0.12),rgba(138,43,226,0.08));
-    border:1px solid rgba(138,43,226,0.6); border-radius:30px; padding:8px 14px; width:280px;
-    backdrop-filter:blur(8px); box-shadow:0 0 16px rgba(255,0,242,0.3);
+    border:1px solid rgba(138,43,226,0.6);border-radius:30px;padding:8px 14px;width:280px;
+    backdrop-filter:blur(8px);box-shadow:0 0 16px rgba(255,0,242,0.3);
   `;
   searchInputWrap.innerHTML = `
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
@@ -4510,24 +4539,24 @@ function showHighlightsModal(videos) {
         <stop stop-color="#00ffea"/><stop offset="1" stop-color="#ff00f2"/>
       </linearGradient></defs>
     </svg>
-    <input id="highlightSearchInput" type="text" placeholder="Search @user, tags, country, city..."
-           style="flex:1; background:transparent; border:none; outline:none; color:#fff; font-size:13px;"/>
+    <input id="highlightSearchInput" type="text" placeholder="Search by ChatID..."
+           style="flex:1;background:transparent;border:none;outline:none;color:#fff;font-size:13px;"/>
   `;
   searchWrap.appendChild(searchInputWrap);
 
-  // Toggle buttons
   const buttonRow = document.createElement("div");
-  buttonRow.style.cssText = "display:flex; gap:8px; align-items:center;";
+  buttonRow.style.cssText = "display:flex;gap:8px;align-items:center;";
   const toggleBtn = document.createElement("button");
-  toggleBtn.id = "toggleLocked"; toggleBtn.textContent = "Show Unlocked";
+  toggleBtn.id = "toggleLocked";
+  toggleBtn.textContent = "Show Unlocked";
   Object.assign(toggleBtn.style, {
     padding: "4px 10px", borderRadius: "6px", background: "linear-gradient(135deg, #240046, #3c0b5e)",
     color: "#00ffea", border: "1px solid rgba(138,43,226,0.6)", fontSize: "12px", cursor: "pointer",
     fontWeight: "600", transition: "all 0.2s", boxShadow: "0 3px 10px rgba(138,43,226,0.4)"
   });
-
   const trendingBtn = document.createElement("button");
-  trendingBtn.id = "toggleTrending"; trendingBtn.textContent = "Trending";
+  trendingBtn.id = "toggleTrending";
+  trendingBtn.textContent = "Trending";
   Object.assign(trendingBtn.style, {
     padding: "4px 10px", borderRadius: "6px",
     background: "linear-gradient(135deg, #8a2be2, #ff00f2)", color: "#fff",
@@ -4537,232 +4566,227 @@ function showHighlightsModal(videos) {
   buttonRow.append(toggleBtn, trendingBtn);
   searchWrap.appendChild(buttonRow);
   modal.appendChild(searchWrap);
+  
+// === CONTENT AREA ===
+const content = document.createElement("div");
+Object.assign(content.style, {
+  display: "flex", gap: "16px", flexWrap: "nowrap", overflowX: "auto",
+  paddingBottom: "40px", scrollBehavior: "smooth", width: "100%", justifyContent: "flex-start"
+});
+modal.appendChild(content);
 
-  // === CONTENT AREA ===
-  const content = document.createElement("div");
+// State
+let unlockedVideos = JSON.parse(localStorage.getItem("userUnlockedVideos") || "[]");
+let filterMode = "all";
+function renderCards(videosToRender) {
+  content.innerHTML = "";
+
+  const filtered = videosToRender.filter(video => {
+    if (filterMode === "unlocked") return unlockedVideos.includes(video.id);
+    if (filterMode === "trending") return video.isTrending === true;
+    return true;
+  });
+
+  // Always horizontal scroll
   Object.assign(content.style, {
     display: "flex", gap: "16px", flexWrap: "nowrap", overflowX: "auto",
     paddingBottom: "40px", scrollBehavior: "smooth", width: "100%", justifyContent: "flex-start"
   });
-  modal.appendChild(content);
 
-  // === STATE ===
-  let unlockedVideos = JSON.parse(localStorage.getItem("userUnlockedVideos") || "[]");
-  let filterMode = "all";
+  // Empty state for trending
+  if (filterMode === "trending" && filtered.length === 0) {
+    const emptyMsg = document.createElement("div");
+    emptyMsg.textContent = "No one is trending right now.";
+    emptyMsg.style.cssText = "width:100%; text-align:center; padding:60px 20px; color:#888; font-size:16px; font-weight:600; opacity:0.8;";
+    content.appendChild(emptyMsg);
+    return;
+  }
 
-  // === RENDER CARDS + CHIPS + SEARCH ===
-  function renderCards(videosToRender) {
-    content.innerHTML = "";
+  // Collect all unique tags for filter chips
+  const allTags = new Set();
+  filtered.forEach(video => {
+    (video.tags || []).forEach(tag => allTags.add(tag.trim().toLowerCase()));
+  });
 
-    // Apply unlocked/trending filter first
-    let filtered = videosToRender.filter(video => {
-      if (filterMode === "unlocked") return unlockedVideos.includes(video.id);
-      if (filterMode === "trending") return video.isTrending === true;
-      return true;
+  filtered.forEach((video) => {
+    const isUnlocked = unlockedVideos.includes(video.id);
+
+    const card = document.createElement("div");
+    card.className = "videoCard";
+    card.setAttribute("data-uploader", (video.uploaderName || "Anonymous").toLowerCase());
+    card.setAttribute("data-title", (video.title || "").toLowerCase());
+    card.setAttribute("data-location", (video.location || "").toLowerCase());
+    card.setAttribute("data-tags", (video.tags || []).join(" ").toLowerCase());
+
+    Object.assign(card.style, {
+      minWidth: "230px", maxWidth: "230px", background: "#0f0a1a", borderRadius: "12px",
+      overflow: "hidden", display: "flex", flexDirection: "column", cursor: "pointer",
+      flexShrink: 0, boxShadow: "0 4px 20px rgba(138,43,226,0.4)",
+      transition: "transform 0.3s ease, box-shadow 0.3s ease",
+      border: "1px solid rgba(138,43,226,0.5)"
     });
 
-    // Empty state
-    if (filterMode === "trending" && filtered.length === 0) {
-      const emptyMsg = document.createElement("div");
-      emptyMsg.textContent = "No one is trending right now.";
-      emptyMsg.style.cssText = "width:100%; text-align:center; padding:60px 20px; color:#888; font-size:16px; font-weight:600; opacity:0.8;";
-      content.appendChild(emptyMsg);
-      return;
+    card.onmouseenter = () => {
+      card.style.transform = "scale(1.03)";
+      card.style.boxShadow = "0 12px 32px rgba(255,0,242,0.6)";
+    };
+    card.onmouseleave = () => {
+      card.style.transform = "scale(1)";
+      card.style.boxShadow = "0 4px 20px rgba(138,43,226,0.4)";
+    };
+
+    // Video container — your exact favorite
+    const videoContainer = document.createElement("div");
+    videoContainer.style.cssText = `
+      height: 320px;
+      overflow: hidden;
+      position: relative;
+      background: #000;
+      cursor: pointer;
+      border-radius: 12px 12px 0 0;
+    `;
+
+    const videoEl = document.createElement("video");
+    videoEl.muted = true;
+    videoEl.loop = true;
+    videoEl.preload = "metadata";
+    videoEl.style.cssText = "width:100%; height:100%; object-fit:cover;";
+
+    if (isUnlocked) {
+      videoEl.src = video.previewClip || video.highlightVideo || video.videoUrl || "";
+      videoEl.load();
+      videoContainer.onmouseenter = () => videoEl.play().catch(() => {});
+      videoContainer.onmouseleave = () => {
+        videoEl.pause();
+        videoEl.currentTime = 0;
+      };
+    } else {
+      videoEl.src = "";
+      const lockedOverlay = document.createElement("div");
+      lockedOverlay.innerHTML = `
+        <div style="
+          position: absolute;
+          inset: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: rgba(10,5,30,0.85);
+          z-index: 2;
+        ">
+          <div style="text-align:center;">
+            <svg width="80" height="80" viewBox="0 0 24 24" fill="none">
+              <path d="M12 2C9.2 2 7 4.2 7 7V11H6C4.9 11 4 11.9 4 13V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V13C20 11.9 19.1 11 18 11H17V7C17 4.2 14.8 2 12 2ZM12 4C13.7 4 15 5.3 15 7V11H9V7C9 5.3 10.3 4 12 4Z" fill="#ff00f2"/>
+            </svg>
+            ${video.highlightVideoPrice > 0 ? `<div style="margin-top:12px;font-size:18px;font-weight:800;color:#ff00f2;">${video.highlightVideoPrice} STRZ</div>` : ''}
+          </div>
+        </div>`;
+      videoContainer.appendChild(lockedOverlay);
     }
 
-    // Collect unique tags for chips
-    const allTags = new Set();
-    filtered.forEach(video => (video.tags || []).forEach(tag => allTags.add(tag.trim().toLowerCase())));
-
-    // === Render video cards ===
-    filtered.forEach(video => {
-      const isUnlocked = unlockedVideos.includes(video.id);
-
-      const card = document.createElement("div");
-      card.className = "videoCard";
-      card.dataset.uploader = (video.uploaderName || "Anonymous").toLowerCase();
-      card.dataset.title = (video.title || "").toLowerCase();
-      card.dataset.country = (video.country || "").toLowerCase();
-      card.dataset.location = (video.location || "").toLowerCase();
-      card.dataset.tags = Array.isArray(video.tags)   ? video.tags.map(t => typeof t === "string" ? t.trim().toLowerCase() : "").join(" ")   : "";
-
-      Object.assign(card.style, {
-        minWidth: "230px", maxWidth: "230px", background: "#0f0a1a", borderRadius: "12px",
-        overflow: "hidden", display: "flex", flexDirection: "column", cursor: "pointer",
-        flexShrink: 0, boxShadow: "0 4px 20px rgba(138,43,226,0.4)",
-        transition: "transform 0.3s ease, box-shadow 0.3s ease",
-        border: "1px solid rgba(138,43,226,0.5)"
-      });
-
-      card.onmouseenter = () => {
-        card.style.transform = "scale(1.03)";
-        card.style.boxShadow = "0 12px 32px rgba(255,0,242,0.6)";
-      };
-      card.onmouseleave = () => {
-        card.style.transform = "scale(1)";
-        card.style.boxShadow = "0 4px 20px rgba(138,43,226,0.4)";
-      };
-
-      // Video container (your exact style preserved)
-      const videoContainer = document.createElement("div");
-      videoContainer.style.cssText = `height:320px; overflow:hidden; position:relative; background:#000; cursor:pointer; border-radius:12px 12px 0 0;`;
-      const videoEl = document.createElement("video");
-      videoEl.muted = true; videoEl.loop = true; videoEl.preload = "metadata";
-      videoEl.style.cssText = "width:100%; height:100%; object-fit:cover;";
-
-      if (isUnlocked) {
-        videoEl.src = video.previewClip || video.highlightVideo || video.videoUrl || "";
-        videoEl.load();
-        videoContainer.onmouseenter = () => videoEl.play().catch(() => {});
-        videoContainer.onmouseleave = () => { videoEl.pause(); videoEl.currentTime = 0; };
-      } else {
-        videoEl.src = "";
-        const lockedOverlay = document.createElement("div");
-        lockedOverlay.innerHTML = `
-          <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(10,5,30,0.85); z-index:2;">
-            <div style="text-align:center;">
-              <svg width="80" height="80" viewBox="0 0 24 24" fill="none">
-                <path d="M12 2C9.2 2 7 4.2 7 7V11H6C4.9 11 4 11.9 4 13V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V13C20 11.9 19.1 11 18 11H17V7C17 4.2 14.8 2 12 2ZM12 4C13.7 4 15 5.3 15 7V11H9V7C9 5.3 10.3 4 12 4Z" fill="#ff00f2"/>
-              </svg>
-              ${video.highlightVideoPrice > 0 ? `<div style="margin-top:12px;font-size:18px;font-weight:800;color:#ff00f2;">${video.highlightVideoPrice} STRZ</div>` : ''}
-            </div>
-          </div>`;
-        videoContainer.appendChild(lockedOverlay);
-      }
-
-      videoContainer.onclick = (e) => {
-        e.stopPropagation();
-        if (!isUnlocked) return showUnlockConfirm(video, () => renderCards(videosToRender));
-        const fullVideo = document.createElement("video");
-        fullVideo.src = video.videoUrl || "";
-        fullVideo.controls = true; fullVideo.playsInline = false;
-        fullVideo.style.cssText = "position:fixed;top:0;left:0;width:100vw;height:100vh;object-fit:contain;background:#000;z-index:99999;";
-        fullVideo.onclick = () => fullVideo.remove();
-        document.body.appendChild(fullVideo);
-        fullVideo.play();
-        if (fullVideo.requestFullscreen) fullVideo.requestFullscreen();
-      };
-      videoContainer.appendChild(videoEl);
-
-      // Info panel
-      const infoPanel = document.createElement("div");
-      infoPanel.style.cssText = "background:linear-gradient(180deg,#1a0b2e,#0f0519);padding:12px;display:flex;flex-direction:column;gap:6px;border-top:1px solid #8a2be2;";
-
-      const title = document.createElement("div");
-      title.textContent = video.title || "Untitled";
-      title.style.cssText = "font-weight:800;color:#e0b0ff;font-size:15px;";
-
-      const uploader = document.createElement("div");
-      const usernameSpan = document.createElement("span");
-      usernameSpan.textContent = `@${video.uploaderName || "Anonymous"}`;
-      usernameSpan.style.cssText = "color:#00ffea;font-size:12px;cursor:pointer;font-weight:600;";
-      usernameSpan.onclick = (e) => {
-        e.stopPropagation();
-        if (video.uploaderId) {
-          getDoc(doc(db, "users", video.uploaderId)).then(snap => {
-            if (snap.exists()) showSocialCard(snap.data());
-          }).catch(() => {});
-        }
-      };
-      uploader.appendChild(usernameSpan);
-      uploader.style.opacity = "0.9";
-
-      // Tags on card
-// Tags on card — FINAL FIX: FORCE VISIBILITY
-const tagsEl = document.createElement("div");
-tagsEl.style.cssText = `
-  margin: 8px 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  min-height: 26px;
-  align-items: center;
-  justify-content: flex-start;
-  width: 100%;
-  padding: 2px 0;
-  box-sizing: border-box;
-`;
-
-const tagsArray = Array.isArray(video.tags) ? video.tags.filter(t => typeof t === "string" && t.trim()) : [];
-
-if (tagsArray.length > 0) {
-  tagsArray.forEach(tag => {
-    const span = document.createElement("span");
-    span.textContent = `#${tag.trim()}`;
-    span.style.cssText = `
-      font-size: 11px !important;
-      color: #ff2e78 !important;
-      background: rgba(255, 46, 120, 0.15) !important;
-      padding: 4px 10px !important;
-      border-radius: 12px !important;
-      opacity: 1 !important;
-      display: inline-block !important;
-      line-height: 1 !important;
-      font-weight: 600 !important;
-      border: 1px solid rgba(255, 46, 120, 0.3) !important;
-    `;
-    tagsEl.appendChild(span);
-  });
-} else {
-  // Optional: show subtle placeholder if no tags
-  // tagsEl.textContent = "No tags";
-  // tagsEl.style.color = "#666";
-}
-
-// Optional debug — remove after testing
-console.log("Rendering tags for video:", video.id || video.title, tagsArray);
-
-      // Unlock button
-      const unlockBtn = document.createElement("button");
-      unlockBtn.textContent = isUnlocked ? "Unlocked ♡" : `Unlock ${video.highlightVideoPrice || 100} ⭐️`;
-      Object.assign(unlockBtn.style, {
-        background: isUnlocked ? "rgba(138,43,226,0.3)" : "linear-gradient(135deg, #ff00f2, #8a2be2, #00ffea)",
-        border: "1px solid #ff00f2", borderRadius: "6px", padding: "8px 0", fontWeight: "800",
-        color: "#fff", cursor: isUnlocked ? "default" : "pointer",
-        transition: "all 0.3s ease", fontSize: "13px", textShadow: "0 0 10px rgba(255,0,242,0.8)",
-        boxShadow: isUnlocked ? "inset 0 2px 10px rgba(0,0,0,0.5)" : "0 0 20px rgba(255,0,242,0.6)"
-      });
-
+    videoContainer.onclick = (e) => {
+      e.stopPropagation();
       if (!isUnlocked) {
-        unlockBtn.onmouseenter = () => {
-          unlockBtn.style.background = "linear-gradient(135deg, #00ffea, #ff00f2, #8a2be2)";
-          unlockBtn.style.transform = "translateY(-2px)";
-          unlockBtn.style.boxShadow = "0 0 30px rgba(0,255,234,0.8)";
-        };
-        unlockBtn.onmouseleave = () => {
-          unlockBtn.style.background = "linear-gradient(135deg, #ff00f2, #8a2be2, #00ffea)";
-          unlockBtn.style.transform = "translateY(0)";
-          unlockBtn.style.boxShadow = "0 0 20px rgba(255,0,242,0.6)";
-        };
-        unlockBtn.onclick = (e) => {
-          e.stopPropagation();
-          showUnlockConfirm(video, () => renderCards(videosToRender));
-        };
-      } else {
-        unlockBtn.disabled = true;
+        showUnlockConfirm(video, () => renderCards(videosToRender));
+        return;
       }
+      const fullVideo = document.createElement("video");
+      fullVideo.src = video.videoUrl || "";
+      fullVideo.controls = true;
+      fullVideo.playsInline = false;
+      fullVideo.style.cssText = "position:fixed;top:0;left:0;width:100vw;height:100vh;object-fit:contain;background:#000;z-index:99999;";
+      fullVideo.onclick = () => fullVideo.remove();
+      document.body.appendChild(fullVideo);
+      fullVideo.play();
+      if (fullVideo.requestFullscreen) fullVideo.requestFullscreen();
+    };
 
-     // Force tags to show — even if layout is tight
-infoPanel.appendChild(title);
-infoPanel.appendChild(uploader);
-infoPanel.appendChild(tagsEl);        // ← Separate for safety
-infoPanel.appendChild(unlockBtn);
+    videoContainer.appendChild(videoEl);
 
-// Optional: Add a tiny bit of bottom margin to unlock button so it doesn't overlap
-unlockBtn.style.marginTop = "10px";
-      card.append(videoContainer, infoPanel);
-      content.appendChild(card);
+    // Info panel
+    const infoPanel = document.createElement("div");
+    infoPanel.style.cssText = "background:linear-gradient(180deg,#1a0b2e,#0f0519);padding:12px;display:flex;flex-direction:column;gap:6px;border-top:1px solid #8a2be2;";
+
+    const title = document.createElement("div");
+    title.textContent = video.title || "Untitled";
+    title.style.cssText = "font-weight:800;color:#e0b0ff;font-size:15px;";
+
+    const uploader = document.createElement("div");
+    const usernameSpan = document.createElement("span");
+    usernameSpan.textContent = `@${video.uploaderName || "Anonymous"}`;
+    usernameSpan.style.cssText = "color:#00ffea; font-size:12px; cursor:pointer; font-weight:600;";
+    usernameSpan.onclick = (e) => {
+      e.stopPropagation();
+      (async () => {
+        if (video.uploaderId) {
+          try {
+            const userSnap = await getDoc(doc(db, "users", video.uploaderId));
+            if (userSnap.exists()) showSocialCard(userSnap.data());
+          } catch (err) {}
+        }
+      })();
+    };
+    uploader.appendChild(usernameSpan);
+    uploader.style.opacity = "0.9";
+
+    // Tags — visible on card (cute pink chips)
+    const tagsArray = video.tags || [];
+    const tagsEl = document.createElement("div");
+    tagsEl.style.cssText = "margin-top:4px; display:flex; flex-wrap:wrap; gap:6px;";
+    tagsArray.forEach(tag => {
+      const tagSpan = document.createElement("span");
+      tagSpan.textContent = `#${tag}`;
+      tagSpan.style.cssText = "font-size:11px; color:#ff2e78; background:rgba(255,46,120,0.15); padding:2px 8px; border-radius:8px; opacity:0.9;";
+      tagsEl.appendChild(tagSpan);
     });
 
-    // === TAG CHIPS (below search bar) ===
-    const oldChips = searchWrap.querySelector("#tagFilterChips");
+    // Unlock button
+    const unlockBtn = document.createElement("button");
+    unlockBtn.textContent = isUnlocked ? "Unlocked ♡" : `Unlock ${video.highlightVideoPrice || 100} ⭐️`;
+    Object.assign(unlockBtn.style, {
+      background: isUnlocked ? "rgba(138,43,226,0.3)" : "linear-gradient(135deg, #ff00f2, #8a2be2, #00ffea)",
+      border: "1px solid #ff00f2", borderRadius: "6px", padding: "8px 0", fontWeight: "800",
+      color: "#fff", cursor: isUnlocked ? "default" : "pointer",
+      transition: "all 0.3s ease", fontSize: "13px", textShadow: "0 0 10px rgba(255,0,242,0.8)",
+      boxShadow: isUnlocked ? "inset 0 2px 10px rgba(0,0,0,0.5)" : "0 0 20px rgba(255,0,242,0.6)"
+    });
+
+    if (!isUnlocked) {
+      unlockBtn.onmouseenter = () => {
+        unlockBtn.style.background = "linear-gradient(135deg, #00ffea, #ff00f2, #8a2be2)";
+        unlockBtn.style.transform = "translateY(-2px)";
+        unlockBtn.style.boxShadow = "0 0 30px rgba(0,255,234,0.8)";
+      };
+      unlockBtn.onmouseleave = () => {
+        unlockBtn.style.background = "linear-gradient(135deg, #ff00f2, #8a2be2, #00ffea)";
+        unlockBtn.style.transform = "translateY(0)";
+        unlockBtn.style.boxShadow = "0 0 20px rgba(255,0,242,0.6)";
+      };
+      unlockBtn.onclick = (e) => {
+        e.stopPropagation();
+        showUnlockConfirm(video, () => renderCards(videosToRender));
+      };
+    } else {
+      unlockBtn.disabled = true;
+    }
+
+    infoPanel.append(title, uploader, tagsEl, unlockBtn);
+    card.append(videoContainer, infoPanel);
+    content.appendChild(card);
+  });
+
+  // Pornhub-style search + filter chips
+  const searchInput = document.getElementById("highlightSearchInput");
+  if (searchInput) {
+    // Clear old chips
+    const oldChips = searchInput.parentNode.parentNode.querySelector("#filterChips");
     if (oldChips) oldChips.remove();
 
-    const tagChips = document.createElement("div");
-    tagChips.id = "tagFilterChips";
-    tagChips.style.cssText = "display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:12px;max-width:380px;";
+    const filterChips = document.createElement("div");
+    filterChips.id = "filterChips";
+    filterChips.style.cssText = "display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin:12px 0 20px; max-width:380px;";
 
-    Array.from(allTags).sort().forEach(tag => {
+    // Add all unique tags as clickable chips
+    allTags.forEach(tag => {
       const chip = document.createElement("div");
       chip.textContent = `#${tag}`;
       chip.style.cssText = `
@@ -4770,139 +4794,74 @@ unlockBtn.style.marginTop = "10px";
         border:1px solid rgba(255,46,120,0.4); border-radius:20px;
         font-size:13px; font-weight:600; cursor:pointer; transition:all 0.3s;
       `;
+      chip.onclick = () => {
+        searchInput.value = tag;
+        searchInput.focus();
+        searchInput.dispatchEvent(new Event('input'));
+      };
       chip.onmouseenter = () => chip.style.background = "rgba(255,46,120,0.3)";
       chip.onmouseleave = () => chip.style.background = "rgba(255,46,120,0.15)";
-      chip.onclick = () => {
-        const input = document.getElementById("highlightSearchInput");
-        input.value = tag;
-        input.focus();
-        input.dispatchEvent(new Event("input"));
-      };
-      tagChips.appendChild(chip);
+      filterChips.appendChild(chip);
     });
-    searchWrap.appendChild(tagChips);
 
-    // === SINGLE UNIFIED SEARCH LOGIC ===
-    const searchInput = document.getElementById("highlightSearchInput");
-    if (searchInput) {
-      searchInput.oninput = () => {
-        const term = searchInput.value.trim().toLowerCase();
-        content.querySelectorAll(".videoCard").forEach(card => {
-          const matches =
-            card.dataset.title.includes(term) ||
-            card.dataset.uploader.includes(term) ||
-            card.dataset.country.includes(term) ||
-            card.dataset.location.includes(term) ||
-            card.dataset.tags.includes(term);
+    // Insert chips below search bar
+    searchInput.parentNode.parentNode.appendChild(filterChips);
 
-          card.style.display = matches ? "flex" : "none";
-        });
-      };
-    }
+    // Search logic
+    searchInput.oninput = (e) => {
+      const term = e.target.value.trim().toLowerCase();
+      content.querySelectorAll(".videoCard").forEach(card => {
+        const title = card.getAttribute("data-title") || "";
+        const uploader = card.getAttribute("data-uploader") || "";
+        const location = card.getAttribute("data-location") || "";
+        const tags = card.getAttribute("data-tags") || "";
+        const matches = title.includes(term) || uploader.includes(term) || location.includes(term) || tags.includes(term);
+        card.style.display = matches ? "flex" : "none";
+      });
+    };
   }
-
-// Tag selection logic for Highlights upload
-const tagSelector = document.getElementById('tagSelector');
-const selectedTags = new Set(); // Use Set to avoid duplicates
-
-// Toggle tag selection
-tagSelector.addEventListener('click', (e) => {
-  const tagBtn = e.target.closest('.tag-btn');
-  if (!tagBtn) return;
-
-  const tag = tagBtn.dataset.tag;
-
-  if (selectedTags.has(tag)) {
-    selectedTags.delete(tag);
-    tagBtn.style.background = '#222';
-    tagBtn.style.color = '#ccc';
-    tagBtn.style.border = '1px solid #444';
-  } else {
-    selectedTags.add(tag);
-    tagBtn.style.background = 'linear-gradient(90deg, #ff2e78, #ff8c2e)';
-    tagBtn.style.color = 'white';
-    tagBtn.style.border = 'none';
-    tagBtn.style.boxShadow = '0 4px 15px rgba(255,46,120,0.4)';
+}
+function updateButtonStates() {
+  toggleBtn.textContent = "Show Unlocked";
+  toggleBtn.style.background = "linear-gradient(135deg, #240046, #3c0b5e)";
+  trendingBtn.textContent = "Trending";
+  trendingBtn.style.background = "linear-gradient(135deg, #8a2be2, #ff00f2)";
+  if (filterMode === "unlocked") {
+    toggleBtn.textContent = "All Videos";
+    toggleBtn.style.background = "linear-gradient(135deg, #ff00f2, #00ffea)";
+    toggleBtn.style.boxShadow = "0 0 20px rgba(0,255,234,0.7)";
+  } else if (filterMode === "trending") {
+    trendingBtn.textContent = "All Videos";
+    trendingBtn.style.background = "linear-gradient(135deg, #00ffea, #8a2be2, #ff00f2)";
+    trendingBtn.style.boxShadow = "0 0 25px rgba(255,0,242,0.8)";
   }
-});
-
-// Helper: Get current selected tags as array
-function getSelectedTags() {
-  return Array.from(selectedTags);
 }
 
-// Example: When uploading, include tags
-document.getElementById('uploadHighlightBtn')?.addEventListener('click', async () => {
-  const tags = getSelectedTags();
-  console.log('Rendering tags for video:', videoId, tags); // ← this is where your log comes from
-
-  if (tags.length === 0) {
-    showStarPopup('Please select at least one tag!');
-    return;
-  }
-
-  // Now proceed with upload, and send tags to backend or render them
-  // e.g. renderHashtags(tags);
+toggleBtn.addEventListener("click", () => {
+  filterMode = filterMode === "unlocked" ? "all" : "unlocked";
+  updateButtonStates();
+  renderCards(videos);
 });
 
-function renderHashtags(tags) {
-  if (tags.length === 0) return '';
+trendingBtn.addEventListener("click", () => {
+  filterMode = filterMode === "trending" ? "all" : "trending";
+  updateButtonStates();
+  renderCards(videos);
+});
 
-  return tags
-    .map(tag => `<span style="
-      display:inline-block;
-      background:#ff2e7822;
-      color:#ff2e78;
-      padding:4px 12px;
-      margin:4px;
-      border-radius:20px;
-      font-size:13px;
-      font-weight:600;
-      border:1px solid #ff2e7833;
-    ">#${tag}</span>`)
-    .join('');
-}
+  searchInputWrap.querySelector("#highlightSearchInput").addEventListener("input", e => {
+    const term = e.target.value.trim().toLowerCase();
+    content.querySelectorAll(".videoCard").forEach(card => {
+      const uploader = (card.getAttribute("data-uploader") || "").toLowerCase();
+      const title = (card.getAttribute("data-title") || "").toLowerCase();
+      card.style.display = (uploader.includes(term) || title.includes(term)) ? "flex" : "none";
+    });
+  });
 
-// Example usage after upload success:
-someElement.innerHTML += '<div style="margin-top:12px;">' + renderHashtags(tags) + '</div>';
-
-  // === BUTTON STATES ===
-  function updateButtonStates() {
-    toggleBtn.textContent = filterMode === "unlocked" ? "All Videos" : "Show Unlocked";
-    trendingBtn.textContent = filterMode === "trending" ? "All Videos" : "Trending";
-
-    toggleBtn.style.background = filterMode === "unlocked"
-      ? "linear-gradient(135deg, #ff00f2, #00ffea)"
-      : "linear-gradient(135deg, #240046, #3c0b5e)";
-    toggleBtn.style.boxShadow = filterMode === "unlocked" ? "0 0 20px rgba(0,255,234,0.7)" : "0 3px 10px rgba(138,43,226,0.4)";
-
-    trendingBtn.style.background = filterMode === "trending"
-      ? "linear-gradient(135deg, #00ffea, #8a2be2, #ff00f2)"
-      : "linear-gradient(135deg, #8a2be2, #ff00f2)";
-    trendingBtn.style.boxShadow = filterMode === "trending" ? "0 0 25px rgba(255,0,242,0.8)" : "0 4px 14px rgba(255,0,242,0.5)";
-  }
-
-  // === BUTTON LISTENERS ===
-  toggleBtn.onclick = () => {
-    filterMode = filterMode === "unlocked" ? "all" : "unlocked";
-    updateButtonStates();
-    renderCards(videos);
-  };
-
-  trendingBtn.onclick = () => {
-    filterMode = filterMode === "trending" ? "all" : "trending";
-    updateButtonStates();
-    renderCards(videos);
-  };
-
-  // === INITIAL RENDER ===
   renderCards(videos);
   updateButtonStates();
-
   document.body.appendChild(modal);
-
-  // Focus search
-  setTimeout(() => document.getElementById("highlightSearchInput")?.focus(), 300);
+  setTimeout(() => searchInputWrap.querySelector("input").focus(), 300);
 }
 
 function showUnlockConfirm(video, onUnlockCallback) {

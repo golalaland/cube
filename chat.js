@@ -3978,54 +3978,62 @@ document.getElementById('openHostsBtn').onclick = () => {
 // === TAB SWITCHING & CONSENT LOGIC ===
 liveTabBtns.forEach(btn => {
   btn.onclick = () => {
+    console.log('Tab clicked:', btn.dataset.content); // LOG 1: which tab?
+
     const target = btn.dataset.content;
 
-    // If clicking the currently active tab, do nothing
-    if (btn.classList.contains('active')) return;
+    if (btn.classList.contains('active')) {
+      console.log('Already active, ignoring');
+      return;
+    }
 
-    // Reset active state on both tabs
+    // Reset active
     liveTabBtns.forEach(b => b.classList.remove('active'));
 
     if (target === 'regular') {
-      // Regular content — always allowed
+      console.log('Switching to Regular');
       btn.classList.add('active');
       switchContent('regular');
       return;
     }
 
-    // Adult tab clicked
-    if (localStorage.getItem('adultConsent') === 'true') {
-      // Already consented — switch immediately
+    // Adult tab
+    const hasConsent = localStorage.getItem('adultConsent') === 'true';
+    console.log('Has adult consent?', hasConsent); // LOG 2: true or false?
+
+    if (hasConsent) {
+      console.log('Consent given — switching to Adult');
       btn.classList.add('active');
       switchContent('adult');
     } else {
-      // Consent required — show warning modal
+      console.log('No consent — showing consent modal');
+      // Keep Regular active
       document.querySelector('.tab-btn[data-content="regular"]').classList.add('active');
       liveConsentModal.style.display = 'flex';
       liveCloseBtn.classList.add('hidden');
-      // Do not load adult stream yet
+      console.log('Consent modal should now be visible');
     }
   };
 });
 
-// Consent: I Agree
+// I Agree
 liveAgreeBtn.onclick = () => {
+  console.log('User clicked I Agree');
   localStorage.setItem('adultConsent', 'true');
   liveConsentModal.style.display = 'none';
   liveCloseBtn.classList.remove('hidden');
 
-  // Now activate Adult tab and load its stream
   liveTabBtns.forEach(b => b.classList.remove('active'));
   document.querySelector('.tab-btn[data-content="adult"]').classList.add('active');
   switchContent('adult');
 };
 
-// Consent: Cancel or click backdrop
+// Cancel or backdrop
 const cancelAdultConsent = () => {
+  console.log('Consent cancelled');
   liveConsentModal.style.display = 'none';
   liveCloseBtn.classList.remove('hidden');
 
-  // Ensure Regular tab stays active
   liveTabBtns.forEach(b => b.classList.remove('active'));
   document.querySelector('.tab-btn[data-content="regular"]').classList.add('active');
   switchContent('regular');

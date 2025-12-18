@@ -4668,18 +4668,46 @@ function showHighlightsModal(videos) {
       uploader.style.opacity = "0.9";
 
       // Tags on card
+// Tags on card — FINAL FIX: FORCE VISIBILITY
 const tagsEl = document.createElement("div");
-tagsEl.style.cssText = "margin-top:8px; margin-bottom:8px; display:flex; flex-wrap:wrap; gap:6px; min-height:24px; justify-content:flex-start;"; // min-height ensures space even if empty
+tagsEl.style.cssText = `
+  margin: 8px 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-height: 26px;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  padding: 2px 0;
+  box-sizing: border-box;
+`;
 
-const tagsArray = Array.isArray(video.tags) ? video.tags : [];
-tagsArray.forEach(tag => {
-  if (typeof tag === "string" && tag.trim()) {
+const tagsArray = Array.isArray(video.tags) ? video.tags.filter(t => typeof t === "string" && t.trim()) : [];
+
+if (tagsArray.length > 0) {
+  tagsArray.forEach(tag => {
     const span = document.createElement("span");
     span.textContent = `#${tag.trim()}`;
-    span.style.cssText = "font-size:11px;color:#ff2e78;background:rgba(255,46,120,0.15);padding:2px 8px;border-radius:8px;opacity:0.9;";
+    span.style.cssText = `
+      font-size: 11px !important;
+      color: #ff2e78 !important;
+      background: rgba(255, 46, 120, 0.15) !important;
+      padding: 4px 10px !important;
+      border-radius: 12px !important;
+      opacity: 1 !important;
+      display: inline-block !important;
+      line-height: 1 !important;
+      font-weight: 600 !important;
+      border: 1px solid rgba(255, 46, 120, 0.3) !important;
+    `;
     tagsEl.appendChild(span);
-  }
-});
+  });
+} else {
+  // Optional: show subtle placeholder if no tags
+  // tagsEl.textContent = "No tags";
+  // tagsEl.style.color = "#666";
+}
 
 // Optional debug — remove after testing
 console.log("Rendering tags for video:", video.id || video.title, tagsArray);

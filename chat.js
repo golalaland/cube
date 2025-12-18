@@ -3975,49 +3975,71 @@ document.getElementById('openHostsBtn').onclick = () => {
   }, 8000);
 };
 
-// TAB SWITCHING – the most important part
+// === TAB SWITCHING & CONSENT LOGIC ===
 liveTabBtns.forEach(btn => {
   btn.onclick = () => {
     const target = btn.dataset.content;
 
-    if (target === 'adult') {
-      if (localStorage.getItem('adultConsent') !== 'true') {
-        // Show consent modal and hide the X
-        liveConsentModal.style.display = 'flex';
-        liveCloseBtn.classList.add('hidden');
-        return; // do NOT switch yet
-      }
+    // If clicking the currently active tab, do nothing
+    if (btn.classList.contains('active')) return;
+
+    // Reset active state on both tabs
+    liveTabBtns.forEach(b => b.classList.remove('active'));
+
+    if (target === 'regular') {
+      // Regular content — always allowed
+      btn.classList.add('active');
+      switchContent('regular');
+      return;
     }
 
-    // Safe to switch (either regular or already consented adult)
-    switchContent(target);
+    // Adult tab clicked
+    if (localStorage.getItem('adultConsent') === 'true') {
+      // Already consented — switch immediately
+      btn.classList.add('active');
+      switchContent('adult');
+    } else {
+      // Consent required — show warning modal
+      document.querySelector('.tab-btn[data-content="regular"]').classList.add('active');
+      liveConsentModal.style.display = 'flex';
+      liveCloseBtn.classList.add('hidden');
+      // Do not load adult stream yet
+    }
   };
 });
 
-// Consent buttons
+// Consent: I Agree
 liveAgreeBtn.onclick = () => {
   localStorage.setItem('adultConsent', 'true');
   liveConsentModal.style.display = 'none';
   liveCloseBtn.classList.remove('hidden');
+
+  // Now activate Adult tab and load its stream
+  liveTabBtns.forEach(b => b.classList.remove('active'));
+  document.querySelector('.tab-btn[data-content="adult"]').classList.add('active');
   switchContent('adult');
 };
 
-liveCancelBtn.onclick = () => {
+// Consent: Cancel or click backdrop
+const cancelAdultConsent = () => {
   liveConsentModal.style.display = 'none';
   liveCloseBtn.classList.remove('hidden');
+
+  // Ensure Regular tab stays active
+  liveTabBtns.forEach(b => b.classList.remove('active'));
+  document.querySelector('.tab-btn[data-content="regular"]').classList.add('active');
   switchContent('regular');
 };
 
-// Click outside consent modal to cancel
+liveCancelBtn.onclick = cancelAdultConsent;
+
 liveConsentModal.onclick = (e) => {
   if (e.target === liveConsentModal) {
-    liveConsentModal.style.display = 'none';
-    liveCloseBtn.classList.remove('hidden');
-    switchContent('regular');
+    cancelAdultConsent();
   }
 };
 
-// Close button (X)
+// Main modal close button (×)
 liveCloseBtn.onclick = () => {
   closeAllLiveModal();
 };
@@ -4028,6 +4050,7 @@ liveModal.onclick = (e) => {
     closeAllLiveModal();
   }
 };
+
 // ---------- DEBUGGABLE HOST INIT (drop-in) ----------
 (function () {
   // Toggle this dynamically in your app

@@ -2236,17 +2236,21 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
 <div id="liveModal" class="live-modal">
   <div class="live-modal-content">
     <span class="live-close">&times;</span>
+  <!-- Live Stream Modal -->
+<div id="liveModal" class="live-modal">
+  <div class="live-modal-content">
+    <span class="live-close">&times;</span>
   
-    <!-- Tab Switcher -->
-    <div class="content-tabs">
-      <button class="tab-btn active" data-content="regular">Regular</button>
-      <button class="tab-btn" data-content="adult">Adult 🔞</button>
+    <!-- Livestream Tab Switcher - unique class -->
+    <div class="live-content-tabs">
+      <button class="live-tab-btn active" data-content="regular">Regular</button>
+      <button class="live-tab-btn" data-content="adult">Adult 🔞</button>
     </div>
   
-    <!-- Main Player - takes priority space -->
+    <!-- Player Container -->
     <div id="livePlayerContainer" class="live-player"></div>
   
-    <!-- Upcoming Posters – now compact & always visible (fades out after 8s) -->
+    <!-- Upcoming Posters -->
     <div id="upcomingPosters" class="upcoming-posters">
       <div class="poster-grid">
         <div class="poster">
@@ -2261,13 +2265,12 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
           <img src="https://cdn.shopify.com/s/files/1/0962/6648/6067/files/Beige_Minimal_Romantic_Love_Questions_Card_Game_Document_1080_x_1920_px_5.jpg?v=1765500400" alt="Exclusive Drop">
           <p class="poster-title">Exclusive Drop</p>
         </div>
-        <!-- Add more posters here -->
       </div>
     </div>
   </div>
 </div>
 
-<!-- Adult Content Consent Modal -->
+<!-- Adult Consent Modal remains the same -->
 <div id="adultConsentModal" class="consent-modal">
   <div class="consent-content">
     <h2>Adult Content Warning</h2>

@@ -3927,8 +3927,9 @@ const STREAM_ORIENTATION = 'portrait'; // or 'landscape'
 function switchContent(type) {
   currentContent = type;
 
+  // Update active tab (using prefixed class)
   liveTabBtns.forEach(btn => btn.classList.remove('active'));
-  document.querySelector(`.tab-btn[data-content="${type}"]`).classList.add('active');
+  document.querySelector(`.live-tab-btn[data-content="${type}"]`).classList.add('active');
 
   startStream(type);
 }
@@ -3970,9 +3971,9 @@ document.getElementById('openHostsBtn').onclick = () => {
   livePostersSection.classList.remove('fading');
   liveCloseBtn.classList.remove('hidden');
 
-  // Force clean tab state
+  // Force Regular tab on open
   liveTabBtns.forEach(b => b.classList.remove('active'));
-  document.querySelector('.tab-btn[data-content="regular"]').classList.add('active');
+  document.querySelector('.live-tab-btn[data-content="regular"]').classList.add('active');
 
   switchContent('regular');
 
@@ -3982,15 +3983,15 @@ document.getElementById('openHostsBtn').onclick = () => {
   }, 8000);
 };
 
-// Remove old listeners by cloning buttons
-const oldTabBtns = document.querySelectorAll('.tab-btn');
-oldTabBtns.forEach(btn => {
+// Remove old listeners by cloning livestream tabs only (no conflict with other tabs)
+const oldLiveTabBtns = document.querySelectorAll('.live-tab-btn');
+oldLiveTabBtns.forEach(btn => {
   const newBtn = btn.cloneNode(true);
   btn.parentNode.replaceChild(newBtn, btn);
 });
 
-// Re-query fresh buttons and attach new listeners
-liveTabBtns = document.querySelectorAll('.tab-btn'); // reassign (not redeclare const)
+// Re-assign liveTabBtns after cloning
+liveTabBtns = document.querySelectorAll('.live-tab-btn');
 
 // === TAB SWITCHING & CONSENT LOGIC (warning EVERY time) ===
 liveTabBtns.forEach(btn => {
@@ -4006,8 +4007,8 @@ liveTabBtns.forEach(btn => {
       return;
     }
 
-    // Adult tab clicked — ALWAYS show consent modal
-    document.querySelector('.tab-btn[data-content="regular"]').classList.add('active');
+    // Adult tab — always show consent modal
+    document.querySelector('.live-tab-btn[data-content="regular"]').classList.add('active');
     liveConsentModal.style.display = 'flex';
     liveCloseBtn.classList.add('hidden');
     console.log('Adult consent modal shown — every time');
@@ -4021,7 +4022,7 @@ liveAgreeBtn.onclick = () => {
   liveCloseBtn.classList.remove('hidden');
 
   liveTabBtns.forEach(b => b.classList.remove('active'));
-  document.querySelector('.tab-btn[data-content="adult"]').classList.add('active');
+  document.querySelector('.live-tab-btn[data-content="adult"]').classList.add('active');
   switchContent('adult');
 };
 
@@ -4032,7 +4033,7 @@ const cancelAdultConsent = () => {
   liveCloseBtn.classList.remove('hidden');
 
   liveTabBtns.forEach(b => b.classList.remove('active'));
-  document.querySelector('.tab-btn[data-content="regular"]').classList.add('active');
+  document.querySelector('.live-tab-btn[data-content="regular"]').classList.add('active');
   switchContent('regular');
 };
 

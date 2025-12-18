@@ -3901,101 +3901,112 @@ document.querySelectorAll(".tag-btn").forEach(btn => {
 
 document.addEventListener("DOMContentLoaded", () => {
 
-// Modal logic
 const modal = document.getElementById('liveModal');
-const openBtn = document.getElementById('openHostsBtn');
-const closeBtn = document.querySelector('.live-close');
+const consentModal = document.getElementById('adultConsentModal');
 const playerContainer = document.getElementById('livePlayerContainer');
+const postersSection = document.getElementById('upcomingPosters');
+const tabBtns = document.querySelectorAll('.tab-btn');
+const closeBtn = document.querySelector('.live-close');
+const agreeBtn = document.getElementById('consentAgree');
+const cancelBtn = document.getElementById('consentCancel');
 
-openBtn.onclick = () => {
+let currentContent = 'regular'; // default
+let fadeTimer;
+
+// Your playback IDs - REPLACE THESE
+const PLAYBACK_IDS = {
+  regular: 'YOUR_REGULAR_MUX_PLAYBACK_ID',
+  adult: 'YOUR_ADULT_MUX_PLAYBACK_ID'
+};
+
+const STREAM_ORIENTATION = 'portrait'; // or 'landscape'
+
+// Open main modal
+document.getElementById('openHostsBtn').onclick = () => {
   modal.style.display = 'block';
-  startLiveStream('agora'); // default to Agora, or 'mux'
+  postersSection.classList.remove('fading');
+  switchContent('regular'); // always start safe
+  
+  fadeTimer = setTimeout(() => {
+    postersSection.classList.add('fading');
+  }, 8000);
 };
 
-closeBtn.onclick = () => {
-  modal.style.display = 'none';
-  stopLiveStream();
-};
-
-window.onclick = (e) => {
-  if (e.target === modal) {
-    modal.style.display = 'none';
-    stopLiveStream();
-  }
-};
-
-// Optional switcher
-document.querySelectorAll('.live-switcher button').forEach(btn => {
+// Tab switching
+tabBtns.forEach(btn => {
   btn.onclick = () => {
-    document.querySelectorAll('.live-switcher button').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    stopLiveStream();
-    startLiveStream(btn.dataset.type);
+    const target = btn.dataset.content;
+
+    if (target === 'adult') {
+      // Check if user has already consented
+      if (localStorage.getItem('adultConsent') !== 'true') {
+        consentModal.style.display = 'flex';
+        return; // stop here, wait for user choice
+      }
+    }
+
+    switchContent(target);
   };
 });
 
-// Placeholder functions - replace with your real config
-async function startLiveStream(type) {
-  playerContainer.innerHTML = ''; // clear
+// Consent handling
+agreeBtn.onclick = () => {
+  localStorage.setItem('adultConsent', 'true');
+  consentModal.style.display = 'none';
+  switchContent('adult');
+};
 
-  if (type === 'mux') {
-    // Mux Live (super simple - replace with your playback ID)
-    const playbackId = 'YOUR_MUX_PLAYBACK_ID_HERE'; // e.g. 'EcHgOK9coz5K4rjSwOkoE7Y7O01201YMIC200RI6lNxnhs'
-    const muxPlayer = document.createElement('mux-player');
-    muxPlayer.setAttribute('playback-id', playbackId);
-    muxPlayer.setAttribute('stream-type', 'live');
-    muxPlayer.setAttribute('autoplay', 'true');
-    muxPlayer.setAttribute('muted', 'true'); // required for autoplay in most browsers
-    muxPlayer.style.width = '100%';
-    muxPlayer.style.height = '100%';
-    playerContainer.appendChild(muxPlayer);
+cancelBtn.onclick = () => {
+  consentModal.style.display = 'none';
+  switchContent('regular'); // go back to safe tab
+};
 
-    // Or use iframe embed:
-    // playerContainer.innerHTML = `<iframe src="https://player.mux.com/${playbackId}?autoplay=true" allowfullscreen></iframe>`;
-
-  } else if (type === 'agora') {
-    // Agora RTC Live (audience mode - replace with your App ID, Channel, Token)
-    const appId = 'YOUR_AGORA_APP_ID';
-    const channel = 'your-channel-name';
-    const token = 'YOUR_TOKEN_OR_NULL_FOR_TOKENLESS';
-
-    // Load Agora SDK if not already
-    if (!window.AgoraRTC) {
-      const script = document.createElement('script');
-      script.src = 'https://cdn.jsdelivr.net/npm/agora-rtc-sdk-ng@4';
-      document.head.appendChild(script);
-      script.onload = initAgora;
-    } else {
-      initAgora();
-    }
-
-    async function initAgora() {
-      const client = AgoraRTC.createClient({ mode: 'live', codec: 'vp8' });
-      client.setClientRole('audience');
-
-      await client.join(appId, channel, token || null, null);
-
-      // Container for remote streams
-      const remoteDiv = document.createElement('div');
-      remoteDiv.id = 'agora-remote';
-      playerContainer.appendChild(remoteDiv);
-
-      client.on('user-published', async (user, mediaType) => {
-        await client.subscribe(user, mediaType);
-        if (mediaType === 'video') {
-          user.videoTrack.play(remoteDiv);
-        }
-        if (mediaType === 'audio') {
-          user.audioTrack.play();
-        }
-      });
-    }
-  }
+// Switch content function
+function switchContent(type) {
+  currentContent = type;
+  
+  // Update active tab
+  tabBtns.forEach(b => b.classList.remove('active'));
+  document.querySelector(`.tab-btn[data-content="${type}"]`).classList.add('active');
+  
+  // Restart stream
+  startStream(type);
 }
 
-function stopLiveStream() {
+// Start stream based on type
+function startStream(type) {
   playerContainer.innerHTML = '';
-  // Add Agora leave logic if needed
+  playerContainer.classList.add(STREAM_ORIENTATION);
+
+  const playbackId = PLAYBACK_IDS[type];
+  if (!playbackId || playbackId.includes('YOUR_')) {
+    playerContainer.innerHTML = '<div style="color:#aaa; text-align:center; padding:40px;">No stream configured</div>';
+    return;
+  }
+
+  const player = document.createElement('mux-player');
+  player.setAttribute('playback-id', playbackId);
+  player.setAttribute('stream-type', 'live');
+  player.setAttribute('autoplay', 'muted');
+  player.setAttribute('muted', 'true');
+  player.setAttribute('poster', `https://image.mux.com/${playbackId}/thumbnail.jpg?width=720&height=1280&fit_mode=smartcrop`);
+
+  playerContainer.appendChild(player);
+}
+
+// Close modals
+closeBtn.onclick = () => closeAll();
+window.onclick = (e) => {
+  if (e.target === modal || e.target === consentModal) closeAll();
+};
+
+function closeAll() {
+  modal.style.display = 'none';
+  consentModal.style.display = 'none';
+  playerContainer.innerHTML = '';
+  playerContainer.classList.remove('portrait', 'landscape');
+  postersSection.classList.remove('fading');
+  clearTimeout(fadeTimer);
 }
 
 // ---------- DEBUGGABLE HOST INIT (drop-in) ----------

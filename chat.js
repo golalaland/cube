@@ -3989,7 +3989,6 @@ tabBtns.forEach(btn => {
   };
 });
 
-// Close main modal - also clean up hidden state
 function closeAll() {
   modal.style.display = 'none';
   consentModal.style.display = 'none';
@@ -3998,7 +3997,7 @@ function closeAll() {
   postersSection.classList.remove('fading');
   clearTimeout(fadeTimer);
   
-  // Always ensure close button is visible when main modal reopens later
+  // Always reset close button visibility
   document.querySelector('.live-close').classList.remove('hidden');
 }
   

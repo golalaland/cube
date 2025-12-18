@@ -3923,21 +3923,84 @@ const STREAM_ORIENTATION = 'portrait'; // or 'landscape'
 function switchContent(type) {
   currentContent = type;
 
+  // Update active tab
   liveTabBtns.forEach(btn => btn.classList.remove('active'));
   document.querySelector(`.tab-btn[data-content="${type}"]`).classList.add('active');
 
-  // Switch tab mode
-  document.body.classList.remove('regular-mode', 'adult-mode');
-  document.body.classList.add(type + '-mode');
+  // Switch mode for CSS hide/show
+  const playerArea = document.getElementById('tabContentArea'); // or livePlayerArea if you use that ID
+  playerArea.classList.remove('regular-mode', 'adult-mode');
+  playerArea.classList.add(type + '-mode');
 
-  // Reset video slide to closed
-  document.getElementById('toggleVideoBtn').textContent = '▲ Open Video';
-  document.getElementById('videoContainer').classList.remove('open');
-  document.getElementById('adultVideoFrame').src = '';
+  // Reset adult video slide to closed
+  const toggleBtn = document.getElementById('toggleVideoBtn');
+  const videoContainer = document.getElementById('videoContainer');
+  if (toggleBtn && videoContainer) {
+    toggleBtn.textContent = '▲ Open Video';
+    videoContainer.classList.remove('open');
+    document.getElementById('adultVideoFrame').src = '';
+  }
 
+  // Load the livestream
   startStream(type);
 }
 
+function startStream(type) {
+  livePlayerContainer.innerHTML = '';
+  livePlayerContainer.classList.add(STREAM_ORIENTATION);
+
+  const playbackId = PLAYBACK_IDS[type];
+
+  if (!playbackId || playbackId.includes('YOUR_')) {
+    livePlayerContainer.innerHTML = '<div style="color:#ccc;text-align:center;padding:60px;font-size:18px;">No stream configured yet</div>';
+    return;
+  }
+
+  const player = document.createElement('mux-player');
+  player.setAttribute('playback-id', playbackId);
+  player.setAttribute('stream-type', 'live');
+  player.setAttribute('autoplay', 'muted');
+  player.setAttribute('muted', 'true');
+  player.setAttribute('poster', `https://image.mux.com/${playbackId}/thumbnail.jpg?width=720&height=1280&fit_mode=smartcrop`);
+  livePlayerContainer.appendChild(player);
+}
+
+function closeAllLiveModal() {
+  liveModal.style.display = 'none';
+  liveConsentModal.style.display = 'none';
+  livePlayerContainer.innerHTML = '';
+  livePlayerContainer.classList.remove('portrait', 'landscape');
+  livePostersSection.classList.remove('fading');
+  clearTimeout(fadeTimer);
+  liveCloseBtn.classList.remove('hidden');
+
+  // Reset video slide
+  const videoContainer = document.getElementById('videoContainer');
+  if (videoContainer) {
+    videoContainer.classList.remove('open');
+    document.getElementById('adultVideoFrame').src = '';
+  }
+}
+
+// === EVENT LISTENERS ===
+document.getElementById('openHostsBtn').onclick = () => {
+  liveModal.style.display = 'block';
+  livePostersSection.classList.remove('fading');
+  liveCloseBtn.classList.remove('hidden');
+
+  // Force Regular tab on open
+  liveTabBtns.forEach(b => b.classList.remove('active'));
+  document.querySelector('.tab-btn[data-content="regular"]').classList.add('active');
+
+  switchContent('regular');
+
+  clearTimeout(fadeTimer);
+  fadeTimer = setTimeout(() => {
+    livePostersSection.classList.add('fading');
+  }, 8000);
+};
+
+// Toggle Adult Video Slide
 document.getElementById('toggleVideoBtn').onclick = () => {
   const container = document.getElementById('videoContainer');
   const btn = document.getElementById('toggleVideoBtn');
@@ -3953,51 +4016,22 @@ document.getElementById('toggleVideoBtn').onclick = () => {
   }
 };
 
-  // Posters and timer
-  livePostersSection.classList.remove('fading');
-  clearTimeout(fadeTimer);
-
-  // Show close button
-  liveCloseBtn.classList.remove('hidden');
-  
-  // Add mode class
-  livePlayerArea.classList.remove('regular-mode', 'adult-mode');
-  livePlayerArea.classList.add(type + '-mode');
-}
-
-// === EVENT LISTENERS ===
-document.getElementById('openHostsBtn').onclick = () => {
-  liveModal.style.display = 'block';
-  livePostersSection.classList.remove('fading');
-  liveCloseBtn.classList.remove('hidden');
-
-  // Force clean tab state
-  liveTabBtns.forEach(b => b.classList.remove('active'));
-  document.querySelector('.tab-btn[data-content="regular"]').classList.add('active');
-
-  switchContent('regular');
-
-  clearTimeout(fadeTimer);
-  fadeTimer = setTimeout(() => {
-    livePostersSection.classList.add('fading');
-  }, 8000);
-};
-
-// Remove old listeners by cloning buttons
+// Remove old tab listeners (prevents duplicates)
 const oldTabBtns = document.querySelectorAll('.tab-btn');
 oldTabBtns.forEach(btn => {
   const newBtn = btn.cloneNode(true);
   btn.parentNode.replaceChild(newBtn, btn);
 });
 
-// Re-query fresh buttons and attach new listeners
-liveTabBtns = document.querySelectorAll('.tab-btn'); // reassign (not redeclare const)
-// === TAB SWITCHING & CONSENT LOGIC (warning EVERY time) ===
+// Re-assign liveTabBtns after cloning
+liveTabBtns = document.querySelectorAll('.tab-btn');
+
+// TAB SWITCHING & CONSENT (warning every time)
 liveTabBtns.forEach(btn => {
   btn.onclick = () => {
     const target = btn.dataset.content;
 
-    // Reset active state
+    // Reset active
     liveTabBtns.forEach(b => b.classList.remove('active'));
 
     if (target === 'regular') {
@@ -4006,17 +4040,15 @@ liveTabBtns.forEach(btn => {
       return;
     }
 
-    // Adult tab clicked — ALWAYS show consent modal
+    // Adult tab — always show consent
     document.querySelector('.tab-btn[data-content="regular"]').classList.add('active');
     liveConsentModal.style.display = 'flex';
     liveCloseBtn.classList.add('hidden');
-    console.log('Adult consent modal shown — every time');
   };
 });
 
-// I Agree — proceed to Adult
+// I Agree
 liveAgreeBtn.onclick = () => {
-  console.log('User agreed — loading Adult content');
   liveConsentModal.style.display = 'none';
   liveCloseBtn.classList.remove('hidden');
 
@@ -4025,9 +4057,8 @@ liveAgreeBtn.onclick = () => {
   switchContent('adult');
 };
 
-// Cancel or backdrop click — stay on Regular
+// Cancel / backdrop
 const cancelAdultConsent = () => {
-  console.log('Consent cancelled — staying on Regular');
   liveConsentModal.style.display = 'none';
   liveCloseBtn.classList.remove('hidden');
 
@@ -4039,14 +4070,11 @@ const cancelAdultConsent = () => {
 liveCancelBtn.onclick = cancelAdultConsent;
 
 liveConsentModal.onclick = (e) => {
-  if (e.target === liveConsentModal) {
-    cancelAdultConsent();
-  }
+  if (e.target === liveConsentModal) cancelAdultConsent();
 };
 
-// Close button and backdrop
-liveCloseBtn.onclick = () => closeAllLiveModal();
-
+// Close modal
+liveCloseBtn.onclick = closeAllLiveModal;
 liveModal.onclick = (e) => {
   if (e.target === liveModal) closeAllLiveModal();
 };

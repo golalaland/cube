@@ -4584,7 +4584,7 @@ function showHighlightsModal(videos) {
       card.dataset.title = (video.title || "").toLowerCase();
       card.dataset.country = (video.country || "").toLowerCase();
       card.dataset.location = (video.location || "").toLowerCase();
-      card.dataset.tags = (video.tags || []).map(t => t.toLowerCase()).join(" ");
+      card.dataset.tags = Array.isArray(video.tags)   ? video.tags.map(t => typeof t === "string" ? t.trim().toLowerCase() : "").join(" ")   : "";
 
       Object.assign(card.style, {
         minWidth: "230px", maxWidth: "230px", background: "#0f0a1a", borderRadius: "12px",
@@ -4668,14 +4668,21 @@ function showHighlightsModal(videos) {
       uploader.style.opacity = "0.9";
 
       // Tags on card
-      const tagsEl = document.createElement("div");
-      tagsEl.style.cssText = "margin-top:4px;display:flex;flex-wrap:wrap;gap:6px;";
-      (video.tags || []).forEach(tag => {
-        const span = document.createElement("span");
-        span.textContent = `#${tag}`;
-        span.style.cssText = "font-size:11px;color:#ff2e78;background:rgba(255,46,120,0.15);padding:2px 8px;border-radius:8px;opacity:0.9;";
-        tagsEl.appendChild(span);
-      });
+const tagsEl = document.createElement("div");
+tagsEl.style.cssText = "margin-top:4px;display:flex;flex-wrap:wrap;gap:6px;min-height:20px;"; // min-height ensures space even if empty
+
+const tagsArray = Array.isArray(video.tags) ? video.tags : [];
+tagsArray.forEach(tag => {
+  if (typeof tag === "string" && tag.trim()) {
+    const span = document.createElement("span");
+    span.textContent = `#${tag.trim()}`;
+    span.style.cssText = "font-size:11px;color:#ff2e78;background:rgba(255,46,120,0.15);padding:2px 8px;border-radius:8px;opacity:0.9;";
+    tagsEl.appendChild(span);
+  }
+});
+
+// Optional debug — remove after testing
+console.log("Rendering tags for video:", video.id || video.title, tagsArray);
 
       // Unlock button
       const unlockBtn = document.createElement("button");

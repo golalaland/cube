@@ -2826,6 +2826,8 @@ replaceStarsWithSVG();
 
 /* ---------- DOM Elements (KEEP THESE) ---------- */
 const openBtn = document.getElementById("openHostsBtn");
+const modal = document.getElementById("featuredHostsModal");
+const closeModal = document.querySelector(".featured-close");
 const videoFrame = document.getElementById("featuredHostVideo");
 const usernameEl = document.getElementById("featuredHostUsername");
 const detailsEl = document.getElementById("featuredHostDetails");
@@ -2835,7 +2837,6 @@ const modalGiftBtn = document.getElementById("featuredGiftBtn");
 const giftAmountEl = document.getElementById("giftAmount");
 const prevBtn = document.getElementById("prevHost");
 const nextBtn = document.getElementById("nextHost");
-
 let hosts = [];
 let currentIndex = 0;
 

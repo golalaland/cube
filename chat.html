@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -1133,7 +1134,7 @@ could you have broken something?  i only asked for color change:
 }
 
 /* Tab Buttons */
-.tab-btn {
+.tab-btnz {
   flex: 1;
   background: rgba(255, 255, 255, 0.1);
   color: #fff;
@@ -1146,7 +1147,7 @@ could you have broken something?  i only asked for color change:
   text-align: center;
 }
 
-.tab-btn.active {
+.tab-btnz.active {
   background: linear-gradient(90deg, #ff0099, #ff6600);
 }
 
@@ -1951,28 +1952,37 @@ could you have broken something?  i only asked for color change:
   justify-content: center;
   text-align: center;
 }
-/* LIVE MODAL ONLY - all selectors prefixed to avoid conflicts with other .tab-btn, .content-tabs, etc. */
 .live-modal {
   display: none;
   position: fixed;
   z-index: 9999;
-  inset: 0;
+  left: 0; top: 0;
+  width: 100%; height: 100%;
   background-color: #000;
-  overflow-y: auto; /* allow scrolling if content is tall */
-  overflow-x: hidden;
+  overflow: hidden;
 }
 
-.live-modal .live-modal-content {
-  min-height: 100vh;
+/* Main modal content - add more top padding to make space */
+.live-modal-content {
+  width: 100%; height: 100%;
   display: flex;
   flex-direction: column;
-  padding: 60px 20px 40px;
+  padding: 60px 20px 20px;  /* Increased top padding from 20px → 60px */
   box-sizing: border-box;
   position: relative;
 }
 
-/* Close button */
-.live-modal .live-close {
+/* Tab Switcher - now naturally sits lower, centered */
+.content-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin: 0 0 20px 0;  /* Removed top margin, relies on container padding */
+  z-index: 10;
+  position: relative;
+}
+
+.live-close {
   position: absolute;
   top: 20px;
   right: 30px;
@@ -1980,36 +1990,95 @@ could you have broken something?  i only asked for color change:
   font-size: 48px;
   font-weight: 300;
   cursor: pointer;
-  z-index: 20;
+  z-index: 20;                  /* Higher than tabs (10) and posters */
   opacity: 0.7;
   transition: opacity 0.3s;
+  pointer-events: auto !important;  /* Force clickable */
+  user-select: none;
+  line-height: 1;
   width: 60px;
   height: 60px;
   display: flex;
   align-items: center;
   justify-content: center;
-  pointer-events: auto !important;
-  user-select: none;
-  line-height: 1;
-}
-.live-modal .live-close:hover {
-  opacity: 1;
-}
-.live-modal .live-close.hidden {
-  opacity: 0;
-  pointer-events: none;
 }
 
-/* Livestream Tab Switcher (unique classes) */
-.live-modal .live-content-tabs {
+.live-close:hover {
+  opacity: 1;
+}
+
+/* When hidden during consent */
+.live-close.hidden {
+  opacity: 0;
+  pointer-events: none;  /* Safe to disable when hidden */
+}
+/* Force orientation */
+.live-player.portrait { aspect-ratio: 9 / 16; }
+.live-player.landscape { aspect-ratio: 16 / 9; }
+
+.live-player mux-player {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+/* Classy Upcoming Posters */
+.upcoming-posters {
+  width: 100%;
+  padding: 20px 0 10px;
+  text-align: center;
+  color: #aaa;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  transition: opacity 1s ease-out, transform 1s ease-out;
+  z-index: 5;
+}
+
+.upcoming-posters.fading {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.poster-grid {
+  display: flex;
+  overflow-x: auto;
+  gap: 20px;
+  padding: 0 10px;
+  scrollbar-width: none;
+}
+.poster-grid::-webkit-scrollbar { display: none; }
+
+.poster {
+  flex: 0 0 180px;
+  text-align: center;
+}
+.poster img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  transition: transform 0.3s;
+}
+.poster:hover img {
+  transform: scale(1.05);
+}
+.poster-title {
+  margin-top: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #ccc;
+}
+/* Tab Switcher */
+.content-tabs {
   display: flex;
   justify-content: center;
-  gap: 24px;
-  margin: 0 0 20px 0;
+  gap: 20px;
+  margin: 20px 0 10px;
   z-index: 10;
-  flex-wrap: wrap; /* mobile friendly */
 }
-.live-modal .live-tab-btn {
+.tab-btnz {
   padding: 12px 28px;
   background: rgba(255,255,255,0.1);
   color: #fff;
@@ -2021,87 +2090,26 @@ could you have broken something?  i only asked for color change:
   transition: all 0.3s;
   backdrop-filter: blur(10px);
 }
-.live-modal .live-tab-btn.active,
-.live-modal .live-tab-btn:hover {
+.tab-btnz.active,
+.tab-btnz:hover {
   background: rgba(255,255,255,0.25);
 }
-.live-modal .live-tab-btn[data-content="adult"] {
+.tab-btnz[data-content="adult"] {
   font-weight: 600;
 }
 
-/* Player */
-.live-modal .live-player {
-  width: 100%;
-  max-width: 100%;
-  margin: 0 auto 20px;
-  background: #000;
-  border-radius: 12px;
-  overflow: hidden;
-}
-.live-modal .live-player.portrait { aspect-ratio: 9 / 16; }
-.live-modal .live-player.landscape { aspect-ratio: 16 / 9; }
-.live-modal .live-player mux-player {
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: cover;
-}
-
-/* Upcoming Posters */
-.live-modal .upcoming-posters {
-  width: 100%;
-  padding: 20px 0 10px;
-  text-align: center;
-  color: #aaa;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  transition: opacity 1s ease-out, transform 1s ease-out;
-  z-index: 5;
-}
-.live-modal .upcoming-posters.fading {
-  opacity: 0;
-  transform: translateY(20px);
-}
-.live-modal .poster-grid {
-  display: flex;
-  overflow-x: auto;
-  gap: 20px;
-  padding: 0 10px;
-  scrollbar-width: none;
-}
-.live-modal .poster-grid::-webkit-scrollbar { display: none; }
-.live-modal .poster {
-  flex: 0 0 180px;
-  text-align: center;
-}
-.live-modal .poster img {
-  width: 100%;
-  height: auto;
-  aspect-ratio: 2 / 3;
-  object-fit: cover;
-  border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-  transition: transform 0.3s;
-}
-.live-modal .poster:hover img {
-  transform: scale(1.05);
-}
-.live-modal .poster-title {
-  margin-top: 12px;
-  font-size: 14px;
-  font-weight: 500;
-  color: #ccc;
-}
-
 /* Consent Modal */
-.live-modal .consent-modal {
+.consent-modal {
   display: none;
   position: fixed;
   z-index: 10000;
-  inset: 0;
+  left: 0; top: 0;
+  width: 100%; height: 100%;
   background-color: rgba(0,0,0,0.9);
   align-items: center;
   justify-content: center;
 }
-.live-modal .consent-content {
+.consent-content {
   background: #111;
   padding: 40px;
   border-radius: 20px;
@@ -2111,24 +2119,24 @@ could you have broken something?  i only asked for color change:
   color: #eee;
   box-shadow: 0 10px 40px rgba(0,0,0,0.6);
 }
-.live-modal .consent-content h2 {
+.consent-content h2 {
   margin-bottom: 20px;
   font-size: 28px;
   color: #fff;
 }
-.live-modal .consent-content ul {
+.consent-content ul {
   text-align: left;
   margin: 20px 0;
   padding-left: 20px;
   line-height: 1.8;
 }
-.live-modal .consent-buttons {
+.consent-buttons {
   margin-top: 30px;
   display: flex;
   gap: 20px;
   justify-content: center;
 }
-.live-modal .consent-buttons button {
+.consent-buttons button {
   padding: 14px 32px;
   border: none;
   border-radius: 30px;
@@ -2137,16 +2145,16 @@ could you have broken something?  i only asked for color change:
   cursor: pointer;
   transition: 0.3s;
 }
-.live-modal #consentAgree {
+#consentAgree {
   background: #ff3366;
   color: white;
 }
-.live-modal #consentAgree:hover { background: #ff1744; }
-.live-modal #consentCancel {
+#consentAgree:hover { background: #ff1744; }
+#consentCancel {
   background: rgba(255,255,255,0.15);
   color: white;
 }
-.live-modal #consentCancel:hover { background: rgba(255,255,255,0.3); }
+#consentCancel:hover { background: rgba(255,255,255,0.3); }
 </style>
 </head>
 <body>
@@ -2190,7 +2198,7 @@ could you have broken something?  i only asked for color change:
         <span>people are interacting in chatrooms</span>
     </div>
     
-  <!-- Buttons (keep aligned) -->
+   <!-- Buttons (keep aligned) -->
 <div id="sessionBar">
   <button class="session-btn" id="topBallersBtn">Win $STRZ</button>
   <button id="highlightsBtn" class="session-btn star-hosts-btn">🌟 Cuties 🌟</button>
@@ -2201,32 +2209,32 @@ could you have broken something?  i only asked for color change:
 <div id="liveModal" class="live-modal">
   <div class="live-modal-content">
     <span class="live-close">&times;</span>
-
-    <!-- Livestream Tab Switcher (unique classes to avoid conflict) -->
-    <div class="live-content-tabs">
-      <button class="live-tab-btn active" data-content="regular">Regular</button>
-      <button class="live-tab-btn" data-content="adult">Adult 🔞</button>
+   
+    <!-- Tab Switcher -->
+    <div class="content-tabs">
+      <button class="tab-btn active" data-content="regular">Regular</button>
+      <button class="tab-btn" data-content="adult">Adult 🔞</button>
     </div>
-
+   
     <!-- Player Container -->
     <div id="livePlayerContainer" class="live-player"></div>
-
-    <!-- Upcoming Posters – fades out after 8s -->
+   
+    <!-- Upcoming Posters – fades out after 8s – now with your real images -->
     <div id="upcomingPosters" class="upcoming-posters">
       <div class="poster-grid">
         <div class="poster">
-          <img src="https://cdn.shopify.com/s/files/1/0962/6648/6067/files/128_x_128_px_Instagram_Post_45.jpg?v=1765857356" alt="Chill Vibes">
+          <img src="https://cdn.shopify.com/s/files/1/0962/6648/6067/files/128_x_128_px_Instagram_Post_45.jpg?v=1765857356" alt="Upcoming Event 1">
           <p class="poster-title">Chill Vibes</p>
         </div>
         <div class="poster">
-          <img src="https://cdn.shopify.com/s/files/1/0962/6648/6067/files/128_x_128_px_Instagram_Post_45.jpg?v=1765857356" alt="Late Night Talk">
+          <img src="https://cdn.shopify.com/s/files/1/0962/6648/6067/files/128_x_128_px_Instagram_Post_45.jpg?v=1765857356" alt="Upcoming Event 2">
           <p class="poster-title">Late Night Talk</p>
         </div>
         <div class="poster">
-          <img src="https://cdn.shopify.com/s/files/1/0962/6648/6067/files/Beige_Minimal_Romantic_Love_Questions_Card_Game_Document_1080_x_1920_px_5.jpg?v=1765500400" alt="Exclusive Drop">
+          <img src="https://cdn.shopify.com/s/files/1/0962/6648/6067/files/Beige_Minimal_Romantic_Love_Questions_Card_Game_Document_1080_x_1920_px_5.jpg?v=1765500400" alt="Upcoming Event 3">
           <p class="poster-title">Exclusive Drop</p>
         </div>
-        <!-- Add more posters here if needed -->
+        <!-- Add more if you want -->
       </div>
     </div>
   </div>
@@ -2353,12 +2361,12 @@ could you have broken something?  i only asked for color change:
 
    <!-- 🧭 TAB HEADER -->
 <div class="tab-header" style="display:flex; gap:12px; padding:12px; border-bottom:1px solid #333;">
-  <button class="tab-btn" data-tab="mediaTab">Profile</button>
+  <button class="tab-btnz" data-tab="mediaTab">Profile</button>
 
   <!-- HOST ONLY -->
-  <button class="tab-btn host-only" data-tab="infoTab">Tools</button>
+  <button class="tab-btnz host-only" data-tab="infoTab">Tools</button>
 
-  <button id="notificationsTabBtn" class="tab-btn" data-tab="notificationsTab" style="position:relative;">
+  <button id="notificationsTabBtn" class="tab-btnz" data-tab="notificationsTab" style="position:relative;">
     Notifications
     <span id="notif-badge" style="
       position:absolute; top:-8px; right:-10px;
@@ -2618,7 +2626,7 @@ could you have broken something?  i only asked for color change:
       text-align:center;
     ">
       <p style="color:#ccc;margin-bottom:16px;font-size:15px;">
-        1 STRZ = ₦0.25
+     STRZ ⇄ CASH
       </p>
       <input type="number" id="convertAmount" placeholder="Enter STRZ amount" 
              style="width:100%;padding:16px;border-radius:14px;background:#222;color:#fff;border:1px solid #444;margin-bottom:16px;font-size:18px;text-align:center;">
@@ -2629,7 +2637,7 @@ could you have broken something?  i only asked for color change:
         width:100%;padding:16px;border:none;border-radius:14px;
         background:linear-gradient(90deg,#00ff9d,#00ffa3);color:#000;
         font-weight:700;font-size:18px;cursor:pointer;
-      ">Convert to Cash</button>
+      ">SWAP</button>
     </div>
   </div>
 
@@ -2663,9 +2671,7 @@ could you have broken something?  i only asked for color change:
         background:linear-gradient(90deg,#ff6600,#ff0099);color:#fff;
         font-weight:700;font-size:18px;cursor:pointer;
       ">Withdraw Cash</button>
-    </div>
-  </div>
-</div>
+
 
  <div id="loaderOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.9);align-items:center;justify-content:center;flex-direction:column;z-index:999999;color:#ff006e;font-size:24px;">
   <div>Processing...</div>
@@ -2966,6 +2972,6 @@ could you have broken something?  i only asked for color change:
 
 <!-- Gift Alert -->
 <div id="giftAlert" class="gift-alert"></div>
-<script type="module" src="chat.js"></script>
+<script type="module" src="chatbackup.js"></script>
 </body>
   </html>

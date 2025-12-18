@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="en">
 <head>
@@ -2233,20 +2232,22 @@ could you have broken something?  i only asked for color change:
   </div>
 </div>
 
-<!-- Adult Content Consent Modal -->
-<div id="adultConsentModal" class="consent-modal">
-  <div class="consent-content">
-    <h2>Adult Content Warning</h2>
-    <p>You are about to view <strong>explicit adult content</strong>.</p>
-    <p>By proceeding, you confirm that:</p>
-    <ul>
-      <li>You are <strong>18 years of age or older</strong> (or the legal age in your jurisdiction)</li>
-      <li>You consent to viewing sexually explicit material</li>
-      <li>You will not expose minors to this content</li>
-    </ul>
-    <div class="consent-buttons">
-      <button id="consentAgree">I Agree</button>
-      <button id="consentCancel">Cancel</button>
+<!-- Adult Content Consent Modal - now properly nested inside live-modal for scoping -->
+<div class="live-modal">
+  <div id="adultConsentModal" class="consent-modal">
+    <div class="consent-content">
+      <h2>Adult Content Warning</h2>
+      <p>You are about to view <strong>explicit adult content</strong>.</p>
+      <p>By proceeding, you confirm that:</p>
+      <ul>
+        <li>You are <strong>18 years of age or older</strong> (or the legal age in your jurisdiction)</li>
+        <li>You consent to viewing sexually explicit material</li>
+        <li>You will not expose minors to this content</li>
+      </ul>
+      <div class="consent-buttons">
+        <button id="consentAgree">I Agree</button>
+        <button id="consentCancel">Cancel</button>
+      </div>
     </div>
   </div>
 </div>

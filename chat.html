@@ -2471,264 +2471,233 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
     </div>
 
 <!-- 📝 INFO TAB -->
-<div id="infoTab" class="tab-content" 
-     style="max-height:500px; overflow-y:auto; padding-right:8px; display:none; font-family: system-ui, sans-serif;">
-
+<div id="infoTab" class="tab-content"
+     style="max-height:500px; overflow-y:auto; padding:16px 8px 8px; display:none; font-family: system-ui, sans-serif; box-sizing:border-box;">
+  
   <!-- 📱 Number Verification Bar -->
-  <div id="verifyNumberBar" style="margin-bottom:15px;">
-    
+  <div id="verifyNumberBar" style="margin-bottom:24px;">
     <h4 style="
       text-align:center;
-      margin-bottom:10px;
+      margin-bottom:12px;
       font-weight:700;
-      font-size:22px; /* ← adjust anytime */
+      font-size:22px;
       background:linear-gradient(90deg,#c3f60c,#e8ff6a);
       -webkit-background-clip:text;
       -webkit-text-fill-color:transparent;
     ">
-      Verify Number  🔎
+      Verify Number 🔎
     </h4>
-
     <div style="
-      display: flex; 
-      align-items: center; 
-      justify-content: center; 
-      max-width: 340px; 
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      max-width: 340px;
       margin: 0 auto;
-      height: 34px; 
-      border-radius: 999px; 
+      height: 36px;
+      border-radius: 999px;
       box-shadow: 0 1px 6px rgba(195,246,12,0.25);
-      border: 1px solid rgba(195,246,12,0.3); 
-      overflow: hidden; 
-      background: rgba(0,0,0,0.8);
+      border: 1px solid rgba(195,246,12,0.3);
+      overflow: hidden;
+      background: rgba(0,0,0,0.85);
     ">
       <input
         type="text"
         id="verifyNumberInput"
         placeholder="Enter phone number to verify"
         style="
-          flex: 1; 
-          height: 100%; 
-          padding: 2px 12px 0; 
-          font-size: 13px; 
-          line-height: 1.3; 
-          border: none; 
-          outline: none; 
-          box-sizing: border-box; 
-          color: #eee; 
+          flex: 1;
+          height: 100%;
+          padding: 0 14px;
+          font-size: 13.5px;
+          border: none;
+          outline: none;
+          color: #eee;
           background: transparent;
         "
       />
       <button
         id="verifyNumberBtn"
         style="
-          flex-shrink: 0; 
-          width: 90px; 
-          height: 100%; 
-          border: none; 
-          background: linear-gradient(90deg,#c3f60c,#e8ff6a); 
+          flex-shrink: 0;
+          width: 90px;
+          height: 100%;
+          border: none;
+          background: linear-gradient(90deg,#c3f60c,#e8ff6a);
           color: #000;
-          font-size: 12.5px; 
-          font-weight: 600; 
-          cursor: pointer; 
+          font-size: 13px;
+          font-weight: 600;
+          cursor: pointer;
           display: flex;
-          align-items: center; 
-          justify-content: center; 
-          transition: all 0.2s ease;
-          border-top-right-radius: 999px; 
-          border-bottom-right-radius: 999px;
-          box-shadow: 0 0 6px rgba(195,246,12,0.4);
-        "
-        onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 0 10px rgba(195,246,12,0.6)';"
-        onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 0 6px rgba(195,246,12,0.4)';"
-      >
+          align-items: center;
+          justify-content: center;
+        ">
         Check
       </button>
     </div>
-
-  </div>
-
-  <p style="
-      margin-top:6px; 
-      font-size:12px; 
-      color:#ccc; 
+    <p style="
+      margin:10px 0 0;
+      font-size:12.5px;
+      color:#bbb;
       text-align:center;
     ">
-    Your safety is our priority. This helps you verify that numbers here belong to real, verified users.
-  </p>
+      Your safety is our priority. This helps you verify that numbers here belong to real, verified users.
+    </p>
+  </div>
 
-  
-<!-- REVENUE DASHBOARD -->
-<div style="margin: 32px 0;">
-  <h4 style="
-    text-align: center;
-    margin-bottom: 20px;
-    font-weight: 700;
-    font-size: 21px;
-    background: linear-gradient(90deg, #ff006e, #ff8c00);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  ">
-    Revenue Dashboard
-  </h4>
-  <div style="
-    background: rgba(20,20,35,0.85);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(255,0,110,0.25);
-    border-radius: 16px;
-    padding: 20px;
-    max-width: 380px;
-    margin: 0 auto;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-  ">
-    <div style="font-size: 14px; color: #aaa; margin-bottom: 6px;">Cash Balance</div>
-    <div style="font-size: 25px; font-weight: 800; color: #00ff9d; margin: 10px 0;">
-      ₦<span id="infoCashBalance">0</span>
-    </div>
-    
-    <div style="font-size: 14px; color: #aaa; margin: 20px 0 6px;">STRZ Balance</div>
-    <div style="font-size: 25px; font-weight: 700; color: #fff;">
-      <span id="infoStarBalance">0</span> ⭐️
-    </div>
-    
-    <div style="color: #888; font-size: 13px; margin-top: 16px;">
-      Last earnings: ₦<span id="infoLastEarnings">0</span>
+  <!-- REVENUE DASHBOARD -->
+  <div style="margin: 32px 0;">
+    <h4 style="
+      text-align: center;
+      margin-bottom: 20px;
+      font-weight: 700;
+      font-size: 21px;
+      background: linear-gradient(90deg, #ff006e, #ff8c00);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    ">
+      Revenue Dashboard
+    </h4>
+    <div style="
+      background: rgba(20,20,35,0.88);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,0,110,0.25);
+      border-radius: 16px;
+      padding: 22px;
+      max-width: 380px;
+      margin: 0 auto;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      text-align: center;
+    ">
+      <div style="font-size: 14.5px; color: #bbb; margin-bottom: 6px;">Cash Balance</div>
+      <div style="font-size: 28px; font-weight: 800; color: #00ff9d; margin: 12px 0;">
+        ₦<span id="infoCashBalance">0</span>
+      </div>
+      
+      <div style="font-size: 14.5px; color: #bbb; margin: 24px 0 6px;">STRZ Balance</div>
+      <div style="font-size: 28px; font-weight: 700; color: #fff;">
+        <span id="infoStarBalance">0</span> ⭐️
+      </div>
+      
+      <div style="color: #aaa; font-size: 13.5px; margin-top: 18px;">
+        Last earnings: ₦<span id="infoLastEarnings">0</span>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- CONVERT STRZ TO CASH -->
-<div style="margin: 32px 0;">
-  <h4 style="
-    text-align: center;
-    margin-bottom: 20px;
-    font-weight: 700;
-    font-size: 20px;
-    background: linear-gradient(90deg, #00ff9d, #00ffa3);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  ">
- <!-- CONVERT STRZ TO CASH -->
-<div style="margin: 32px 0;">
-  <h4 style="
-    text-align: center;
-    margin-bottom: 20px;
-    font-weight: 700;
-    font-size: 20px;
-    background: linear-gradient(90deg, #00ff9d, #00ffa3);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  ">
-    Convert STRZ to Cash
-  </h4>
-  <div style="
-    background: rgba(20,35,20,0.8);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(0,255,157,0.35);
-    border-radius: 16px;
-    padding: 20px;
-    max-width: 380px;
-    margin: 0 auto;
-    text-align: center;
-  ">
-    <p style="
-      color: #ccc;
-      margin: 0 0 20px 0;
-      font-size: 14px;
-      font-weight: 500;
+  <!-- CONVERT STRZ TO CASH -->
+  <div style="margin: 32px 0;">
+    <h4 style="
+      text-align: center;
+      margin-bottom: 20px;
+      font-weight: 700;
+      font-size: 20px;
+      background: linear-gradient(90deg, #00ff9d, #00ffa3);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     ">
-      STRZ ⇄ CASH
-    </p>
-    
-    <input
-      type="number"
-      id="convertAmount"
-      placeholder="Enter STRZ amount"
-      style="
+      Convert STRZ to Cash
+    </h4>
+    <div style="
+      background: rgba(20,35,20,0.88);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(0,255,157,0.35);
+      border-radius: 16px;
+      padding: 22px;
+      max-width: 380px;
+      margin: 0 auto;
+      text-align: center;
+    ">
+      <p style="color: #ddd; margin: 0 0 22px; font-size: 14.5px; font-weight: 500;">
+        STRZ ⇄ CASH
+      </p>
+      
+      <input
+        type="number"
+        id="convertAmount"
+        placeholder="Enter STRZ amount"
+        style="
+          width: 100%;
+          max-width: 300px;
+          padding: 15px;
+          border-radius: 12px;
+          background: #1a1a1a;
+          color: #fff;
+          border: 1px solid #444;
+          font-size: 17px;
+          text-align: center;
+          box-sizing: border-box;
+          margin: 0 auto 24px;
+          display: block;
+        "
+      />
+      
+      <div style="color: #00ff9d; font-size: 23px; font-weight: 800; margin: 24px 0;">
+        → ₦<span id="convertResult">0</span>
+      </div>
+      
+      <button id="convertBtn" style="
         width: 100%;
         max-width: 300px;
         padding: 15px;
+        border: none;
         border-radius: 12px;
-        background: #1a1a1a;
-        color: #fff;
-        border: 1px solid #444;
+        background: linear-gradient(90deg, #00ff9d, #00ffa3);
+        color: #000;
+        font-weight: 700;
         font-size: 17px;
-        text-align: center;
-        box-sizing: border-box;
+        cursor: pointer;
         margin: 0 auto;
         display: block;
-      "
-    />
-    
-    <div style="
-      color: #00ff9d;
-      font-size: 22px;
-      font-weight: 800;
-      margin: 24px 0;
-    ">
-      → ₦<span id="convertResult">0</span>
+      ">
+        SWAP
+      </button>
     </div>
-    
-    <button id="convertBtn" style="
-      width: 100%;
-      max-width: 300px;
-      padding: 15px;
-      border: none;
-      border-radius: 12px;
-      background: linear-gradient(90deg, #00ff9d, #00ffa3);
-      color: #000;
-      font-weight: 700;
-      font-size: 17px;
-      cursor: pointer;
-      transition: opacity 0.2s;
-      margin: 0 auto;
-      display: block;
-    ">
-      SWAP
-    </button>
   </div>
-</div>
 
-<!-- WITHDRAW CASH ONLY -->
-<div style="margin: 32px 0;">
-  <h4 style="
-    text-align: center;
-    margin-bottom: 20px;
-    font-weight: 700;
-    font-size: 20px;
-    background: linear-gradient(90deg, #ff6600, #ff0099);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  ">
-    WITHDRAW
-  </h4>
-  <div style="
-    background: rgba(35,20,20,0.8);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(255,0,153,0.35);
-    border-radius: 16px;
-    padding: 20px;
-    max-width: 380px;
-    margin: 0 auto;
-  ">
-    <p style="color: #ccc; margin-bottom: 22px; font-size: 14px;">
-      Minimum withdrawal: ₦5,000
-    </p>
-    
-    <button id="withdrawCashBtn" style="
-      width: 100%;
-      padding: 15px;
-      border: none;
-      border-radius: 12px;
-      background: linear-gradient(90deg, #ff6600, #ff0099);
-      color: #fff;
+  <!-- WITHDRAW CASH ONLY -->
+  <div style="margin: 32px 0;">
+    <h4 style="
+      text-align: center;
+      margin-bottom: 20px;
       font-weight: 700;
-      font-size: 17px;
-      cursor: pointer;
-      transition: opacity 0.2s;
+      font-size: 20px;
+      background: linear-gradient(90deg, #ff6600, #ff0099);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     ">
-      Withdraw Cash
-    </button>
+      WITHDRAW
+    </h4>
+    <div style="
+      background: rgba(35,20,20,0.88);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,0,153,0.35);
+      border-radius: 16px;
+      padding: 22px;
+      max-width: 380px;
+      margin: 0 auto;
+      text-align: center;
+    ">
+      <p style="color: #ddd; margin-bottom: 24px; font-size: 14.5px;">
+        Minimum withdrawal: ₦5,000
+      </p>
+      
+      <button id="withdrawCashBtn" style="
+        width: 100%;
+        max-width: 300px;
+        padding: 15px;
+        border: none;
+        border-radius: 12px;
+        background: linear-gradient(90deg, #ff6600, #ff0099);
+        color: #fff;
+        font-weight: 700;
+        font-size: 17px;
+        cursor: pointer;
+        margin: 0 auto;
+        display: block;
+      ">
+        Withdraw Cash
+      </button>
+    </div>
   </div>
 </div>
 

@@ -823,7 +823,7 @@ function updateRedeemLink() {
 }
 function updateTipLink() {
   if (!refs.tipBtn || !currentUser?.uid) return;
-  refs.tipBtn.href = `menu.html?uid=${currentUser.uid}`;
+  refs.tipBtn.href = `tapmaster.html?uid=${currentUser.uid}`;
   refs.tipBtn.style.display = "inline-block";
 }
 

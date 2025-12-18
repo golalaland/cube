@@ -3469,8 +3469,6 @@ if (!window.verifyHandlersInitialized) {
     setTimeout(() => alertEl.remove(), duration);
   };
 
-
-
   // ---------- PHONE NORMALIZER (for backend matching) ----------
   function normalizePhone(number) {
     return number.replace(/\D/g, "").slice(-10); // last 10 digits
@@ -3898,9 +3896,7 @@ document.querySelectorAll(".tag-btn").forEach(btn => {
 })();
 
 
-const adultVideoUrl = 'https://www.youtube.com/embed/YourVideoID?autoplay=1&mute=1'; // Change this link!
-// Or for direct MP4: 'https://yourdomain.com/video.mp4'
-// Or Vimeo: 'https://player.vimeo.com/video/123456789'
+const adultVideoUrl = 'https://www.youtube.com/embed/YOUR_VIDEO_ID?autoplay=1'; // Change this!
 
 // ----------LIVESTREAM MODAL----------
 // === LIVESTREAM MODAL: VARIABLES & CONSTANTS ===
@@ -3930,81 +3926,32 @@ function switchContent(type) {
   liveTabBtns.forEach(btn => btn.classList.remove('active'));
   document.querySelector(`.tab-btn[data-content="${type}"]`).classList.add('active');
 
+  // Switch tab mode
+  document.body.classList.remove('regular-mode', 'adult-mode');
+  document.body.classList.add(type + '-mode');
+
+  // Reset video slide to closed
+  document.getElementById('toggleVideoBtn').textContent = '▲ Open Video';
+  document.getElementById('videoContainer').classList.remove('open');
+  document.getElementById('adultVideoFrame').src = '';
+
   startStream(type);
 }
 
-function startStream(type) {
-  // Clear the main livestream container
-  livePlayerContainer.innerHTML = '';
-  livePlayerContainer.classList.add(STREAM_ORIENTATION);
+document.getElementById('toggleVideoBtn').onclick = () => {
+  const container = document.getElementById('videoContainer');
+  const btn = document.getElementById('toggleVideoBtn');
 
-  // Hide/show sections based on tab
-  const adultTVSection = document.getElementById('adultTVSection');
-  const liveStreamSection = document.getElementById('liveStreamSection');
-
-  if (type === 'regular') {
-    adultTVSection.style.display = 'none';
-    liveStreamSection.style.display = 'block';
-
-    const playbackId = PLAYBACK_IDS.regular;
-    if (!playbackId || playbackId.includes('YOUR_')) {
-      livePlayerContainer.innerHTML = '<div style="color:#ccc;text-align:center;padding:60px;font-size:18px;">No stream configured yet</div>';
-      return;
-    }
-
-    const player = document.createElement('mux-player');
-    player.setAttribute('playback-id', playbackId);
-    player.setAttribute('stream-type', 'live');
-    player.setAttribute('autoplay', 'muted');
-    player.setAttribute('muted', 'true');
-    player.setAttribute('poster', `https://image.mux.com/${playbackId}/thumbnail.jpg?width=720&height=1280&fit_mode=smartcrop`);
-    livePlayerContainer.appendChild(player);
-
-  } else if (type === 'adult') {
-    // Show the TV section for pre-recorded video
-    adultTVSection.style.display = 'block';
-    liveStreamSection.style.display = 'block'; // keep livestream visible below TV
-
-    // Reset TV to "off" state every time Adult tab is selected
-    document.getElementById('tvOff').style.display = 'flex';
-    const tvOn = document.getElementById('tvOn');
-    tvOn.classList.remove('visible');
+  if (container.classList.contains('open')) {
+    container.classList.remove('open');
+    btn.textContent = '▲ Open Video';
     document.getElementById('adultVideoFrame').src = '';
-
-    // Load adult livestream (if you have a different playback ID for adult live)
-    const playbackId = PLAYBACK_IDS.adult;
-    if (!playbackId || playbackId.includes('YOUR_')) {
-      livePlayerContainer.innerHTML = '<div style="color:#ccc;text-align:center;padding:60px;font-size:18px;">No adult stream configured yet</div>';
-      return;
-    }
-
-    const player = document.createElement('mux-player');
-    player.setAttribute('playback-id', playbackId);
-    player.setAttribute('stream-type', 'live');
-    player.setAttribute('autoplay', 'muted');
-    player.setAttribute('muted', 'true');
-    player.setAttribute('poster', `https://image.mux.com/${playbackId}/thumbnail.jpg?width=720&height=1280&fit_mode=smartcrop`);
-    livePlayerContainer.appendChild(player);
+  } else {
+    container.classList.add('open');
+    btn.textContent = '▼ Close Video';
+    document.getElementById('adultVideoFrame').src = adultVideoUrl;
   }
-}
-
-function closeAllLiveModal() {
-  liveModal.style.display = 'none';
-  liveConsentModal.style.display = 'none';
-
-  // Clear livestream player
-  livePlayerContainer.innerHTML = '';
-  livePlayerContainer.classList.remove('portrait', 'landscape');
-
-  // Reset Adult TV to off state
-  const adultTVSection = document.getElementById('adultTVSection');
-  if (adultTVSection) {
-    document.getElementById('tvOff').style.display = 'flex';
-    const tvOn = document.getElementById('tvOn');
-    if (tvOn) tvOn.classList.remove('visible');
-    const frame = document.getElementById('adultVideoFrame');
-    if (frame) frame.src = '';
-  }
+};
 
   // Posters and timer
   livePostersSection.classList.remove('fading');

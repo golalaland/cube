@@ -4012,6 +4012,10 @@ function closeAllLiveModal() {
 
   // Show close button
   liveCloseBtn.classList.remove('hidden');
+  
+  // Add mode class
+  livePlayerArea.classList.remove('regular-mode', 'adult-mode');
+  livePlayerArea.classList.add(type + '-mode');
 }
 
 // === EVENT LISTENERS ===

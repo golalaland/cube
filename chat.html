@@ -2565,40 +2565,46 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
     </p>
   </div>
 
- <!-- REVENUE DASHBOARD -->
+<!-- REVENUE DASHBOARD -->
 <div style="margin: 32px 0;">
   <h4 style="
     text-align: center;
     margin-bottom: 20px;
     font-weight: 700;
     font-size: 21px;
-    background: linear-gradient(90deg, #ff006e, #ff8c00);
+    background: linear-gradient(90deg, #c3f60c, #e8ff6a);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
   ">
-   REVENUE DASHBOARD
+    REVENUE DASHBOARD
   </h4>
   <div style="
-    background: rgba(20,20,35,0.85);
+    background: #000000;
     backdrop-filter: blur(12px);
-    border: 1px solid rgba(255,0,110,0.25);
+    border: 1px solid rgba(195, 246, 12, 0.4);
     border-radius: 16px;
-    padding: 20px;
+    padding: 24px;
     max-width: 380px;
     margin: 0 auto;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7),
+                0 0 20px rgba(195, 246, 12, 0.15);
+    text-align: center;
   ">
-    <div style="font-size: 12px; color: #aaa; margin-bottom: 6px;">Cash Balance</div>
-    <div style="font-size: 18px; font-weight: 800; color: #00ff9d; margin: 10px 0;">
+    <div style="font-size: 13px; color: #cccccc; margin-bottom: 8px; font-weight: 500;">
+      Cash Balance
+    </div>
+    <div style="font-size: 32px; font-weight: 800; color: #c3f60c; margin: 12px 0;">
       ₦<span id="infoCashBalance">0</span>
     </div>
     
-    <div style="font-size: 12px; color: #aaa; margin: 20px 0 6px;">STRZ Balance</div>
-    <div style="font-size: 18px; font-weight: 700; color: #fff;">
+    <div style="font-size: 13px; color: #cccccc; margin: 28px 0 8px; font-weight: 500;">
+      STRZ Balance
+    </div>
+    <div style="font-size: 30px; font-weight: 700; color: #ffffff;">
       <span id="infoStarBalance">0</span> ⭐️
     </div>
     
-    <div style="color: #888; font-size: 13px; margin-top: 16px;">
+    <div style="color: #aaaaaa; font-size: 13.5px; margin-top: 20px;">
       Last earnings: ₦<span id="infoLastEarnings">0</span>
     </div>
   </div>

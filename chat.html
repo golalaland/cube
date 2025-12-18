@@ -2582,12 +2582,12 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
     box-shadow: 0 10px 30px rgba(0,0,0,0.5);
   ">
     <div style="font-size: 14px; color: #aaa; margin-bottom: 6px;">Cash Balance</div>
-    <div style="font-size: 32px; font-weight: 800; color: #00ff9d; margin: 10px 0;">
+    <div style="font-size: 25px; font-weight: 800; color: #00ff9d; margin: 10px 0;">
       ₦<span id="infoCashBalance">0</span>
     </div>
     
     <div style="font-size: 14px; color: #aaa; margin: 20px 0 6px;">STRZ Balance</div>
-    <div style="font-size: 28px; font-weight: 700; color: #fff;">
+    <div style="font-size: 25px; font-weight: 700; color: #fff;">
       <span id="infoStarBalance">0</span> ⭐️
     </div>
     
@@ -2608,6 +2608,17 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
   ">
+ <!-- CONVERT STRZ TO CASH -->
+<div style="margin: 32px 0;">
+  <h4 style="
+    text-align: center;
+    margin-bottom: 20px;
+    font-weight: 700;
+    font-size: 20px;
+    background: linear-gradient(90deg, #00ff9d, #00ffa3);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  ">
     Convert STRZ to Cash
   </h4>
   <div style="
@@ -2618,36 +2629,49 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
     padding: 20px;
     max-width: 380px;
     margin: 0 auto;
+    text-align: center;
   ">
-    <p style="color: #ccc; margin-bottom: 18px; font-size: 14px; font-weight: 500;">
+    <p style="
+      color: #ccc;
+      margin: 0 0 20px 0;
+      font-size: 14px;
+      font-weight: 500;
+    ">
       STRZ ⇄ CASH
     </p>
     
-    <div style="position: relative; margin-bottom: 20px;">
-      <input 
-        type="number" 
-        id="convertAmount" 
-        placeholder="Enter STRZ amount"
-        style="
-          width: 100%;
-          padding: 15px;
-          border-radius: 12px;
-          background: #1a1a1a;
-          color: #fff;
-          border: 1px solid #444;
-          font-size: 17px;
-          text-align: center;
-          box-sizing: border-box;
-        "
-      />
-    </div>
+    <input
+      type="number"
+      id="convertAmount"
+      placeholder="Enter STRZ amount"
+      style="
+        width: 100%;
+        max-width: 300px;
+        padding: 15px;
+        border-radius: 12px;
+        background: #1a1a1a;
+        color: #fff;
+        border: 1px solid #444;
+        font-size: 17px;
+        text-align: center;
+        box-sizing: border-box;
+        margin: 0 auto;
+        display: block;
+      "
+    />
     
-    <div style="color: #00ff9d; font-size: 22px; font-weight: 800; margin-bottom: 24px;">
+    <div style="
+      color: #00ff9d;
+      font-size: 22px;
+      font-weight: 800;
+      margin: 24px 0;
+    ">
       → ₦<span id="convertResult">0</span>
     </div>
     
     <button id="convertBtn" style="
       width: 100%;
+      max-width: 300px;
       padding: 15px;
       border: none;
       border-radius: 12px;
@@ -2657,6 +2681,8 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
       font-size: 17px;
       cursor: pointer;
       transition: opacity 0.2s;
+      margin: 0 auto;
+      display: block;
     ">
       SWAP
     </button>

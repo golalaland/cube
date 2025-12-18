@@ -3962,12 +3962,17 @@ function closeAllLiveModal() {
 }
 
 // === EVENT LISTENERS ===
+// === TAB SWITCHING & CONSENT LOGIC (fixed for premature active) ===
 document.getElementById('openHostsBtn').onclick = () => {
   liveModal.style.display = 'block';
   livePostersSection.classList.remove('fading');
-  liveCloseBtn.classList.remove('hidden'); // ensure X is visible
+  liveCloseBtn.classList.remove('hidden');
 
-  switchContent('regular'); // always open on Regular
+  // FORCE clean state on open
+  liveTabBtns.forEach(b => b.classList.remove('active'));
+  document.querySelector('.tab-btn[data-content="regular"]').classList.add('active');
+
+  switchContent('regular');
 
   clearTimeout(fadeTimer);
   fadeTimer = setTimeout(() => {
@@ -3975,23 +3980,27 @@ document.getElementById('openHostsBtn').onclick = () => {
   }, 8000);
 };
 
-// === TAB SWITCHING & CONSENT LOGIC ===
+// Remove any old listeners by re-querying (prevents duplicates)
+const tabButtons = document.querySelectorAll('.tab-btn');
+tabButtons.forEach(btn => {
+  // Clone to remove old listeners
+  const newBtn = btn.cloneNode(true);
+  btn.parentNode.replaceChild(newBtn, btn);
+});
+
+// Re-query after clone
+const liveTabBtns = document.querySelectorAll('.tab-btn');
+
 liveTabBtns.forEach(btn => {
   btn.onclick = () => {
-    console.log('Tab clicked:', btn.dataset.content); // LOG 1: which tab?
+    console.log('Tab clicked:', btn.dataset.content);
 
     const target = btn.dataset.content;
-
-    if (btn.classList.contains('active')) {
-      console.log('Already active, ignoring');
-      return;
-    }
 
     // Reset active
     liveTabBtns.forEach(b => b.classList.remove('active'));
 
     if (target === 'regular') {
-      console.log('Switching to Regular');
       btn.classList.add('active');
       switchContent('regular');
       return;
@@ -3999,19 +4008,17 @@ liveTabBtns.forEach(btn => {
 
     // Adult tab
     const hasConsent = localStorage.getItem('adultConsent') === 'true';
-    console.log('Has adult consent?', hasConsent); // LOG 2: true or false?
+    console.log('Has consent?', hasConsent);
 
     if (hasConsent) {
-      console.log('Consent given — switching to Adult');
       btn.classList.add('active');
       switchContent('adult');
     } else {
-      console.log('No consent — showing consent modal');
-      // Keep Regular active
+      // Force Regular active while asking for consent
       document.querySelector('.tab-btn[data-content="regular"]').classList.add('active');
       liveConsentModal.style.display = 'flex';
       liveCloseBtn.classList.add('hidden');
-      console.log('Consent modal should now be visible');
+      console.log('Consent modal displayed');
     }
   };
 });

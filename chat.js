@@ -3953,53 +3953,43 @@ tabBtns.forEach(btn => {
 agreeBtn.onclick = () => {
   localStorage.setItem('adultConsent', 'true');
   consentModal.style.display = 'none';
+  document.querySelector('.live-close').classList.remove('hidden'); // show close X
   switchContent('adult');
 };
 
 cancelBtn.onclick = () => {
   consentModal.style.display = 'none';
+  document.querySelector('.live-close').classList.remove('hidden'); // show close X
   switchContent('regular'); // go back to safe tab
 };
 
-// Switch content function
-function switchContent(type) {
-  currentContent = type;
-  
-  // Update active tab
-  tabBtns.forEach(b => b.classList.remove('active'));
-  document.querySelector(`.tab-btn[data-content="${type}"]`).classList.add('active');
-  
-  // Restart stream
-  startStream(type);
-}
-
-// Start stream based on type
-function startStream(type) {
-  playerContainer.innerHTML = '';
-  playerContainer.classList.add(STREAM_ORIENTATION);
-
-  const playbackId = PLAYBACK_IDS[type];
-  if (!playbackId || playbackId.includes('YOUR_')) {
-    playerContainer.innerHTML = '<div style="color:#aaa; text-align:center; padding:40px;">No stream configured</div>';
-    return;
+// Also allow clicking the dark backdrop of consent modal to cancel
+consentModal.onclick = (e) => {
+  if (e.target === consentModal) {
+    consentModal.style.display = 'none';
+    document.querySelector('.live-close').classList.remove('hidden');
+    switchContent('regular');
   }
-
-  const player = document.createElement('mux-player');
-  player.setAttribute('playback-id', playbackId);
-  player.setAttribute('stream-type', 'live');
-  player.setAttribute('autoplay', 'muted');
-  player.setAttribute('muted', 'true');
-  player.setAttribute('poster', `https://image.mux.com/${playbackId}/thumbnail.jpg?width=720&height=1280&fit_mode=smartcrop`);
-
-  playerContainer.appendChild(player);
-}
-
-// Close modals
-closeBtn.onclick = () => closeAll();
-window.onclick = (e) => {
-  if (e.target === modal || e.target === consentModal) closeAll();
 };
 
+// UPDATED: When opening the consent modal, hide the main close button
+tabBtns.forEach(btn => {
+  btn.onclick = () => {
+    const target = btn.dataset.content;
+
+    if (target === 'adult') {
+      if (localStorage.getItem('adultConsent') !== 'true') {
+        consentModal.style.display = 'flex';
+        document.querySelector('.live-close').classList.add('hidden'); // HIDE X
+        return;
+      }
+    }
+
+    switchContent(target);
+  };
+});
+
+// Close main modal - also clean up hidden state
 function closeAll() {
   modal.style.display = 'none';
   consentModal.style.display = 'none';
@@ -4007,8 +3997,11 @@ function closeAll() {
   playerContainer.classList.remove('portrait', 'landscape');
   postersSection.classList.remove('fading');
   clearTimeout(fadeTimer);
+  
+  // Always ensure close button is visible when main modal reopens later
+  document.querySelector('.live-close').classList.remove('hidden');
 }
-
+  
 // ---------- DEBUGGABLE HOST INIT (drop-in) ----------
 (function () {
   // Toggle this dynamically in your app

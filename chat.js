@@ -4669,7 +4669,7 @@ function showHighlightsModal(videos) {
 
       // Tags on card
 const tagsEl = document.createElement("div");
-tagsEl.style.cssText = "margin-top:4px;display:flex;flex-wrap:wrap;gap:6px;min-height:20px;"; // min-height ensures space even if empty
+tagsEl.style.cssText = "margin-top:8px; margin-bottom:8px; display:flex; flex-wrap:wrap; gap:6px; min-height:24px; justify-content:flex-start;"; // min-height ensures space even if empty
 
 const tagsArray = Array.isArray(video.tags) ? video.tags : [];
 tagsArray.forEach(tag => {
@@ -4714,7 +4714,14 @@ console.log("Rendering tags for video:", video.id || video.title, tagsArray);
         unlockBtn.disabled = true;
       }
 
-      infoPanel.append(title, uploader, tagsEl, unlockBtn);
+     // Force tags to show — even if layout is tight
+infoPanel.appendChild(title);
+infoPanel.appendChild(uploader);
+infoPanel.appendChild(tagsEl);        // ← Separate for safety
+infoPanel.appendChild(unlockBtn);
+
+// Optional: Add a tiny bit of bottom margin to unlock button so it doesn't overlap
+unlockBtn.style.marginTop = "10px";
       card.append(videoContainer, infoPanel);
       content.appendChild(card);
     });

@@ -1952,7 +1952,6 @@ could you have broken something?  i only asked for color change:
   justify-content: center;
   text-align: center;
 }
-/* Main modal - allow scroll if needed */
 .live-modal {
   display: none;
   position: fixed;
@@ -1960,97 +1959,308 @@ could you have broken something?  i only asked for color change:
   left: 0; top: 0;
   width: 100%; height: 100%;
   background-color: #000;
-  overflow-y: auto; /* crucial — allows scroll if content tall */
-  overflow-x: hidden;
-}
-
-.live-modal-content {
-  min-height: 100%;
-  display: flex;
-  flex-direction: column;
-  padding: 60px 20px 40px; /* more bottom padding */
-  box-sizing: border-box;
-}
-
-/* Player area - take available space but don't force overflow */
-.live-player-area {
-  flex: 1;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 30px;
-  padding: 0 10px;
-  max-width: 100%;
-  box-sizing: border-box;
-}
-
-/* Adult TV Section - responsive, never too big */
-.adult-tv-section {
-  width: 100%;
-  max-width: 900px; /* limit max size */
-  margin: 0 auto;
-  background: #000;
-  border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+}
+
+/* Main modal content - add more top padding to make space */
+.live-modal-content {
+  width: 100%; height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 60px 20px 20px;  /* Increased top padding from 20px → 60px */
+  box-sizing: border-box;
   position: relative;
 }
 
-/* Responsive aspect ratio - keeps 16:9 but flexible */
-.adult-tv-section::before {
-  content: '';
-  display: block;
-  padding-top: 56.25%; /* 16:9 ratio */
+/* Tab Switcher - now naturally sits lower, centered */
+.content-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin: 0 0 20px 0;  /* Removed top margin, relies on container padding */
+  z-index: 10;
+  position: relative;
 }
 
-.adult-tv-section > * {
+.live-close {
   position: absolute;
-  top: 0; left: 0;
-  width: 100%;
-  height: 100%;
+  top: 20px;
+  right: 30px;
+  color: #fff;
+  font-size: 48px;
+  font-weight: 300;
+  cursor: pointer;
+  z-index: 20;                  /* Higher than tabs (10) and posters */
+  opacity: 0.7;
+  transition: opacity 0.3s;
+  pointer-events: auto !important;  /* Force clickable */
+  user-select: none;
+  line-height: 1;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* Livestream player - responsive */
-.live-player {
-  width: 100%;
-  aspect-ratio: 16 / 9; /* landscape for livestream */
-  max-width: 900px;
-  margin: 0 auto;
-  background: #000;
-  border-radius: 12px;
-  overflow: hidden;
+.live-close:hover {
+  opacity: 1;
 }
+
+/* When hidden during consent */
+.live-close.hidden {
+  opacity: 0;
+  pointer-events: none;  /* Safe to disable when hidden */
+}
+/* Force orientation */
+.live-player.portrait { aspect-ratio: 9 / 16; }
+.live-player.landscape { aspect-ratio: 16 / 9; }
 
 .live-player mux-player {
   width: 100% !important;
   height: 100% !important;
   object-fit: cover;
+  border-radius: 12px;
 }
 
-/* Hide/show based on mode */
-.regular-mode #adultTVSection { 
-  display: none; 
-}
-.adult-mode #liveStreamSection { 
-  display: block; /* change to 'none' if you want only TV in adult */
+/* Classy Upcoming Posters */
+.upcoming-posters {
+  width: 100%;
+  padding: 20px 0 10px;
+  text-align: center;
+  color: #aaa;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  transition: opacity 1s ease-out, transform 1s ease-out;
+  z-index: 5;
 }
 
-/* Posters - smaller on mobile */
+.upcoming-posters.fading {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.poster-grid {
+  display: flex;
+  overflow-x: auto;
+  gap: 20px;
+  padding: 0 10px;
+  scrollbar-width: none;
+}
+.poster-grid::-webkit-scrollbar { display: none; }
+
 .poster {
-  flex: 0 0 150px; /* smaller than before */
+  flex: 0 0 180px;
+  text-align: center;
+}
+.poster img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  transition: transform 0.3s;
+}
+.poster:hover img {
+  transform: scale(1.05);
+}
+.poster-title {
+  margin-top: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #ccc;
+}
+/* Tab Switcher */
+.content-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin: 20px 0 10px;
+  z-index: 10;
+}
+.tab-btn {
+  padding: 12px 28px;
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+  border: none;
+  border-radius: 30px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+  backdrop-filter: blur(10px);
+}
+.tab-btn.active,
+.tab-btn:hover {
+  background: rgba(255,255,255,0.25);
+}
+.tab-btn[data-content="adult"] {
+  font-weight: 600;
 }
 
-@media (max-width: 768px) {
-  .poster {
-    flex: 0 0 120px;
-  }
-  .turn-on-btn {
-    padding: 16px 40px;
-    font-size: 20px;
-  }
-  .livestream-header {
-    font-size: 24px;
-  }
+/* Consent Modal */
+.consent-modal {
+  display: none;
+  position: fixed;
+  z-index: 10000;
+  left: 0; top: 0;
+  width: 100%; height: 100%;
+  background-color: rgba(0,0,0,0.9);
+  align-items: center;
+  justify-content: center;
+}
+.consent-content {
+  background: #111;
+  padding: 40px;
+  border-radius: 20px;
+  max-width: 90%;
+  width: 500px;
+  text-align: center;
+  color: #eee;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+}
+.consent-content h2 {
+  margin-bottom: 20px;
+  font-size: 28px;
+  color: #fff;
+}
+.consent-content ul {
+  text-align: left;
+  margin: 20px 0;
+  padding-left: 20px;
+  line-height: 1.8;
+}
+.consent-buttons {
+  margin-top: 30px;
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+}
+.consent-buttons button {
+  padding: 14px 32px;
+  border: none;
+  border-radius: 30px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+}
+#consentAgree {
+  background: #ff3366;
+  color: white;
+}
+#consentAgree:hover { background: #ff1744; }
+#consentCancel {
+  background: rgba(255,255,255,0.15);
+  color: white;
+}
+#consentCancel:hover { background: rgba(255,255,255,0.3); }
+#tabContentArea {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+/* Hide/show based on tab */
+.regular-mode .adult-poster,
+.regular-mode #adultVideoSlide { display: none !important; }
+
+.adult-mode .regular-poster { display: none !important; }
+.adult-mode .adult-poster { display: block !important; }
+
+/* Collapsible Video Slide */
+.adult-video-slide {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.toggle-video-btn {
+  width: 100%;
+  padding: 12px;
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+  border: none;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 12px;
+  text-align: center;
+  backdrop-filter: blur(10px);
+}
+
+.video-container {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  margin-top: 10px;
+  overflow: hidden;
+  border-radius: 12px;
+  transition: height 0.6s ease;
+  height: 0;
+}
+
+.video-container.open {
+  height: auto;
+}
+
+#adultVideoFrame {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+#tabContentArea {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Hide/show based on tab */
+.regular-mode .adult-poster,
+.regular-mode #adultVideoSlide { display: none !important; }
+
+.adult-mode .regular-poster { display: none !important; }
+.adult-mode .adult-poster { display: block !important; }
+
+/* Collapsible Video Slide */
+.adult-video-slide {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.toggle-video-btn {
+  width: 100%;
+  padding: 12px;
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+  border: none;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 12px;
+  text-align: center;
+  backdrop-filter: blur(10px);
+}
+
+.video-container {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  margin-top: 10px;
+  overflow: hidden;
+  border-radius: 12px;
+  transition: height 0.6s ease;
+  height: 0;
+}
+
+.video-container.open {
+  height: auto;
+}
+
+#adultVideoFrame {
+  width: 100%;
+  height: 100%;
+  border: none;
 }
 </style>
 </head>
@@ -2095,67 +2305,51 @@ could you have broken something?  i only asked for color change:
         <span>people are interacting in chatrooms</span>
     </div>
     
-   <!-- Buttons (keep aligned) -->
-<div id="sessionBar">
-  <button class="session-btn" id="topBallersBtn">Win $STRZ</button>
-  <button id="highlightsBtn" class="session-btn star-hosts-btn">🌟 Cuties 🌟</button>
-  <button class="session-btn" id="openHostsBtn">Livestreams</button>
+ <!-- Tab Switcher -->
+<div class="content-tabs">
+  <button class="tab-btn active" data-content="regular">Regular</button>
+  <button class="tab-btn" data-content="adult">Adult 🔞</button>
 </div>
 
-<!-- Live Stream Modal -->
-<div id="liveModal" class="live-modal">
-  <div class="live-modal-content">
-    <span class="live-close">&times;</span>
-   
-    <!-- Tab Switcher -->
-    <div class="content-tabs">
-      <button class="tab-btn active" data-content="regular">Regular</button>
-      <button class="tab-btn" data-content="adult">Adult 🔞</button>
-    </div>
-   
-   <!-- Player Area - now dynamic for Adult TV + Livestream -->
-<div id="livePlayerArea" class="live-player-area">
+<!-- Dynamic Content Area -->
+<div id="tabContentArea">
+  <!-- Posters Section (different image for Adult) -->
+  <div id="upcomingPosters" class="upcoming-posters">
+    <div class="poster-grid">
+      <!-- Regular posters (shown on Regular tab) -->
+      <div class="poster regular-poster">
+        <img src="https://cdn.shopify.com/s/files/1/0962/6648/6067/files/128_x_128_px_Instagram_Post_45.jpg?v=1765857356" alt="Chill Vibes">
+        <p class="poster-title">Chill Vibes</p>
+      </div>
+      <div class="poster regular-poster">
+        <img src="https://cdn.shopify.com/s/files/1/0962/6648/6067/files/128_x_128_px_Instagram_Post_45.jpg?v=1765857356" alt="Late Night Talk">
+        <p class="poster-title">Late Night Talk</p>
+      </div>
+      <div class="poster regular-poster">
+        <img src="https://cdn.shopify.com/s/files/1/0962/6648/6067/files/Beige_Minimal_Romantic_Love_Questions_Card_Game_Document_1080_x_1920_px_5.jpg?v=1765500400" alt="Exclusive Drop">
+        <p class="poster-title">Exclusive Drop</p>
+      </div>
 
-  <!-- Adult Tab: TV Screen (hidden on Regular) -->
-  <div id="adultTVSection" class="adult-tv-section">
-    <!-- Off State -->
-    <div id="tvOff" class="tv-off">
-      <button id="turnOnTV" class="turn-on-btn">Turn On TV</button>
+      <!-- Adult custom teaser photo (shown only on Adult tab) -->
+      <div class="poster adult-poster" style="display:none;">
+        <img src="YOUR_ADULT_TEASER_IMAGE_URL_HERE" alt="Adult Teaser"> <!-- CHANGE THIS LINK -->
+        <p class="poster-title">Exclusive Adult Session</p>
+      </div>
     </div>
+  </div>
+
+  <!-- Collapsible Video Slide (Adult only) -->
+  <div id="adultVideoSlide" class="adult-video-slide" style="display:none;">
+    <button id="toggleVideoBtn" class="toggle-video-btn">▲ Open Video</button>
+    <div id="videoContainer" class="video-container collapsed">
+      <iframe id="adultVideoFrame" src="" allowfullscreen allow="autoplay"></iframe>
+    </div>
+  </div>
+
+  <!-- Main Livestream Player (shared) -->
+  <div id="livePlayerContainer" class="live-player"></div>
+</div>
     
-    <!-- On State - Embedded Video Frame -->
-    <div id="tvOn" class="tv-on hidden">
-      <span id="turnOffTV" class="turn-off-btn">&times;</span>
-      <iframe id="adultVideoFrame" src="" allowfullscreen allow="autoplay; encrypted-media"></iframe>
-    </div>
-  </div>
-
-  <!-- Shared Livestream Frame (for both tabs) -->
-  <div id="liveStreamSection" class="live-stream-section">
-    <h3 class="livestream-header">LIVESTREAM</h3>
-    <div id="livePlayerContainer" class="live-player"></div>
-  </div>
-
-</div>
-
-<!-- Adult Content Consent Modal -->
-<div id="adultConsentModal" class="consent-modal">
-  <div class="consent-content">
-    <h2>Adult Content Warning</h2>
-    <p>You are about to view <strong>explicit adult content</strong>.</p>
-    <p>By proceeding, you confirm that:</p>
-    <ul>
-      <li>You are <strong>18 years of age or older</strong> (or the legal age in your jurisdiction)</li>
-      <li>You consent to viewing sexually explicit material</li>
-      <li>You will not expose minors to this content</li>
-    </ul>
-    <div class="consent-buttons">
-      <button id="consentAgree">I Agree</button>
-      <button id="consentCancel">Cancel</button>
-    </div>
-  </div>
-</div>
-
     <button id="openHostsBtnz" class="featured-btnn" style="display:none;"></button>
 </div>
 
@@ -2524,7 +2718,7 @@ could you have broken something?  i only asked for color change:
       text-align:center;
     ">
       <p style="color:#ccc;margin-bottom:16px;font-size:15px;">
-        1 STRZ = ₦0.25
+       STRZ ⇄ Cash
       </p>
       <input type="number" id="convertAmount" placeholder="Enter STRZ amount" 
              style="width:100%;padding:16px;border-radius:14px;background:#222;color:#fff;border:1px solid #444;margin-bottom:16px;font-size:18px;text-align:center;">
@@ -2535,7 +2729,7 @@ could you have broken something?  i only asked for color change:
         width:100%;padding:16px;border:none;border-radius:14px;
         background:linear-gradient(90deg,#00ff9d,#00ffa3);color:#000;
         font-weight:700;font-size:18px;cursor:pointer;
-      ">Convert to Cash</button>
+      ">SWAP</button>
     </div>
   </div>
 

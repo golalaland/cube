@@ -239,8 +239,11 @@ function revealHostTabs() {
   console.log("[HOST UI] revealed");
 }
 
-
-
+// =============================
+// CHAT REPLY STATE — GLOBAL VARIABLES
+// =============================
+let currentReplyTarget = null;     // DOM element of the message being replied to
+let currentReplyData = null;       // Optional: extra data if needed (replyTo, etc.)
 
 /* ===============================
    FINAL 2025 BULLETPROOF AUTH + NOTIFICATIONS + UTILS

@@ -1867,42 +1867,43 @@ function sanitizeKey(email) {
     card.appendChild(bioEl);
     typeWriterEffect(bioEl, user.bioPick || "Nothing shared yet...");
 
-  // Meet button — ONLY color changed, everything else 100% original
-if (user.isHost) {
-  const meetBtn = document.createElement("div");
-  meetBtn.style.cssText = `
-    width:50px;height:50px;border-radius:50%;
-    background:rgba(30,30,35,0.9);
-    display:flex;align-items:center;justify-content:center;
-    margin:20px auto 10px auto;
-    cursor:pointer;
-    border:2px solid rgba(80,80,90,0.5);
-    transition:all 0.3s ease;
-    box-shadow:0 4px 15px rgba(0,0,0,0.7),
-               inset 0 1px 0 rgba(255,255,255,0.06);
-  `;
-  meetBtn.innerHTML = `<img src="https://cdn.shopify.com/s/files/1/0962/6648/6067/files/128_x_128_px_1.png?v=1765845334" style="width:28px;height:28px;"/>`;
+     // Meet button — centered (only for Hosts) — Original purple neon style
+    if (user.isHost) {
+      const meetBtn = document.createElement("div");
+      meetBtn.style.cssText = `
+        width:50px;height:50px;border-radius:50%;
+        background:rgba(255,0,242,0.15);
+        display:flex;align-items:center;justify-content:center;
+        margin:20px auto 10px auto;  /* Extra top margin for breathing room */
+        cursor:pointer;
+        border:2px solid rgba(255,0,242,0.5);
+        transition:all 0.3s ease;
+        box-shadow:0 0 15px rgba(255,0,242,0.4);
+      `;
+      meetBtn.innerHTML = `<img src="https://cdn.shopify.com/s/files/1/0962/6648/6067/files/128_x_128_px_1.png?v=1765845334" style="width:28px;height:28px;filter:drop-shadow(0 0 10px #ff00f2);"/>`;
+      
+      meetBtn.onclick = (e) => {
+        e.stopPropagation();
+        if (typeof showMeetModal === 'function') showMeetModal(user);
+      };
+      
+      meetBtn.onmouseenter = () => {
+        meetBtn.style.transform = "scale(1.15)";
+        meetBtn.style.background = "rgba(255,0,242,0.3)";
+        meetBtn.style.boxShadow = "0 0 25px rgba(255,0,242,0.7)";
+      };
+      
+      meetBtn.onmouseleave = () => {
+        meetBtn.style.transform = "scale(1)";
+        meetBtn.style.background = "rgba(255,0,242,0.15)";
+        meetBtn.style.boxShadow = "0 0 15px rgba(255,0,242,0.4)";
+      };
+      
+      card.appendChild(meetBtn);
+    }
 
-  meetBtn.onclick = (e) => {
-    e.stopPropagation();
-    if (typeof showMeetModal === 'function') showMeetModal(user);
-  };
-
-  // Hover exactly like your original (only darker colors)
-  meetBtn.onmouseenter = () => {
-    meetBtn.style.transform = "scale(1.15)";
-    meetBtn.style.background = "rgba(40,40,45,0.95)";
-    meetBtn.style.boxShadow = "0 8px 25px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.1)";
-  };
-
-  meetBtn.onmouseleave = () => {
-    meetBtn.style.transform = "scale(1)";
-    meetBtn.style.background = "rgba(30,30,35,0.9)";
-    meetBtn.style.boxShadow = "0 4px 15px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.06)";
-  };
-
-  card.appendChild(meetBtn);
-}
+    document.body.appendChild(card);
+    
     // Fade in
     requestAnimationFrame(() => {
       card.style.opacity = "1";

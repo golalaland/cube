@@ -86,6 +86,15 @@ const cashCountEl = document.getElementById('cashCount');
 const profileNameEl = document.getElementById('profileName');
 
 
+// make sure inner exists so RedHot never crashes
+if (tapButton && !tapButton.querySelector('.inner')) {
+  const span = document.createElement('span');
+  span.className = 'inner';
+  span.textContent = tapButton.textContent || 'TAP';
+  tapButton.innerHTML = '';
+  tapButton.appendChild(span);
+}
+
 // Prevent sound spam
 window.lastSoundTime = 0;
 
@@ -785,28 +794,49 @@ async function endSessionRecord() {
       });
     });
 
-    // === NEW: UPDATE BID TAPS IF USER IS IN CURRENT BID ===
-    if (sessionTaps > 0 && window.isUserInCurrentBid) {
-      // Find the user's bid document for this round
+      // === UPDATE BID TAPS IF USER IS IN CURRENT BID ===
+    if (sessionTaps > 0 && window.isUserInCurrentBid && window.CURRENT_ROUND_ID) {
       const bidQuery = query(
         collection(db, "bids"),
         where("uid", "==", currentUser.uid),
         where("roundId", "==", window.CURRENT_ROUND_ID),
         where("status", "==", "active")
       );
-      const bidSnap = await getDocs(bidQuery);
 
-      if (!bidSnap.empty) {
-        const bidRef = bidSnap.docs[0].ref;
-        // Atomically increment taps
-        await updateDoc(bidRef, {
-          taps: increment(sessionTaps),
-          lastActive: serverTimestamp() // Optional: update activity timestamp
-        });
-        console.log(`Bid taps updated: +${sessionTaps} for ${currentUser.uid}`);
-      } else {
-        console.warn("User in bid cache but no bid doc found — skipping bid taps update");
-      }
+      // Retry up to 5 times (1-second intervals) in case the join document is still propagating
+      let attempts = 0;
+      const maxAttempts = 5;
+
+      const tryUpdateBidTaps = async () => {
+        try {
+          const bidSnap = await getDocs(bidQuery);
+
+          if (!bidSnap.empty) {
+            const bidRef = bidSnap.docs[0].ref;
+            await updateDoc(bidRef, {
+              taps: increment(sessionTaps),
+              lastActive: serverTimestamp()
+            });
+            console.log(`%cBid taps saved: +${sessionTaps} (Total on leaderboard will update instantly)`, "color:#00ffaa;font-weight:bold");
+            return true;
+          } else {
+            attempts++;
+            if (attempts < maxAttempts) {
+              // Wait 1 second and try again
+              setTimeout(tryUpdateBidTaps, 1000);
+            } else {
+              console.warn("Bid document not found after", maxAttempts, "attempts — taps will be credited next round");
+            }
+            return false;
+          }
+        } catch (err) {
+          console.error("Error updating bid taps:", err);
+          return false;
+        }
+      };
+
+      // Start the first attempt immediately
+      tryUpdateBidTaps();
     }
 
     // Update local currentUser cache for instant UI consistency
@@ -815,7 +845,6 @@ async function endSessionRecord() {
     currentUser.bonusLevel = persistentBonusLevel;
 
     console.log("%cSESSION SAVED SUCCESSFULLY — Level:", "color:#00ffaa;font-weight:bold", persistentBonusLevel);
-
   } catch (error) {
     console.error("Failed to save session record:", error);
     sessionAlreadySaved = false; // Allow retry on next attempt if needed

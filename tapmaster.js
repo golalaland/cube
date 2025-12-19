@@ -248,67 +248,84 @@ function initializePot(){
 function randomInt(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
 function formatNumber(n){ return n.toLocaleString(); }
 
-// ---------- LOAD USER ----------
+// ---------- LOAD USER (UPDATED FOR BONUS LEVEL PERSISTENCE) ----------
 async function loadCurrentUserForGame() {
   try {
     const vipRaw = localStorage.getItem("vipUser");
     const hostRaw = localStorage.getItem("hostUser");
     const storedUser = vipRaw ? JSON.parse(vipRaw) : hostRaw ? JSON.parse(hostRaw) : null;
-    
+   
     if (!storedUser?.email) {
       currentUser = null;
       profileNameEl && (profileNameEl.textContent = "GUEST 0000");
       starCountEl && (starCountEl.textContent = "50");
       cashCountEl && (cashCountEl.textContent = "₦0");
+
+      // For guests: start at level 1 (no persistence)
+      persistentBonusLevel = 1;
       return;
     }
 
-// Generate the exact same document ID as your signup page
-const uid = storedUser.email
-  .trim()
-  .toLowerCase()
-  .replace(/[@.]/g, '_')      // @ and . → _   (this is the key!)
-  .replace(/_+/g, '_')        // collapse multiple ___ → _
-  .replace(/^_|_$/g, '');     // remove leading/trailing _
+    // Generate the exact same document ID as your signup page
+    const uid = storedUser.email
+      .trim()
+      .toLowerCase()
+      .replace(/[@.]/g, '_')
+      .replace(/_+/g, '_')
+      .replace(/^_|_$/g, '');
 
-const userRef = doc(db, "users", uid);
-const snap = await getDoc(userRef);
+    const userRef = doc(db, "users", uid);
+    const snap = await getDoc(userRef);
 
-if (!snap.exists()) {
-  // CREATE USER AUTOMATICALLY — only once, forever
-  await setDoc(userRef, {
-    uid,                                            // safe document ID
-    chatId: storedUser.fullName || 
-            storedUser.displayName || 
-            storedUser.email.split('@')[0] || 
-            "Player",
-    email: storedUser.email,                        // original email with @ and .
-    stars: 100,
-    cash: 0,
-    totalTaps: 0,
-    createdAt: serverTimestamp(),
-    tapsDaily: {},
-    tapsWeekly: {},
-    tapsMonthly: {}
-  });
-}
+    if (!snap.exists()) {
+      // CREATE USER AUTOMATICALLY — first time only
+      await setDoc(userRef, {
+        uid,
+        chatId: storedUser.fullName ||
+                storedUser.displayName ||
+                storedUser.email.split('@')[0] ||
+                "Player",
+        email: storedUser.email,
+        stars: 100,
+        cash: 0,
+        totalTaps: 0,
+        bonusLevel: 1,                    // ← new users start at level 1
+        createdAt: serverTimestamp(),
+        tapsDaily: {},
+        tapsWeekly: {},
+        tapsMonthly: {}
+      });
+    }
 
+    // Always fetch fresh data (even after create)
     const data = (await getDoc(userRef)).data();
+
     currentUser = {
       uid,
-      chatId: data.chatId || storedUser.email.split("_")[0],
+      chatId: data.chatId || storedUser.email.split('@')[0],
       email: storedUser.email,
       stars: Number(data.stars || 100),
       cash: Number(data.cash || 0),
-      totalTaps: Number(data.totalTaps || 0)
+      totalTaps: Number(data.totalTaps || 0),
+      bonusLevel: Number(data.bonusLevel || 1)   // ← include in currentUser if you need it elsewhere
     };
 
+    // ==== CRITICAL: SET THE PERSISTENT BONUS LEVEL FOR GAME ENGINE ====
+    persistentBonusLevel = Number(data.bonusLevel || 1);
+    // If somehow corrupted, force minimum
+    if (persistentBonusLevel < 1) persistentBonusLevel = 1;
+
+    // Update UI
     profileNameEl && (profileNameEl.textContent = currentUser.chatId);
     starCountEl && (starCountEl.textContent = formatNumber(currentUser.stars));
     cashCountEl && (cashCountEl.textContent = '₦' + formatNumber(currentUser.cash));
 
+    console.log("%cUser loaded — Starting at Bonus Level:", "color:#00ffaa;font-weight:bold", persistentBonusLevel);
+
   } catch (err) {
     console.warn("load user error", err);
+    // Fallback: safe defaults
+    persistentBonusLevel = 1;
   }
 }
 
@@ -480,6 +497,8 @@ let taps = 0;
 let earnings = 0;
 let timer = 0;
 let bonusLevel = 1;
+// Add near your other globals
+let persistentBonusLevel = 1; // This is the level the player has UNLOCKED (saved across rounds)
 let progress = 0;
 let tapsForNext = 100;
 let cashCounter = 0;
@@ -696,85 +715,79 @@ function getWeekNumber(date) {
 let sessionAlreadySaved = false;
 
 async function endSessionRecord() {
-  if (sessionAlreadySaved || !currentUser?.uid || sessionTaps + sessionEarnings === 0) return;
+  // Prevent double-saving or saving empty sessions
+  if (
+    sessionAlreadySaved ||
+    !currentUser?.uid ||
+    (sessionTaps === 0 && sessionEarnings === 0)
+  ) {
+    return;
+  }
 
   sessionAlreadySaved = true;
 
-  const userRef = doc(db, "users", currentUser.uid);
-  const now = new Date();
-  const lagosTime = new Date(now.getTime() + 60 * 60 * 1000);
+  // === UPDATE PERSISTENT LEVEL IF NEW HIGH ACHIEVED THIS ROUND ===
+  if (sessionBonusLevel > persistentBonusLevel) {
+    persistentBonusLevel = sessionBonusLevel;
+    console.log("%cNEW BONUS LEVEL UNLOCKED:", "color:#ff00ff;font-weight:bold", persistentBonusLevel);
+  }
 
-  const dailyKey = lagosTime.toISOString().split("T")[0];
+  const userRef = doc(db, "users", currentUser.uid);
+
+  // Lagos timezone offset (WAT = UTC+1)
+  const now = new Date();
+  const lagosTime = new Date(now.getTime() + 60 * 60 * 1000); // +1 hour
+  const dailyKey = lagosTime.toISOString().split("T")[0]; // YYYY-MM-DD
   const weeklyKey = `${lagosTime.getFullYear()}-W${getWeekNumber(lagosTime)}`;
   const monthlyKey = `${lagosTime.getFullYear()}-${String(lagosTime.getMonth() + 1).padStart(2, "0")}`;
 
   try {
-    await runTransaction(db, async (t) => {
-      const snap = await t.get(userRef);
-      const data = snap.data() || {};
+    await runTransaction(db, async (transaction) => {
+      const snap = await transaction.get(userRef);
+      if (!snap.exists()) {
+        console.warn("User document missing during save — skipping transaction");
+        return;
+      }
 
-      t.update(userRef, {
+      const data = snap.data();
+
+      // Prepare tap tracking updates
+      const tapsDaily = { ...data.tapsDaily };
+      tapsDaily[dailyKey] = (tapsDaily[dailyKey] || 0) + sessionTaps;
+
+      const tapsWeekly = { ...data.tapsWeekly };
+      tapsWeekly[weeklyKey] = (tapsWeekly[weeklyKey] || 0) + sessionTaps;
+
+      const tapsMonthly = { ...data.tapsMonthly };
+      tapsMonthly[monthlyKey] = (tapsMonthly[monthlyKey] || 0) + sessionTaps;
+
+      transaction.update(userRef, {
         cash: (data.cash || 0) + sessionEarnings,
         totalTaps: (data.totalTaps || 0) + sessionTaps,
         lastEarnings: sessionEarnings,
+        bonusLevel: persistentBonusLevel,           // ← Persisted unlocked level
         updatedAt: serverTimestamp(),
+        lastPlayed: serverTimestamp(),
 
-        tapsDaily: {
-          ...data.tapsDaily,
-          [dailyKey]: (data.tapsDaily?.[dailyKey] || 0) + sessionTaps,
-        },
-        tapsWeekly: {
-          ...data.tapsWeekly,
-          [weeklyKey]: (data.tapsWeekly?.[weeklyKey] || 0) + sessionTaps,
-        },
-        tapsMonthly: {
-          ...data.tapsMonthly,
-          [monthlyKey]: (data.tapsMonthly?.[monthlyKey] || 0) + sessionTaps,
-        },
+        // Daily / Weekly / Monthly tap counters
+        tapsDaily,
+        tapsWeekly,
+        tapsMonthly,
       });
     });
 
-    if (window.CURRENT_ROUND_ID && sessionTaps > 0) {
-      const bidCheck = await getDocs(
-        query(
-          collection(db, "bids"),
-          where("uid", "==", currentUser.uid),
-          where("roundId", "==", window.CURRENT_ROUND_ID),
-          where("status", "==", "active")
-        )
-      );
+    // Update local currentUser cache for instant UI consistency
+    currentUser.cash = (currentUser.cash || 0) + sessionEarnings;
+    currentUser.totalTaps = (currentUser.totalTaps || 0) + sessionTaps;
+    currentUser.bonusLevel = persistentBonusLevel;
 
-      if (!bidCheck.empty) {
-        await addDoc(collection(db, "taps"), {
-          uid: currentUser.uid,
-          username: currentUser.chatId || "Player",
-          displayName: currentUser.chatId || "Player",
-          count: sessionTaps,
-          roundId: window.CURRENT_ROUND_ID,
-          inBid: true,
-          timestamp: serverTimestamp(),
-        });
-      }
-    }
+    console.log("%cSESSION SAVED SUCCESSFULLY — Level:", "color:#00ffaa;font-weight:bold", persistentBonusLevel);
 
-    currentUser.cash += sessionEarnings;
-    currentUser.totalTaps += sessionTaps;
-
-    cashCountEl && (cashCountEl.textContent = "₦" + formatNumber(currentUser.cash));
-    earningsEl && (earningsEl.textContent = "₦0");
-    miniEarnings && (miniEarnings.textContent = "₦0");
-
-    console.log("%cROUND SAVED — UNSTOPPABLE!", "color:#0f9;font-size:20px;font-weight:bold");
-  } catch (err) {
-    console.error(
-      "%cSAVE FAILED — WILL RETRY NEXT ROUND",
-      "color:#f00;background:#300;padding:12px;border-radius:10px",
-      err
-    );
-    sessionAlreadySaved = false;
+  } catch (error) {
+    console.error("Failed to save session record:", error);
+    sessionAlreadySaved = false; // Allow retry on next attempt if needed
   }
 }
-
 // ======================================================
 //  RED HOT DEVIL MODE
 // ======================================================

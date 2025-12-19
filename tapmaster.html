@@ -272,25 +272,88 @@ body {display:flex;justify-content:center;align-items:flex-start;padding:18px 0 
 @keyframes starBoom {
   to { transform: translate(var(--dx), var(--dy)) rotate(360deg) scale(2); opacity:0; }
 }
-/* modal (normal fade-in centered) */
-  .modal-backdrop {
-    position:fixed; inset:0; background: rgba(0,0,0,0.6); display:none; align-items:center; justify-content:center; z-index:9999;
-  }
-  .modal {
-  width:92%; max-width:420px; background:#0f0f0f; border-radius:12px; padding:16px; border:1px solid rgba(255,255,255,0.06);
-  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+/* MODAL BACKDROP – PERFECTLY CENTERED + SMOOTH FADE */
+.modal-backdrop {
+  position: fixed;
+  inset: 0; /* top:0; left:0; right:0; bottom:0; */
+  background: rgba(0, 0, 0, 0.75); /* slightly darker for better focus */
+  display: none;                    /* hidden by default */
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;                    /* prevents edges on small screens */
+  box-sizing: border-box;
+  overflow-y: auto;                 /* scroll if modal taller than screen */
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
 }
-.modal h3{ margin:0 0 8px 0; color:var(--accent1); font-size:16px; }
-.modal .list { text-align:left; margin-top:12px; max-height:320px; overflow:auto; }
-.modal .list li { padding:8px 6px; border-bottom:1px dashed rgba(255,255,255,0.03); font-weight:700; }
 
-/* result panel (small) */
-#resultModalInner { display:none; margin-top:18px; }
+/* Active state – use class toggle (recommended) or inline display:flex */
+.modal-backdrop.active,
+.modal-backdrop[style*="flex"] {    /* fallback for inline style toggles */
+  display: flex !important;
+  opacity: 1;
+  visibility: visible;
+}
 
-/* small helpers */
-.hidden { display:none!important; }
-button, input { font-size:16px; } /* prevents iOS zoom on tap */
+/* MODAL CONTENT – CLEAN & CONSISTENT */
+.modal {
+  width: 92%;
+  max-width: 420px;
+  background: #0f0f0f;
+  border-radius: 18px;              /* slightly rounder, modern feel */
+  padding: 20px 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7);
+  display: flex;
+  flex-direction: column;
+  max-height: 88vh;                  /* prevent overflow on small screens */
+  overflow: hidden;                 /* inner scroll if needed */
+}
 
+/* Optional: add inner scrollable area for long content */
+.modal .modal-content {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 4px;               /* space for scrollbar */
+  margin: 8px 0;
+}
+
+/* Headers */
+.modal h3 {
+  margin: 0 0 12px 0;
+  color: var(--accent1, #FFD700);
+  font-size: 18px;
+  font-weight: 800;
+  text-align: center;
+}
+
+/* Lists */
+.modal .list {
+  text-align: left;
+  margin-top: 12px;
+  max-height: 340px;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+.modal .list li {
+  padding: 10px 6px;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.05);
+  font-weight: 700;
+  color: #eee;
+}
+
+/* RESULT PANEL (small) */
+#resultModalInner {
+  display: none;
+  margin-top: 18px;
+}
+
+/* SMALL HELPERS */
+.hidden { display: none !important; }
+button, input { font-size: 16px; } /* prevents iOS zoom on tap */
 /* ——— ACTIVE TAB: COLD GOLD UNDERLINE + SHIMMER ——— */
 .lb-tab.active {
   background: #222 !important;

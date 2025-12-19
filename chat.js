@@ -3580,7 +3580,7 @@ if (!window.verifyHandlersInitialized) {
     }
   });
 
- // ---------- CONFIRM MODAL (Highlighter Theme Update) ----------
+// ---------- CONFIRM MODAL ----------
 window.showConfirmModal = function (number, cost = 21) {
   let modal = document.getElementById("verifyConfirmModal");
   if (modal) modal.remove();
@@ -3592,62 +3592,27 @@ window.showConfirmModal = function (number, cost = 21) {
     left: 0,
     width: "100vw",
     height: "100vh",
-    background: "rgba(0,0,0,0.75)",
+    background: "rgba(0,0,0,0.7)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     zIndex: "999999",
-    backdropFilter: "blur(3px)",
-    WebkitBackdropFilter: "blur(3px)"
+    backdropFilter: "blur(2px)",
   });
-
   modal.innerHTML = `
-    <div style="
-      background:#111;
-      padding:20px 22px;
-      border-radius:12px;
-      text-align:center;
-      color:#fff;
-      max-width:340px;
-      width:90%;
-      box-shadow:0 0 20px rgba(0,0,0,0.5);
-    ">
-      <h3 style="margin:0 0 10px; font-weight:600; font-size:20px;">Verification</h3>
-      <p style="margin:0 0 20px; line-height:1.5; color:#ccc; font-size:15px;">
-        Scan phone number <b>${number}</b> for <b>${cost} stars ⭐</b>?
-      </p>
-      <div style="display:flex; gap:12px; justify-content:center;">
-        <button id="cancelVerify" style="
-          padding:10px 20px;
-          background:#333;
-          border:none;
-          color:#ccc;
-          border-radius:10px;
-          font-weight:500;
-          cursor:pointer;
-          min-width:100px;
-        ">Cancel</button>
-        <button id="confirmVerify" style="
-          padding:10px 20px;
-          background:linear-gradient(90deg,#c3f60c,#e8ff6a);
-          border:none;
-          color:#000;
-          border-radius:10px;
-          font-weight:700;
-          cursor:pointer;
-          min-width:100px;
-        ">Yes</button>
+    <div style="background:#111;padding:16px 18px;border-radius:10px;text-align:center;color:#fff;max-width:280px;box-shadow:0 0 12px rgba(0,0,0,0.5);">
+      <h3 style="margin-bottom:10px;font-weight:600;">Verification</h3>
+      <p>Scan phone number <b>${number}</b> for <b>${cost} stars ⭐</b>?</p>
+      <div style="display:flex;justify-content:center;gap:10px;margin-top:12px;">
+        <button id="cancelVerify" style="padding:6px 12px;border:none;border-radius:6px;background:#333;color:#fff;font-weight:600;cursor:pointer;">Cancel</button>
+        <button id="confirmVerify" style="padding:6px 12px;border:none;border-radius:6px;background:linear-gradient(90deg,#c3f60c,#e8ff6a);color:#000;font-weight:600;cursor:pointer;">Yes</button>
       </div>
     </div>
   `;
-
   document.body.appendChild(modal);
-
   const cancelBtn = modal.querySelector("#cancelVerify");
   const confirmBtn = modal.querySelector("#confirmVerify");
-
   cancelBtn.onclick = () => modal.remove();
-
   confirmBtn.onclick = async () => {
     if (!currentUser?.uid) {
       showGoldAlert("⚠️ Please log in first");
@@ -3659,17 +3624,14 @@ window.showConfirmModal = function (number, cost = 21) {
       modal.remove();
       return;
     }
-
     confirmBtn.disabled = true;
-    confirmBtn.style.opacity = "0.6";
+    confirmBtn.style.opacity = 0.6;
     confirmBtn.style.cursor = "not-allowed";
-
     try {
       // Deduct stars
       await updateDoc(doc(db, "users", currentUser.uid), { stars: increment(-cost) });
       currentUser.stars -= cost;
       if (refs?.starCountEl) refs.starCountEl.textContent = formatNumberWithCommas(currentUser.stars);
-
       // Run verification
       await runNumberVerification(number);
       modal.remove();
@@ -3680,6 +3642,7 @@ window.showConfirmModal = function (number, cost = 21) {
     }
   };
 };
+  
   // ---------- RUN VERIFICATION ----------
   async function runNumberVerification(number) {
     try {

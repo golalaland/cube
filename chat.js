@@ -3580,79 +3580,106 @@ if (!window.verifyHandlersInitialized) {
     }
   });
 
-  // ---------- CONFIRM MODAL ----------
-  window.showConfirmModal = function (number, cost = 21) {
-    let modal = document.getElementById("verifyConfirmModal");
-    if (modal) modal.remove();
+ // ---------- CONFIRM MODAL (Highlighter Theme Update) ----------
+window.showConfirmModal = function (number, cost = 21) {
+  let modal = document.getElementById("verifyConfirmModal");
+  if (modal) modal.remove();
+  modal = document.createElement("div");
+  modal.id = "verifyConfirmModal";
+  Object.assign(modal.style, {
+    position: "fixed",
+    top: 0,
+    left: 0,
+    width: "100vw",
+    height: "100vh",
+    background: "rgba(0,0,0,0.75)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: "999999",
+    backdropFilter: "blur(3px)",
+    WebkitBackdropFilter: "blur(3px)"
+  });
 
-    modal = document.createElement("div");
-    modal.id = "verifyConfirmModal";
-    Object.assign(modal.style, {
-      position: "fixed",
-      top: 0,
-      left: 0,
-      width: "100vw",
-      height: "100vh",
-      background: "rgba(0,0,0,0.7)",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      zIndex: "999999",
-      backdropFilter: "blur(2px)",
-    });
-
-    modal.innerHTML = `
-      <div style="background:#111;padding:16px 18px;border-radius:10px;text-align:center;color:#fff;max-width:280px;box-shadow:0 0 12px rgba(0,0,0,0.5);">
-        <h3 style="margin-bottom:10px;font-weight:600;">Verification</h3>
-        <p>Scan phone number <b>${number}</b> for <b>${cost} stars ⭐</b>?</p>
-        <div style="display:flex;justify-content:center;gap:10px;margin-top:12px;">
-          <button id="cancelVerify" style="padding:6px 12px;border:none;border-radius:6px;background:#333;color:#fff;font-weight:600;cursor:pointer;">Cancel</button>
-          <button id="confirmVerify" style="padding:6px 12px;border:none;border-radius:6px;background:linear-gradient(90deg,#ff0099,#ff6600);color:#fff;font-weight:600;cursor:pointer;">Yes</button>
-        </div>
+  modal.innerHTML = `
+    <div style="
+      background:#111;
+      padding:20px 22px;
+      border-radius:12px;
+      text-align:center;
+      color:#fff;
+      max-width:340px;
+      width:90%;
+      box-shadow:0 0 20px rgba(0,0,0,0.5);
+    ">
+      <h3 style="margin:0 0 10px; font-weight:600; font-size:20px;">Verification</h3>
+      <p style="margin:0 0 20px; line-height:1.5; color:#ccc; font-size:15px;">
+        Scan phone number <b>${number}</b> for <b>${cost} stars ⭐</b>?
+      </p>
+      <div style="display:flex; gap:12px; justify-content:center;">
+        <button id="cancelVerify" style="
+          padding:10px 20px;
+          background:#333;
+          border:none;
+          color:#ccc;
+          border-radius:10px;
+          font-weight:500;
+          cursor:pointer;
+          min-width:100px;
+        ">Cancel</button>
+        <button id="confirmVerify" style="
+          padding:10px 20px;
+          background:linear-gradient(90deg,#c3f60c,#e8ff6a);
+          border:none;
+          color:#000;
+          border-radius:10px;
+          font-weight:700;
+          cursor:pointer;
+          min-width:100px;
+        ">Yes</button>
       </div>
-    `;
+    </div>
+  `;
 
-    document.body.appendChild(modal);
+  document.body.appendChild(modal);
 
-    const cancelBtn = modal.querySelector("#cancelVerify");
-    const confirmBtn = modal.querySelector("#confirmVerify");
+  const cancelBtn = modal.querySelector("#cancelVerify");
+  const confirmBtn = modal.querySelector("#confirmVerify");
 
-    cancelBtn.onclick = () => modal.remove();
+  cancelBtn.onclick = () => modal.remove();
 
-confirmBtn.onclick = async () => {
-  if (!currentUser?.uid) {
-    showGoldAlert("⚠️ Please log in first");
-    modal.remove();
-    return;
-  }
+  confirmBtn.onclick = async () => {
+    if (!currentUser?.uid) {
+      showGoldAlert("⚠️ Please log in first");
+      modal.remove();
+      return;
+    }
+    if ((currentUser.stars || 0) < cost) {
+      showGoldAlert("⚠️ Not enough stars ⭐");
+      modal.remove();
+      return;
+    }
 
-  if ((currentUser.stars || 0) < cost) {
-    showGoldAlert("⚠️ Not enough stars ⭐");
-    modal.remove();
-    return;
-  }
+    confirmBtn.disabled = true;
+    confirmBtn.style.opacity = "0.6";
+    confirmBtn.style.cursor = "not-allowed";
 
-      confirmBtn.disabled = true;
-      confirmBtn.style.opacity = 0.6;
-      confirmBtn.style.cursor = "not-allowed";
+    try {
+      // Deduct stars
+      await updateDoc(doc(db, "users", currentUser.uid), { stars: increment(-cost) });
+      currentUser.stars -= cost;
+      if (refs?.starCountEl) refs.starCountEl.textContent = formatNumberWithCommas(currentUser.stars);
 
-      try {
-        // Deduct stars
-        await updateDoc(doc(db, "users", currentUser.uid), { stars: increment(-cost) });
-        currentUser.stars -= cost;
-        if (refs?.starCountEl) refs.starCountEl.textContent = formatNumberWithCommas(currentUser.stars);
-
-        // Run verification
-        await runNumberVerification(number);
-        modal.remove();
-      } catch (err) {
-        console.error(err);
-        showGoldAlert("❌ Verification failed, please retry!");
-        modal.remove();
-      }
-    };
+      // Run verification
+      await runNumberVerification(number);
+      modal.remove();
+    } catch (err) {
+      console.error(err);
+      showGoldAlert("❌ Verification failed, please retry!");
+      modal.remove();
+    }
   };
-
+};
   // ---------- RUN VERIFICATION ----------
   async function runNumberVerification(number) {
     try {
@@ -3748,26 +3775,48 @@ confirmBtn.onclick = async () => {
       setTimeout(() => {
         stageMsgEl.textContent = stage;
 
-        if (index === stages.length - 1) {
-          setTimeout(() => {
-            modalContent.innerHTML = user
-              ? `<h3>Number Verified! ✅</h3>
-                 <p>This number belongs to <b>${user.fullName}</b></p>
-                 <p style="margin-top:8px; font-size:13px; color:#ccc;">You’re free to chat — they’re legit 😌</p>
-                 <button id="closeVerifyModal" style="margin-top:12px;padding:6px 14px;border:none;border-radius:8px;background:linear-gradient(90deg,#ff0099,#ff6600);color:#fff;font-weight:600;cursor:pointer;">Close</button>`
-              : `<h3>Number Not Verified! ❌</h3>
-                 <p>The number <b>${inputNumber}</b> does not exist on verified records — be careful!</p>
-                 <button id="closeVerifyModal" style="margin-top:12px;padding:6px 14px;border:none;border-radius:8px;background:linear-gradient(90deg,#ff0099,#ff6600);color:#fff;font-weight:600;cursor:pointer;">Close</button>`;
+      if (index === stages.length - 1) {
+  setTimeout(() => {
+    modalContent.innerHTML = user
+      ? `<h3 style="margin:0 0 10px; font-weight:600; font-size:20px;">Number Verified! ✅</h3>
+         <p style="margin:0 0 20px; line-height:1.5; color:#ccc; font-size:15px;">
+           This number belongs to <b>${user.fullName}</b>
+         </p>
+         <p style="margin:0 0 20px; font-size:14px; color:#aaa;">
+           You’re free to chat — they’re legit 😌
+         </p>
+         <button id="closeVerifyModal" style="
+           padding:10px 20px;
+           border:none;
+           border-radius:10px;
+           background:linear-gradient(90deg,#c3f60c,#e8ff6a);
+           color:#000;
+           font-weight:700;
+           cursor:pointer;
+           min-width:100px;
+         ">Close</button>`
+      : `<h3 style="margin:0 0 10px; font-weight:600; font-size:20px;">Number Not Verified! ❌</h3>
+         <p style="margin:0 0 20px; line-height:1.5; color:#ccc; font-size:15px;">
+           The number <b>${inputNumber}</b> does not exist on verified records — be careful!
+         </p>
+         <button id="closeVerifyModal" style="
+           padding:10px 20px;
+           border:none;
+           border-radius:10px;
+           background:linear-gradient(90deg,#c3f60c,#e8ff6a);
+           color:#000;
+           font-weight:700;
+           cursor:pointer;
+           min-width:100px;
+         ">Close</button>`;
 
-            modal.querySelector("#closeVerifyModal").onclick = () => modal.remove();
+    modal.querySelector("#closeVerifyModal").onclick = () => modal.remove();
 
-            if (user) setTimeout(() => modal.remove(), 8000 + Math.random() * 1000);
-          }, 500);
-        }
-      }, totalTime);
-    });
-  }
+    // Auto-close after ~8-9 seconds only on success
+    if (user) setTimeout(() => modal.remove(), 8000 + Math.random() * 1000);
+  }, 500);
 }
+        
 // ================================
 // UPLOAD HIGHLIGHT — TAGS + CLEAN BUTTONS + NO ERRORS
 // ================================

@@ -633,22 +633,26 @@ function updateInfoTab() {
   }
 }
 
-// CONVERT PREVIEW
+// CONVERT PREVIEW (unchanged)
 document.getElementById("convertAmount")?.addEventListener("input", e => {
   const stars = Number(e.target.value) || 0;
   document.getElementById("convertResult").textContent = (stars * 0.25).toLocaleString();
 });
 
-// CONVERT STRZ TO CASH
+// WITHDRAW PREVIEW — NEW: Live update as user types
+document.getElementById("withdrawAmount")?.addEventListener("input", e => {
+  const amount = Number(e.target.value) || 0;
+  document.getElementById("withdrawPreview").textContent = amount.toLocaleString();
+});
+
+// CONVERT STRZ TO CASH (unchanged)
 document.getElementById("convertBtn")?.addEventListener("click", async () => {
   const stars = Number(document.getElementById("convertAmount").value);
   if (!stars || stars <= 0) return showGoldAlert("Enter valid amount");
   if (stars > (currentUser?.stars || 0)) return showGoldAlert("Not enough STRZ");
-
   const cash = stars * 0.25;
   const ok = await showConfirm("Convert", `Convert ${stars.toLocaleString()} STRZ → ₦${cash.toLocaleString()}?`);
   if (!ok) return;
-
   showLoader("Converting...");
   try {
     await updateDoc(doc(db, "users", currentUser.uid), {
@@ -668,15 +672,29 @@ document.getElementById("convertBtn")?.addEventListener("click", async () => {
   }
 });
 
+// WITHDRAW CASH — NOW MODAL-FREE & CLEAN
 document.getElementById("withdrawCashBtn")?.addEventListener("click", async () => {
-  const cash = currentUser?.cash || 0;
-  if (cash < 5000) return showNiceAlert("Minimum ₦5,000 required");
+  const input = document.getElementById("withdrawAmount");
+  const amount = Number(input.value);
 
-  const amountStr = prompt(`Enter amount to withdraw (₦5,000 - ₦${cash.toLocaleString()}):`, cash);
-  const amount = Number(amountStr);
-  if (isNaN(amount) || amount < 5000 || amount > cash) return showNiceAlert("Invalid amount");
+  const currentCash = currentUser?.cash || 0;
 
-  const ok = await showConfirm("Withdraw Cash", `Request ₦${amount.toLocaleString()}?\nCash will be deducted now.`);
+  // Basic validation
+  if (!amount || amount <= 0) {
+    return showGoldAlert("Enter a valid amount");
+  }
+  if (amount < 5000) {
+    return showGoldAlert("Minimum withdrawal is ₦5,000");
+  }
+  if (amount > currentCash) {
+    return showGoldAlert(`Insufficient balance. Available: ₦${currentCash.toLocaleString()}`);
+  }
+
+  // Confirm action
+  const ok = await showConfirm(
+    "Withdraw Cash",
+    `Request withdrawal of ₦${amount.toLocaleString()}?\n\nYour balance will be deducted immediately.`
+  );
   if (!ok) return;
 
   showLoader("Processing withdrawal...");
@@ -706,19 +724,26 @@ document.getElementById("withdrawCashBtn")?.addEventListener("click", async () =
       });
     });
 
-    // Update local balance
+    // Update local state
     currentUser.cash -= amount;
-    updateInfoTab();  // refresh info tab
-    // Also update any other balance displays
-    document.getElementById("cashCount") && (document.getElementById("cashCount").textContent = currentUser.cash.toLocaleString());
+    updateInfoTab();
+
+    // Update any other cash displays
+    const cashCountEl = document.getElementById("cashCount");
+    if (cashCountEl) cashCountEl.textContent = currentUser.cash.toLocaleString();
+
+    // Reset input
+    input.value = "";
+    document.getElementById("withdrawPreview").textContent = "0";
 
     hideLoader();
-    showGoldAlert("Withdrawal requested!\n₦" + amount.toLocaleString() + " deducted from balance.\nAdmin will transfer soon.");
-
+    showGoldAlert(
+      `Withdrawal requested!\n₦${amount.toLocaleString()} deducted.\nAdmin will transfer soon.`
+    );
   } catch (e) {
     console.error("Withdraw failed:", e);
     hideLoader();
-    showGoldAlert("Request failed — try again");
+    showGoldAlert("Request failed — please try again");
   }
 });
 
@@ -740,26 +765,85 @@ function hideLoader() {
 }
 
 
-// SIMPLE CONFIRM MODAL — WORKS EVERYWHERE
+// MODERN CONFIRM MODAL — MATCHES MEET MODAL DESIGN
 async function showConfirm(title, msg) {
   return new Promise(resolve => {
     const overlay = document.createElement("div");
-    overlay.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.95);display:flex;align-items:center;justify-content:center;z-index:999999;backdrop-filter:blur(12px);";
+    overlay.id = "confirmModalOverlay"; // optional ID for cleanup
+    Object.assign(overlay.style, {
+      position: "fixed",
+      top: 0,
+      left: 0,
+      width: "100vw",
+      height: "100vh",
+      background: "rgba(0,0,0,0.75)",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      zIndex: "999999",
+      backdropFilter: "blur(3px)",
+      WebkitBackdropFilter: "blur(3px)"
+    });
+
     overlay.innerHTML = `
-      <div style="background:#111;padding:32px;border-radius:18px;text-align:center;max-width:380px;width:90%;box-shadow:0 0 60px rgba(255,0,110,0.5);border:1px solid #444;">
-        <h3 style="color:#fff;margin:0 0 16px;font-size:22px;">${title}</h3>
-        <p style="color:#ccc;margin:0 0 24px;line-height:1.6;">${msg}</p>
-        <div style="display:flex;gap:16px;justify-content:center;">
-          <button id="no" style="padding:12px 28px;background:#333;color:#ccc;border:none;border-radius:12px;font-weight:600;cursor:pointer;">Cancel</button>
-          <button id="yes" style="padding:12px 28px;background:linear-gradient(90deg,#ff006e,#ff4500);color:#fff;border:none;border-radius:12px;font-weight:700;cursor:pointer;">Confirm</button>
+      <div style="
+        background:#111;
+        padding:20px 22px;
+        border-radius:12px;
+        text-align:center;
+        color:#fff;
+        max-width:340px;
+        width:90%;
+        box-shadow:0 0 20px rgba(0,0,0,0.5);
+      ">
+        <h3 style="margin:0 0 10px; font-weight:600; font-size:20px;">${title}</h3>
+        <p style="margin:0 0 20px; line-height:1.5; color:#ccc; font-size:15px;">${msg}</p>
+        <div style="display:flex; gap:12px; justify-content:center;">
+          <button id="confirmNo" style="
+            padding:10px 20px;
+            background:#333;
+            border:none;
+            color:#ccc;
+            border-radius:10px;
+            font-weight:500;
+            cursor:pointer;
+            min-width:100px;
+          ">Cancel</button>
+          <button id="confirmYes" style="
+            padding:10px 20px;
+            background:linear-gradient(90deg,#c3f60c,#e8ff6a);
+            border:none;
+            color:#000;
+            border-radius:10px;
+            font-weight:700;
+            cursor:pointer;
+            min-width:100px;
+          ">Confirm</button>
         </div>
-      </div>`;
+      </div>
+    `;
+
     document.body.appendChild(overlay);
-    overlay.querySelector("#no").onclick = () => { overlay.remove(); resolve(false); };
-    overlay.querySelector("#yes").onclick = () => { overlay.remove(); resolve(true); };
+
+    overlay.querySelector("#confirmNo").onclick = () => {
+      overlay.remove();
+      resolve(false);
+    };
+
+    overlay.querySelector("#confirmYes").onclick = () => {
+      overlay.remove();
+      resolve(true);
+    };
+
+    // Optional: click outside to cancel
+    overlay.addEventListener("click", e => {
+      if (e.target === overlay) {
+        overlay.remove();
+        resolve(false);
+      }
+    });
   });
 }
-
 // ==============================
 // CHAT.JS — CLEAN FULL VERSION
 // ==============================

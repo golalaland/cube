@@ -2565,7 +2565,7 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
     </p>
   </div>
 
-<!-- REVENUE DASHBOARD -->
+<!-- REVENUE & ACTIONS – BANK APP STYLE -->
 <div style="margin: 32px 0;">
   <h4 style="
     text-align: center;
@@ -2578,17 +2578,20 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
   ">
     REVENUE DASHBOARD
   </h4>
+
+  <!-- Main Unified Card -->
   <div style="
     background: #000000;
     backdrop-filter: blur(12px);
     border: 1px solid rgba(195, 246, 12, 0.4);
     border-radius: 16px;
-    padding: 20px;
+    padding: 24px 20px;
     max-width: 380px;
     margin: 0 auto;
     box-shadow: 0 10px 30px rgba(0,0,0,0.5),
                 0 0 15px rgba(195, 246, 12, 0.12);
   ">
+    <!-- Balances Section – Exactly as you wanted, untouched sizes -->
     <div style="font-size: 12px; color: #bbbbbb; margin-bottom: 6px;">Cash Balance</div>
     <div style="font-size: 18px; font-weight: 800; color: #c3f60c; margin: 10px 0;">
       ₦<span id="infoCashBalance">0</span>
@@ -2599,38 +2602,15 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
       <span id="infoStarBalance">0</span> ⭐️
     </div>
     
-    <div style="color: #aaaaaa; font-size: 13px; margin-top: 16px;">
+    <div style="color: #aaaaaa; font-size: 13px; margin-top: 16px; margin-bottom: 32px;">
       Last earnings: ₦<span id="infoLastEarnings">0</span>
     </div>
-  </div>
-</div>
-  
-<!-- CONVERT STRZ TO CASH -->
-<div style="margin: 32px 0;">
-  <h4 style="
-    text-align: center;
-    margin-bottom: 20px;
-    font-weight: 700;
-    font-size: 20px;
-    background: linear-gradient(90deg, #c3f60c, #e8ff6a);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  ">
-    SWAP SHOP
-  </h4>
-  <div style="
-    background: #000000;
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(195, 246, 12, 0.4);
-    border-radius: 16px;
-    padding: 22px;
-    max-width: 380px;
-    margin: 0 auto;
-    text-align: center;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5),
-                0 0 15px rgba(195, 246, 12, 0.12);
-  ">
-    <p style="color: #cccccc; margin: 0 0 22px; font-size: 14.5px; font-weight: 500;">
+
+    <!-- Divider -->
+    <div style="height: 1px; background: rgba(195, 246, 12, 0.2); margin: 0 0 28px;"></div>
+
+    <!-- SWAP SHOP Section -->
+    <p style="color: #cccccc; margin: 0 0 16px; font-size: 14px; font-weight: 600; text-align: center;">
       STRZ ⇄ CASH
     </p>
     
@@ -2640,106 +2620,84 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
       placeholder="Enter STRZ amount"
       style="
         width: 100%;
-        max-width: 300px;
-        padding: 15px;
+        max-width: 280px;
+        padding: 13px;
         border-radius: 12px;
         background: #1a1a1a;
         color: #fff;
         border: 1px solid #444;
-        font-size: 17px;
+        font-size: 16px;
         text-align: center;
         box-sizing: border-box;
-        margin: 0 auto 24px;
+        margin: 0 auto 20px;
         display: block;
       "
     />
     
-    <div style="color: #c3f60c; font-size: 23px; font-weight: 800; margin: 24px 0;">
+    <div style="color: #c3f60c; font-size: 21px; font-weight: 800; margin: 20px 0;">
       → ₦<span id="convertResult">0</span>
     </div>
     
     <button id="convertBtn" style="
       width: 100%;
-      max-width: 300px;
-      padding: 15px;
+      max-width: 280px;
+      padding: 13px;
       border: none;
       border-radius: 12px;
       background: linear-gradient(90deg, #c3f60c, #e8ff6a);
       color: #000;
       font-weight: 700;
-      font-size: 17px;
+      font-size: 16px;
       cursor: pointer;
-      margin: 0 auto;
+      margin: 0 auto 28px;
       display: block;
     ">
       SWAP
     </button>
-  </div>
-</div>
-  
- <!-- WITHDRAW CASH -->
-<div style="margin: 32px 0;">
-  <h4 style="
-    text-align: center;
-    margin-bottom: 20px;
-    font-weight: 700;
-    font-size: 20px;
-    background: linear-gradient(90deg, #c3f60c, #e8ff6a);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  ">
-    WITHDRAW CASH
-  </h4>
-  <div style="
-    background: #000000;
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(195, 246, 12, 0.4);
-    border-radius: 16px;
-    padding: 22px;
-    max-width: 380px;
-    margin: 0 auto;
-    text-align: center;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5),
-                0 0 15px rgba(195, 246, 12, 0.12);
-  ">
-    <p style="color: #cccccc; margin: 0 0 18px; font-size: 14.5px; font-weight: 500;">
-      Minimum withdrawal: ₦5,000
+
+    <!-- WITHDRAW Section -->
+    <p style="color: #cccccc; margin: 0 0 16px; font-size: 14px; font-weight: 600; text-align: center;">
+      WITHDRAW CASH
+    </p>
+    
+    <p style="color: #aaaaaa; margin: -12px 0 16px; font-size: 12.5px; text-align: center;">
+      Minimum: ₦5,000
     </p>
     
     <input
       type="number"
       id="withdrawAmount"
-      placeholder="Enter amount to withdraw"
+      placeholder="Enter amount"
       style="
         width: 100%;
-        max-width: 300px;
-        padding: 15px;
+        max-width: 280px;
+        padding: 13px;
         border-radius: 12px;
         background: #1a1a1a;
         color: #fff;
         border: 1px solid #444;
-        font-size: 17px;
+        font-size: 16px;
         text-align: center;
         box-sizing: border-box;
-        margin: 0 auto 24px;
+        margin: 0 auto 20px;
         display: block;
       "
     />
     
-    <div style="color: #c3f60c; font-size: 23px; font-weight: 800; margin: 24px 0;">
+    <div style="color: #c3f60c; font-size: 21px; font-weight: 800; margin: 20px 0;">
       → ₦<span id="withdrawPreview">0</span>
     </div>
     
     <button id="withdrawCashBtn" style="
       width: 100%;
-      max-width: 300px;
-      padding: 15px;
+      max-width: 280px;
+      padding: 13px;
       border: none;
       border-radius: 12px;
       background: linear-gradient(90deg, #c3f60c, #e8ff6a);
       color: #000;
       font-weight: 700;
-      font-size: 17px;
+      font-size: 16px;
       cursor: pointer;
       margin: 0 auto;
       display: block;

@@ -721,10 +721,9 @@ function getWeekNumber(date) {
 }
 
 // ======================================================
-//  END SESSION — BULLETPROOF SAVE
+// END SESSION — BULLETPROOF SAVE (WITH BID TAPS INCREMENT)
 // ======================================================
 let sessionAlreadySaved = false;
-
 async function endSessionRecord() {
   // Prevent double-saving or saving empty sessions
   if (
@@ -776,16 +775,39 @@ async function endSessionRecord() {
         cash: (data.cash || 0) + sessionEarnings,
         totalTaps: (data.totalTaps || 0) + sessionTaps,
         lastEarnings: sessionEarnings,
-        bonusLevel: persistentBonusLevel,           // ← Persisted unlocked level
+        bonusLevel: persistentBonusLevel, // ← Persisted unlocked level
         updatedAt: serverTimestamp(),
         lastPlayed: serverTimestamp(),
-
         // Daily / Weekly / Monthly tap counters
         tapsDaily,
         tapsWeekly,
         tapsMonthly,
       });
     });
+
+    // === NEW: UPDATE BID TAPS IF USER IS IN CURRENT BID ===
+    if (sessionTaps > 0 && window.isUserInCurrentBid) {
+      // Find the user's bid document for this round
+      const bidQuery = query(
+        collection(db, "bids"),
+        where("uid", "==", currentUser.uid),
+        where("roundId", "==", window.CURRENT_ROUND_ID),
+        where("status", "==", "active")
+      );
+      const bidSnap = await getDocs(bidQuery);
+
+      if (!bidSnap.empty) {
+        const bidRef = bidSnap.docs[0].ref;
+        // Atomically increment taps
+        await updateDoc(bidRef, {
+          taps: increment(sessionTaps),
+          lastActive: serverTimestamp() // Optional: update activity timestamp
+        });
+        console.log(`Bid taps updated: +${sessionTaps} for ${currentUser.uid}`);
+      } else {
+        console.warn("User in bid cache but no bid doc found — skipping bid taps update");
+      }
+    }
 
     // Update local currentUser cache for instant UI consistency
     currentUser.cash = (currentUser.cash || 0) + sessionEarnings;
@@ -1751,10 +1773,11 @@ document.getElementById('finalConfirmBtn')?.addEventListener('click', async () =
 // SUCCESS: OFFICIALLY JOIN THE BID
 await addDoc(collection(db, "bids"), {
   uid: currentUser.uid,
-  username: currentUser.chatId,           // ← CORRECT (this is your real name)
-  displayName: currentUser.chatId,        // ← ADD THIS TOO (future-proof)
+  username: currentUser.chatId,
+  displayName: currentUser.chatId,
   roundId: window.CURRENT_ROUND_ID,
   status: "active",
+  taps: 0,                    // ← ADD THIS
   joinedAt: serverTimestamp()
 });
     // SUCCESS FLOW — EVERYTHING WORKS
@@ -1869,49 +1892,40 @@ function startDailyBidEngine() {
       prizeEl.textContent = "₦" + prize.toLocaleString();
     });
 
-    // ─── BID-ONLY LEADERBOARD (only paid & joined players) ───
-    if (bidActive && leaderboardEl) {
-      const tapsQuery = query(
-        collection(db, "taps"),
-        where("roundId", "==", window.CURRENT_ROUND_ID),
-        where("inBid", "==", true)
-      );
+  // ─── BID-ONLY LEADERBOARD (now from bids collection) ───
+if (bidActive && leaderboardEl) {
+  const leaderboardQuery = query(
+    collection(db, "bids"),
+    where("roundId", "==", window.CURRENT_ROUND_ID),
+    where("status", "==", "active"),
+    orderBy("taps", "desc"),
+    limit(15)
+  );
+  unsubLeaderboard = onSnapshot(leaderboardQuery, (snap) => {
+    const ranked = snap.docs.map((doc, i) => {
+      const d = doc.data();
+      return {
+        name: (d.displayName || d.username || "Player").substring(0, 13),
+        taps: d.taps || 0,
+        rank: i + 1
+      };
+    });
 
-      unsubLeaderboard = onSnapshot(tapsQuery, (snap) => {
-        const scores = {};
-
-        snap.docs.forEach(doc => {
-          const d = doc.data();
-          if (d.roundId !== window.CURRENT_ROUND_ID || d.inBid !== true) return;
-
-          const realName = d.displayName || d.username || "Player";
-
-          if (!scores[d.uid]) {
-            scores[d.uid] = { name: realName, taps: 0 };
-          }
-          scores[d.uid].taps += (d.count || 1);
-        });
-
-        const ranked = Object.values(scores)
-          .sort((a, b) => b.taps - a.taps)
-          .slice(0, 15);   // change to 5 later if you want Top-5 only
-
-        if (ranked.length === 0) {
-          leaderboardEl.innerHTML = `<div style="text-align:center;color:#666;padding:30px 0;font-size:14px;">
-            No taps yet.<br>Join now and dominate!
-          </div>`;
-        } else {
-          leaderboardEl.innerHTML = ranked.map((p, i) => `
-            <div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid #333;">
-              <span style="color:${i===0?'#FFD700':i===1?'#C0C0C0':i===2?'#CD7F32':'#00FFA3'};font-weight:bold;">
-                #${i+1} ${p.name.substring(0,13)}
-              </span>
-              <span style="color:#00FFA3;font-weight:900;">${p.taps.toLocaleString()}</span>
-            </div>
-          `).join('');
-        }
-      });
-
+    if (ranked.length === 0) {
+      leaderboardEl.innerHTML = `<div style="text-align:center;color:#666;padding:30px 0;font-size:14px;">
+        No players yet.<br>Join now and dominate!
+      </div>`;
+    } else {
+      leaderboardEl.innerHTML = ranked.map(p => `
+        <div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid #333;">
+          <span style="color:${p.rank===1?'#FFD700':p.rank===2?'#C0C0C0':p.rank===3?'#CD7F32':'#00FFA3'};font-weight:bold;">
+            #${p.rank} ${p.name}
+          </span>
+          <span style="color:#00FFA3;font-weight:900;">${p.taps.toLocaleString()}</span>
+        </div>
+      `).join('');
+    }
+  });
     } else if (leaderboardEl) {
       leaderboardEl.innerHTML = `<div style="text-align:center;color:#555;padding:30px 0;">
         Bid opens at 00:33

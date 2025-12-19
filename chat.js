@@ -927,16 +927,15 @@ function showGiftAlert(text) {
   setTimeout(() => refs.giftAlert.classList.remove("show", "glow"), 4000);
 }
 
-// ---------------------- GLOBALS ----------------------
+// ---------------------- AUTO-SCROLL + TWITCH-STYLE MIDDLE DRAG BUTTON ----------------------
 let scrollPending = false;
-let tapModalEl = null;
-let currentReplyTarget = null;
 let scrollArrow = null;
+let middleDragBtn = null;
 
-// ---------------------- INIT AUTO-SCROLL ----------------------
 function handleChatAutoScroll() {
   if (!refs.messagesEl) return;
 
+  // BOTTOM ARROW (your existing one)
   scrollArrow = document.getElementById("scrollToBottomBtn");
   if (!scrollArrow) {
     scrollArrow = document.createElement("div");
@@ -946,17 +945,18 @@ function handleChatAutoScroll() {
       position: fixed;
       bottom: 90px;
       right: 20px;
-      padding: 6px 12px;
-      background: rgba(255,20,147,0.9);
+      padding: 10px 16px;
+      background: rgba(255,20,147,0.95);
       color: #fff;
-      border-radius: 14px;
-      font-size: 16px;
-      font-weight: 700;
+      border-radius: 50px;
+      font-size: 18px;
+      font-weight: 900;
       cursor: pointer;
       opacity: 0;
       pointer-events: none;
       transition: all 0.3s ease;
       z-index: 9999;
+      box-shadow: 0 0 20px rgba(255,0,147,0.6);
     `;
     document.body.appendChild(scrollArrow);
     scrollArrow.addEventListener("click", () => {
@@ -966,17 +966,91 @@ function handleChatAutoScroll() {
     });
   }
 
+  // TWITCH-STYLE MIDDLE DRAG BUTTON
+  middleDragBtn = document.getElementById("middleScrollDrag");
+  if (!middleDragBtn) {
+    middleDragBtn = document.createElement("div");
+    middleDragBtn.id = "middleScrollDrag";
+    middleDragBtn.innerHTML = "Drag";
+    middleDragBtn.style.cssText = `
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 36px;
+      height: 80px;
+      background: rgba(255,20,147,0.7);
+      color: #fff;
+      border-radius: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 12px;
+      cursor: ns-resize;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+      z-index: 999;
+      box-shadow: 0 0 20px rgba(255,0,147,0.4);
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+    `;
+    refs.messagesEl.style.position = "relative"; // important
+    refs.messagesEl.appendChild(middleDragBtn);
+
+    // DRAG FUNCTIONALITY
+    let isDragging = false;
+    let startY = 0;
+    let startScroll = 0;
+
+    middleDragBtn.addEventListener("mousedown", e => {
+      isDragging = true;
+      startY = e.clientY;
+      startScroll = refs.messagesEl.scrollTop;
+      middleDragBtn.style.background = "rgba(255,20,147,1)";
+      e.preventDefault();
+    });
+
+    document.addEventListener("mousemove", e => {
+      if (!isDragging) return;
+      const delta = startY - e.clientY;
+      refs.messagesEl.scrollTop = startScroll + delta;
+    });
+
+    document.addEventListener("mouseup", () => {
+      if (isDragging) {
+        isDragging = false;
+        middleDragBtn.style.background = "rgba(255,20,147,0.7)";
+      }
+    });
+  }
+
+  // SHOW/HIDE LOGIC
   refs.messagesEl.addEventListener("scroll", () => {
     const distanceFromBottom = refs.messagesEl.scrollHeight - refs.messagesEl.scrollTop - refs.messagesEl.clientHeight;
-    if (distanceFromBottom > 150) {
+    const distanceFromTop = refs.messagesEl.scrollTop;
+
+    // Bottom arrow
+    if (distanceFromBottom > 300) {
       scrollArrow.style.opacity = 1;
       scrollArrow.style.pointerEvents = "auto";
     } else {
       scrollArrow.style.opacity = 0;
       scrollArrow.style.pointerEvents = "none";
     }
+
+    // Middle drag button — show when not at bottom
+    if (distanceFromBottom > 100 && distanceFromTop > 100) {
+      middleDragBtn.style.opacity = 0.8;
+      middleDragBtn.style.pointerEvents = "auto";
+    } else {
+      middleDragBtn.style.opacity = 0;
+      middleDragBtn.style.pointerEvents = "none";
+    }
   });
 
+  // AUTO SCROLL TO BOTTOM ON NEW MESSAGES
   if (!scrollPending) {
     scrollPending = true;
     requestAnimationFrame(() => {
@@ -985,6 +1059,8 @@ function handleChatAutoScroll() {
     });
   }
 }
+
+// CALL IT
 handleChatAutoScroll();
 
 // Cancel reply

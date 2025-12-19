@@ -640,43 +640,45 @@ async function processTapQueue() {
 }
 
 // ======================================================
-//  START SESSION — FULL RESET
+// START SESSION — NOW USES PERSISTENT BONUS LEVEL
 // ======================================================
 function startSession() {
-  console.log("%c STARTING NEW ROUND — RESETTING SAVE GUARD", "color:#ff00aa;font-weight:bold");
+  console.log("%cSTARTING NEW ROUND — USING PERSISTENT BONUS LEVEL", "color:#ff00aa;font-weight:bold");
+  console.log("Starting at Bonus Level:", persistentBonusLevel);
 
   sessionAlreadySaved = false;
 
   taps = 0;
   earnings = 0;
   timer = SESSION_DURATION;
- bonusLevel = 1;
-sessionBonusLevel = 1;
-  progress = 0;
-  tapsForNext = 100 + (bonusLevel - 1) * 50;
+
+  // === CORRECT: Use the persisted/unlocked level ===
+  bonusLevel = persistentBonusLevel;           // Start from saved level
+  sessionBonusLevel = bonusLevel;              // Track for saving at end
+  progress = 0;                                // Always reset progress (fresh grind)
+  tapsForNext = 100 + (bonusLevel - 1) * 50;   // Correct requirement for next level
 
   cashCounter = 0;
   cashThreshold = randomInt(1, 12);
-
   sessionTaps = 0;
   sessionEarnings = 0;
-  sessionBonusLevel = bonusLevel;
 
   running = true;
   tapLocked = false;
   tapButton.disabled = false;
-
   RedHotMode.reset();
+
+  // Timer bar full at start
   trainBar && (trainBar.style.width = "100%");
-  updateBonusBar();
+
+  // Update UI immediately with correct level + 0% progress
+  updateBonusBar();  // ← This now also updates #bonusLevelVal text!
   updateUI();
 
   if (intervalId) clearInterval(intervalId);
-
   intervalId = setInterval(() => {
     if (!running) return;
     timer--;
-
     if (timer <= 0) {
       timer = 0;
       running = false;
@@ -686,10 +688,8 @@ sessionBonusLevel = 1;
       endSessionRecord();
       return;
     }
-
     updateUI();
     trainBar && (trainBar.style.width = (timer / SESSION_DURATION) * 100 + "%");
-
     if (timer % 8 === 0 && timer > 15) {
       maybeTriggerRedHot();
     }

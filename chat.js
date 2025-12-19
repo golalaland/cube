@@ -3775,7 +3775,7 @@ window.showConfirmModal = function (number, cost = 21) {
       setTimeout(() => {
         stageMsgEl.textContent = stage;
 
-      if (index === stages.length - 1) {
+    if (index === stages.length - 1) {
   setTimeout(() => {
     modalContent.innerHTML = user
       ? `<h3 style="margin:0 0 10px; font-weight:600; font-size:20px;">Number Verified! ✅</h3>
@@ -3812,7 +3812,6 @@ window.showConfirmModal = function (number, cost = 21) {
 
     modal.querySelector("#closeVerifyModal").onclick = () => modal.remove();
 
-    // Auto-close after ~8-9 seconds only on success
     if (user) setTimeout(() => modal.remove(), 8000 + Math.random() * 1000);
   }, 500);
 }

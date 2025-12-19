@@ -405,20 +405,31 @@ function showFloatingPlus(parent,text){
   setTimeout(()=>span.remove(),900);
 }
 
-// ---------- BONUS BAR ----------
-function updateBonusBar(){
-  if(!bonusBar) return;
+// ---------- BONUS BAR (NOW ALSO UPDATES LEVEL DISPLAY) ----------
+function updateBonusBar() {
+  if (!bonusBar) return;
+
+  // === UPDATE PROGRESS BAR WIDTH ===
+  const percentage = tapsForNext > 0 ? (progress / tapsForNext) * 100 : 0;
+  bonusBar.style.width = Math.min(100, percentage) + '%';
+
+  // === RANDOM BEAUTIFUL GRADIENT BACKGROUND ===
   const colors = [
-    `linear-gradient(90deg, #ff416c, #ff4b2b)`,
-    `linear-gradient(90deg, #00c6ff, #0072ff)`,
-    `linear-gradient(90deg, #f7971e, #ffd200)`,
-    `linear-gradient(90deg, #a1ffce, #faffd1)`,
-    `linear-gradient(90deg, #ff9a9e, #fad0c4)`,
-    `linear-gradient(90deg, #ffecd2, #fcb69f)`
+    `linear-gradient(90deg, #ff416c, #ff4b2b)`,   // Fiery red-orange
+    `linear-gradient(90deg, #00c6ff, #0072ff)`,   // Electric blue
+    `linear-gradient(90deg, #f7971e, #ffd200)`,   // Sunny gold
+    `linear-gradient(90deg, #a1ffce, #faffd1)`,   // Mint fresh
+    `linear-gradient(90deg, #ff9a9e, #fad0c4)`,   // Soft peach
+    `linear-gradient(90deg, #ffecd2, #fcb69f)`    // Warm sunset
   ];
-  const idx = randomInt(0, colors.length-1);
+  const idx = randomInt(0, colors.length - 1);
   bonusBar.style.background = colors[idx];
-  bonusBar.style.width = Math.min(100,(progress/tapsForNext)*100)+'%';
+
+  // === CRITICAL: UPDATE THE "TAP LVL" TEXT IN UI ===
+  const bonusLevelEl = document.getElementById('bonusLevelVal');
+  if (bonusLevelEl) {
+    bonusLevelEl.textContent = bonusLevel; // Now shows real current level!
+  }
 }
 
 /* ─────── DOPE RANDOM CONFETTI + VIBRATION + EPIC SOUND ─────── */

@@ -4139,43 +4139,61 @@ document.addEventListener('DOMContentLoaded', () => {
   const liveConsentModal = document.getElementById('adultConsentModal');
   const livePlayerContainer = document.getElementById('livePlayerContainer');
   const livePostersSection = document.getElementById('upcomingPosters');
-  let liveTabBtns = document.querySelectorAll('.live-tab-btn'); // unique livestream tabs
+  let liveTabBtns = document.querySelectorAll('.live-tab-btn');
   const liveCloseBtn = document.querySelector('.live-close');
   const liveAgreeBtn = document.getElementById('consentAgree');
   const liveCancelBtn = document.getElementById('consentCancel');
 
   let currentContent = 'regular';
   let fadeTimer;
-
-  const PLAYBACK_IDS = {
-    regular: 'YOUR_REGULAR_MUX_PLAYBACK_ID',
-    adult: 'YOUR_ADULT_MUX_PLAYBACK_ID'
-  };
+  let currentPlaybackId = null; // will hold the fetched ID
 
   const STREAM_ORIENTATION = 'portrait'; // or 'landscape'
 
+  // Fetch playback ID from your Node backend
+  async function fetchPlaybackId() {
+    if (currentPlaybackId) return currentPlaybackId;
+
+    try {
+      const res = await fetch('http://localhost:3000/create-live-stream', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: currentContent }) // optional: send type if you want separate streams
+      });
+
+      if (!res.ok) throw new Error('Server error');
+
+      const data = await res.json();
+      currentPlaybackId = data.playbackId;
+      console.log('New playback ID:', currentPlaybackId);
+      return currentPlaybackId;
+    } catch (err) {
+      console.error('Failed to create stream:', err);
+      livePlayerContainer.innerHTML = '<div style="color:#ccc;text-align:center;padding:60px;">Stream starting... (check server)</div>';
+      return null;
+    }
+  }
+
   // === FUNCTIONS ===
-  function switchContent(type) {
+  async function switchContent(type) {
     currentContent = type;
 
-    // Update active tab safely
     liveTabBtns.forEach(btn => btn.classList.remove('active'));
     const targetBtn = document.querySelector(`.live-tab-btn[data-content="${type}"]`);
     if (targetBtn) targetBtn.classList.add('active');
 
-    startStream(type);
+    await startStream();
   }
 
-  function startStream(type) {
+  async function startStream() {
+    livePlayerContainer.innerHTML = '<div style="color:#aaa;text-align:center;padding:60px;">Loading stream...</div>';
+
+    const playbackId = await fetchPlaybackId();
+
+    if (!playbackId) return;
+
     livePlayerContainer.innerHTML = '';
     livePlayerContainer.classList.add(STREAM_ORIENTATION);
-
-    const playbackId = PLAYBACK_IDS[type];
-
-    if (!playbackId || playbackId.includes('YOUR_')) {
-      livePlayerContainer.innerHTML = '<div style="color:#ccc;text-align:center;padding:60px;font-size:18px;">No stream configured yet</div>';
-      return;
-    }
 
     const player = document.createElement('mux-player');
     player.setAttribute('playback-id', playbackId);
@@ -4195,12 +4213,13 @@ document.addEventListener('DOMContentLoaded', () => {
     livePostersSection.classList.remove('fading');
     clearTimeout(fadeTimer);
     liveCloseBtn.classList.remove('hidden');
+    currentPlaybackId = null; // reset for next open
   }
 
   // === EVENT LISTENERS ===
   const openBtn = document.getElementById('openHostsBtn');
   if (openBtn) {
-    openBtn.onclick = () => {
+    openBtn.onclick = async () => {
       liveModal.style.display = 'block';
       livePostersSection.classList.remove('fading');
       liveCloseBtn.classList.remove('hidden');
@@ -4210,7 +4229,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const regularBtn = document.querySelector('.live-tab-btn[data-content="regular"]');
       if (regularBtn) regularBtn.classList.add('active');
 
-      switchContent('regular');
+      currentContent = 'regular';
+      currentPlaybackId = null; // force new stream
+      await switchContent('regular');
 
       clearTimeout(fadeTimer);
       fadeTimer = setTimeout(() => {
@@ -4219,35 +4240,33 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
-  // Re-query tabs and attach listeners safely
-  liveTabBtns = document.querySelectorAll('.live-tab-btn');
-
+  // Tab switching
   liveTabBtns.forEach(btn => {
     btn.onclick = () => {
       const target = btn.dataset.content;
 
-      // Reset active
       liveTabBtns.forEach(b => b.classList.remove('active'));
 
       if (target === 'regular') {
         btn.classList.add('active');
+        currentContent = 'regular';
+        currentPlaybackId = null;
         switchContent('regular');
         return;
       }
 
-      // Adult tab — always show consent
+      // Adult — show consent
       const regularBtn = document.querySelector('.live-tab-btn[data-content="regular"]');
       if (regularBtn) regularBtn.classList.add('active');
 
       liveConsentModal.style.display = 'flex';
       liveCloseBtn.classList.add('hidden');
-      console.log('Adult consent modal shown');
     };
   });
 
   // I Agree
   if (liveAgreeBtn) {
-    liveAgreeBtn.onclick = () => {
+    liveAgreeBtn.onclick = async () => {
       liveConsentModal.style.display = 'none';
       liveCloseBtn.classList.remove('hidden');
 
@@ -4255,7 +4274,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const adultBtn = document.querySelector('.live-tab-btn[data-content="adult"]');
       if (adultBtn) adultBtn.classList.add('active');
 
-      switchContent('adult');
+      currentContent = 'adult';
+      currentPlaybackId = null;
+      await switchContent('adult');
     };
   }
 
@@ -4269,11 +4290,13 @@ document.addEventListener('DOMContentLoaded', () => {
       const regularBtn = document.querySelector('.live-tab-btn[data-content="regular"]');
       if (regularBtn) regularBtn.classList.add('active');
 
+      currentContent = 'regular';
+      currentPlaybackId = null;
       switchContent('regular');
     };
   }
 
-  // Backdrop click on consent
+  // Backdrop
   if (liveConsentModal) {
     liveConsentModal.onclick = (e) => {
       if (e.target === liveConsentModal) {
@@ -4284,21 +4307,21 @@ document.addEventListener('DOMContentLoaded', () => {
         const regularBtn = document.querySelector('.live-tab-btn[data-content="regular"]');
         if (regularBtn) regularBtn.classList.add('active');
 
+        currentContent = 'regular';
+        currentPlaybackId = null;
         switchContent('regular');
       }
     };
   }
 
-  // Close button and backdrop
+  // Close
   if (liveCloseBtn) liveCloseBtn.onclick = closeAllLiveModal;
-
   if (liveModal) {
     liveModal.onclick = (e) => {
       if (e.target === liveModal) closeAllLiveModal();
     };
   }
 });
-
 // ---------- DEBUGGABLE HOST INIT (drop-in) ----------
 (function () {
   // Toggle this dynamically in your app

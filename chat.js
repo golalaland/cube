@@ -3081,7 +3081,7 @@ fetchFeaturedHosts();
 
 /* ---------- STAR HOSTS BUTTON — PURE ELEGANCE EDITION ---------- */
 if (openBtn) {
-  openBtn1.onclick = async () => {
+  openBtn.onclick = async () => {
     // If no hosts yet → try to fetch silently (no visual feedback)
     if (!hosts || hosts.length === 0) {
       await fetchFeaturedHosts();

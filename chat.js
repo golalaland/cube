@@ -4138,6 +4138,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.head.appendChild(script);
   }
 
+ document.addEventListener('DOMContentLoaded', () => {
   // === LIVESTREAM MODAL: VARIABLES & CONSTANTS ===
   const liveModal = document.getElementById('liveModal');
   const liveConsentModal = document.getElementById('adultConsentModal');
@@ -4150,50 +4151,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let currentContent = 'regular';
   let fadeTimer;
-  let currentPlaybackId = null;
 
   const STREAM_ORIENTATION = 'portrait'; // or 'landscape'
 
-  // Fetch playback ID from backend
-  async function fetchPlaybackId() {
-    if (currentPlaybackId) return currentPlaybackId;
-
-    try {
-      const res = await fetch('http://localhost:3000/create-live-stream', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type: currentContent })
-      });
-
-      if (!res.ok) throw new Error('Server error');
-
-      const data = await res.json();
-      currentPlaybackId = data.playbackId;
-      console.log('New playback ID:', currentPlaybackId);
-      return currentPlaybackId;
-    } catch (err) {
-      console.error('Failed to create stream:', err);
-      livePlayerContainer.innerHTML = '<div style="color:#ccc;text-align:center;padding:60px;">Stream starting... (check server)</div>';
-      return null;
-    }
-  }
+  // === FIXED PLAYBACK IDs (one permanent stream per tab) ===
+  const PLAYBACK_IDS = {
+    regular: 'YOUR_REGULAR_PERMANENT_PLAYBACK_ID_HERE', // Paste your main stream ID
+    adult:   'YOUR_ADULT_PERMANENT_PLAYBACK_ID_HERE'    // Optional: separate for adult
+  };
 
   // === FUNCTIONS ===
-  async function switchContent(type) {
+  function switchContent(type) {
     currentContent = type;
 
     liveTabBtns.forEach(btn => btn.classList.remove('active'));
     const targetBtn = document.querySelector(`.live-tab-btn[data-content="${type}"]`);
     if (targetBtn) targetBtn.classList.add('active');
 
-    await startStream();
+    startStream(type);
   }
 
-  async function startStream() {
+  function startStream(type) {
     livePlayerContainer.innerHTML = '<div style="color:#aaa;text-align:center;padding:60px;">Loading stream...</div>';
 
-    const playbackId = await fetchPlaybackId();
-    if (!playbackId) return;
+    const playbackId = PLAYBACK_IDS[type];
+
+    if (!playbackId) {
+      livePlayerContainer.innerHTML = '<div style="color:#ccc;text-align:center;padding:60px;">Stream not configured</div>';
+      return;
+    }
 
     livePlayerContainer.innerHTML = '';
     livePlayerContainer.classList.add(STREAM_ORIENTATION);
@@ -4216,26 +4202,22 @@ document.addEventListener('DOMContentLoaded', () => {
     livePostersSection.classList.remove('fading');
     clearTimeout(fadeTimer);
     liveCloseBtn.classList.remove('hidden');
-    currentPlaybackId = null;
   }
 
   // === EVENT LISTENERS ===
   const openBtn = document.getElementById('openHostsBtn');
   if (openBtn) {
-    openBtn.onclick = async () => {
+    openBtn.onclick = () => {
       liveModal.style.display = 'block';
       livePostersSection.classList.remove('fading');
       liveCloseBtn.classList.remove('hidden');
 
-       currentPlaybackId = null;
-
+      // Always start on Regular
       liveTabBtns.forEach(b => b.classList.remove('active'));
       const regularBtn = document.querySelector('.live-tab-btn[data-content="regular"]');
       if (regularBtn) regularBtn.classList.add('active');
 
-      currentContent = 'regular';
-      currentPlaybackId = null;
-      await switchContent('regular');
+      switchContent('regular');
 
       clearTimeout(fadeTimer);
       fadeTimer = setTimeout(() => {
@@ -4244,6 +4226,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
+  // Tab switching with consent
   liveTabBtns.forEach(btn => {
     btn.onclick = () => {
       const target = btn.dataset.content;
@@ -4252,12 +4235,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (target === 'regular') {
         btn.classList.add('active');
-        currentContent = 'regular';
-        currentPlaybackId = null;
         switchContent('regular');
         return;
       }
 
+      // Adult — show consent
       const regularBtn = document.querySelector('.live-tab-btn[data-content="regular"]');
       if (regularBtn) regularBtn.classList.add('active');
 
@@ -4266,8 +4248,9 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   });
 
+  // I Agree
   if (liveAgreeBtn) {
-    liveAgreeBtn.onclick = async () => {
+    liveAgreeBtn.onclick = () => {
       liveConsentModal.style.display = 'none';
       liveCloseBtn.classList.remove('hidden');
 
@@ -4275,12 +4258,11 @@ document.addEventListener('DOMContentLoaded', () => {
       const adultBtn = document.querySelector('.live-tab-btn[data-content="adult"]');
       if (adultBtn) adultBtn.classList.add('active');
 
-      currentContent = 'adult';
-      currentPlaybackId = null;
-      await switchContent('adult');
+      switchContent('adult');
     };
   }
 
+  // Cancel
   if (liveCancelBtn) {
     liveCancelBtn.onclick = () => {
       liveConsentModal.style.display = 'none';
@@ -4290,12 +4272,11 @@ document.addEventListener('DOMContentLoaded', () => {
       const regularBtn = document.querySelector('.live-tab-btn[data-content="regular"]');
       if (regularBtn) regularBtn.classList.add('active');
 
-      currentContent = 'regular';
-      currentPlaybackId = null;
       switchContent('regular');
     };
   }
 
+  // Backdrop
   if (liveConsentModal) {
     liveConsentModal.onclick = (e) => {
       if (e.target === liveConsentModal) {
@@ -4306,13 +4287,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const regularBtn = document.querySelector('.live-tab-btn[data-content="regular"]');
         if (regularBtn) regularBtn.classList.add('active');
 
-        currentContent = 'regular';
-        currentPlaybackId = null;
         switchContent('regular');
       }
     };
   }
 
+  // Close
   if (liveCloseBtn) liveCloseBtn.onclick = closeAllLiveModal;
   if (liveModal) {
     liveModal.onclick = (e) => {
@@ -4320,7 +4300,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 });
-
+  
 // ---------- DEBUGGABLE HOST INIT (drop-in) ----------
 (function () {
   // Toggle this dynamically in your app

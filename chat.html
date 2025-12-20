@@ -1987,36 +1987,31 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
   gap: 20px;
 }
 
-/* Close button - premium feel */
+/* Close button - clean, no circular pad, moved higher */
 .live-modal .live-close {
   position: fixed;
-  top: 20px;
+  top: 12px;               /* moved higher */
   right: 20px;
-  width: 60px;
-  height: 60px;
-  background: rgba(255,255,255,0.1);
-  backdrop-filter: blur(12px);
-  border-radius: 50%;
   color: #fff;
-  font-size: 36px;
+  font-size: 56px;         /* larger for visibility/tap */
   font-weight: 200;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   cursor: pointer;
   z-index: 30;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  opacity: 0.8;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  line-height: 1;
+  user-select: none;
+  pointer-events: auto !important;
 }
-.live-modal .live-close:hover {
-  background: rgba(255,255,255,0.2);
+.live-modal .live-close:hover,
+.live-modal .live-close:active {
+  opacity: 1;
   transform: scale(1.1);
 }
 .live-modal .live-close.hidden {
   opacity: 0;
   pointer-events: none;
 }
-
 /* Tabs - glassmorphism with glow */
 .live-modal .live-content-tabs {
   display: flex;

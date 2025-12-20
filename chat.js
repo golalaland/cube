@@ -241,8 +241,7 @@ function revealHostTabs() {
 
 // =============================
 // CHAT REPLY STATE — GLOBAL VARIABLES
-// =============================
-let currentReplyTarget = null;     // DOM element of the message being replied to
+// =============================  
 let currentReplyData = null;       // Optional: extra data if needed (replyTo, etc.)
 
 let tapModalEl = null;

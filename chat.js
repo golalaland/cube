@@ -4129,11 +4129,15 @@ document.querySelectorAll(".tag-btn").forEach(btn => {
 })();
 
 
-const adultVideoUrl = 'https://www.youtube.com/embed/YourVideoID?autoplay=1&mute=1'; // Change this link!
-// Or for direct MP4: 'https://yourdomain.com/video.mp4'
-// Or Vimeo: 'https://player.vimeo.com/video/123456789'
-
 document.addEventListener('DOMContentLoaded', () => {
+  // Load Mux Player script if not already
+  if (!customElements.get('mux-player')) {
+    const script = document.createElement('script');
+    script.src = 'https://src.mux.com/mux-player/latest/mux-player.js';
+    script.async = true;
+    document.head.appendChild(script);
+  }
+
   // === LIVESTREAM MODAL: VARIABLES & CONSTANTS ===
   const liveModal = document.getElementById('liveModal');
   const liveConsentModal = document.getElementById('adultConsentModal');
@@ -4146,11 +4150,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let currentContent = 'regular';
   let fadeTimer;
-  let currentPlaybackId = null; // will hold the fetched ID
+  let currentPlaybackId = null;
 
   const STREAM_ORIENTATION = 'portrait'; // or 'landscape'
 
-  // Fetch playback ID from your Node backend
+  // Fetch playback ID from backend
   async function fetchPlaybackId() {
     if (currentPlaybackId) return currentPlaybackId;
 
@@ -4158,7 +4162,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const res = await fetch('http://localhost:3000/create-live-stream', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type: currentContent }) // optional: send type if you want separate streams
+        body: JSON.stringify({ type: currentContent })
       });
 
       if (!res.ok) throw new Error('Server error');
@@ -4189,7 +4193,6 @@ document.addEventListener('DOMContentLoaded', () => {
     livePlayerContainer.innerHTML = '<div style="color:#aaa;text-align:center;padding:60px;">Loading stream...</div>';
 
     const playbackId = await fetchPlaybackId();
-
     if (!playbackId) return;
 
     livePlayerContainer.innerHTML = '';
@@ -4213,7 +4216,7 @@ document.addEventListener('DOMContentLoaded', () => {
     livePostersSection.classList.remove('fading');
     clearTimeout(fadeTimer);
     liveCloseBtn.classList.remove('hidden');
-    currentPlaybackId = null; // reset for next open
+    currentPlaybackId = null;
   }
 
   // === EVENT LISTENERS ===
@@ -4224,13 +4227,12 @@ document.addEventListener('DOMContentLoaded', () => {
       livePostersSection.classList.remove('fading');
       liveCloseBtn.classList.remove('hidden');
 
-      // Force Regular tab
       liveTabBtns.forEach(b => b.classList.remove('active'));
       const regularBtn = document.querySelector('.live-tab-btn[data-content="regular"]');
       if (regularBtn) regularBtn.classList.add('active');
 
       currentContent = 'regular';
-      currentPlaybackId = null; // force new stream
+      currentPlaybackId = null;
       await switchContent('regular');
 
       clearTimeout(fadeTimer);
@@ -4240,7 +4242,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
-  // Tab switching
   liveTabBtns.forEach(btn => {
     btn.onclick = () => {
       const target = btn.dataset.content;
@@ -4255,7 +4256,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      // Adult — show consent
       const regularBtn = document.querySelector('.live-tab-btn[data-content="regular"]');
       if (regularBtn) regularBtn.classList.add('active');
 
@@ -4264,7 +4264,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   });
 
-  // I Agree
   if (liveAgreeBtn) {
     liveAgreeBtn.onclick = async () => {
       liveConsentModal.style.display = 'none';
@@ -4280,7 +4279,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
-  // Cancel
   if (liveCancelBtn) {
     liveCancelBtn.onclick = () => {
       liveConsentModal.style.display = 'none';
@@ -4296,7 +4294,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
-  // Backdrop
   if (liveConsentModal) {
     liveConsentModal.onclick = (e) => {
       if (e.target === liveConsentModal) {
@@ -4314,7 +4311,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
-  // Close
   if (liveCloseBtn) liveCloseBtn.onclick = closeAllLiveModal;
   if (liveModal) {
     liveModal.onclick = (e) => {
@@ -4322,6 +4318,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 });
+
 // ---------- DEBUGGABLE HOST INIT (drop-in) ----------
 (function () {
   // Toggle this dynamically in your app

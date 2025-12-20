@@ -1128,9 +1128,6 @@ async function reportMessage(msgData) {
   }
 }
 
-// GLOBAL — DECLARE AT TOP WITH OTHER GLOBALS
-let tapModalEl = null;  // ← ADD THIS LINE AT THE TOP WITH scrollPending etc.
-
 // Tap modal for Reply / Report — FINAL FIXED VERSION
 function showTapModal(targetEl, msgData) {
   // Remove any existing modal first

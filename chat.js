@@ -4139,6 +4139,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
  document.addEventListener('DOMContentLoaded', () => {
+   
   // === LIVESTREAM MODAL: VARIABLES & CONSTANTS ===
   const liveModal = document.getElementById('liveModal');
   const liveConsentModal = document.getElementById('adultConsentModal');
@@ -4156,7 +4157,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // === FIXED PLAYBACK IDs (one permanent stream per tab) ===
   const PLAYBACK_IDS = {
-    regular: 'YOUR_REGULAR_PERMANENT_PLAYBACK_ID_HERE', // Paste your main stream ID
+    regular: 'He8OOiyK3dFE3BHaZAP9WNzK2KpN8kbCct3d5W02o5oA', // Paste your main stream ID
     adult:   'YOUR_ADULT_PERMANENT_PLAYBACK_ID_HERE'    // Optional: separate for adult
   };
 

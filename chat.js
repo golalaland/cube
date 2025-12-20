@@ -245,6 +245,12 @@ function revealHostTabs() {
 let currentReplyTarget = null;     // DOM element of the message being replied to
 let currentReplyData = null;       // Optional: extra data if needed (replyTo, etc.)
 
+let tapModalEl = null;
+let currentReplyTarget = null;
+let scrollPending = false;
+let scrollArrow = null;
+let middleDragBtn = null;
+
 /* ===============================
    FINAL 2025 BULLETPROOF AUTH + NOTIFICATIONS + UTILS
    NO ERRORS — NO RANDOM MODALS — NO MISSING BUTTONS
@@ -1127,52 +1133,78 @@ async function reportMessage(msgData) {
   }
 }
 
-// Tap modal for Reply / Report
+// GLOBAL — DECLARE AT TOP WITH OTHER GLOBALS
+let tapModalEl = null;  // ← ADD THIS LINE AT THE TOP WITH scrollPending etc.
+
+// Tap modal for Reply / Report — FINAL FIXED VERSION
 function showTapModal(targetEl, msgData) {
-  tapModalEl?.remove();
+  // Remove any existing modal first
+  if (tapModalEl) {
+    tapModalEl.remove();
+    tapModalEl = null;
+  }
+
   tapModalEl = document.createElement("div");
   tapModalEl.className = "tap-modal";
 
   const replyBtn = document.createElement("button");
-  replyBtn.textContent = "Reply ⤿";
+  replyBtn.textContent = "Reply";
   replyBtn.onclick = () => {
-    currentReplyTarget = { id: msgData.id, chatId: msgData.chatId, content: msgData.content };
-    refs.messageInputEl.placeholder = `Replying to ${msgData.chatId}: ${msgData.content.substring(0, 30)}`;
+    currentReplyTarget = { 
+      id: msgData.id, 
+      chatId: msgData.chatId, 
+      content: msgData.content 
+    };
+    refs.messageInputEl.placeholder = `Replying to ${msgData.chatId}: ${msgData.content.substring(0, 30)}...`;
     refs.messageInputEl.focus();
     showReplyCancelButton();
     tapModalEl.remove();
+    tapModalEl = null;
   };
 
   const reportBtn = document.createElement("button");
-  reportBtn.textContent = "Report ⚠︎";
+  reportBtn.textContent = "Report";
   reportBtn.onclick = async () => {
     await reportMessage(msgData);
     tapModalEl.remove();
+    tapModalEl = null;
   };
 
   const cancelBtn = document.createElement("button");
-  cancelBtn.textContent = "x";
-  cancelBtn.onclick = () => tapModalEl.remove();
+  cancelBtn.textContent = "×";
+  cancelBtn.onclick = () => {
+    tapModalEl.remove();
+    tapModalEl = null;
+  };
 
   tapModalEl.append(replyBtn, reportBtn, cancelBtn);
   document.body.appendChild(tapModalEl);
 
   const rect = targetEl.getBoundingClientRect();
   tapModalEl.style.cssText = `
-    position:absolute;
-    top:${rect.top - 40 + window.scrollY}px;
-    left:${rect.left}px;
-    background:rgba(0,0,0,0.85);
-    color:#fff;
-    padding:6px 10px;
-    border-radius:8px;
-    font-size:12px;
-    display:flex;
-    gap:6px;
-    z-index:9999;
+    position: absolute;
+    top: ${rect.top - 50 + window.scrollY}px;
+    left: ${rect.left}px;
+    background: rgba(20,20,30,0.95);
+    color: #fff;
+    padding: 10px 16px;
+    border-radius: 12px;
+    font-size: 14px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    z-index: 99999;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+    border: 1px solid rgba(255,0,110,0.3);
   `;
 
-  setTimeout(() => tapModalEl?.remove(), 3000);
+  // Auto-remove after 4 seconds
+  setTimeout(() => {
+    if (tapModalEl) {
+      tapModalEl.remove();
+      tapModalEl = null;
+    }
+  }, 4000);
 }
 
 

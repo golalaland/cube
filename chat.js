@@ -243,12 +243,8 @@ function revealHostTabs() {
 // CHAT REPLY STATE — GLOBAL VARIABLES
 // =============================  
 let currentReplyData = null;       // Optional: extra data if needed (replyTo, etc.)
-
 let tapModalEl = null;
 let currentReplyTarget = null;
-let scrollPending = false;
-let scrollArrow = null;
-let middleDragBtn = null;
 
 /* ===============================
    FINAL 2025 BULLETPROOF AUTH + NOTIFICATIONS + UTILS

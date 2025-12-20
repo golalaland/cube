@@ -1140,7 +1140,7 @@ function showTapModal(targetEl, msgData) {
   tapModalEl.className = "tap-modal";
 
   const replyBtn = document.createElement("button");
-  replyBtn.textContent = "Reply";
+  replyBtn.textContent = "Reply ⤿";
   replyBtn.onclick = () => {
     currentReplyTarget = { 
       id: msgData.id, 
@@ -1155,7 +1155,7 @@ function showTapModal(targetEl, msgData) {
   };
 
   const reportBtn = document.createElement("button");
-  reportBtn.textContent = "Report";
+  reportBtn.textContent = "Report ⚠";
   reportBtn.onclick = async () => {
     await reportMessage(msgData);
     tapModalEl.remove();
@@ -1172,23 +1172,27 @@ function showTapModal(targetEl, msgData) {
   tapModalEl.append(replyBtn, reportBtn, cancelBtn);
   document.body.appendChild(tapModalEl);
 
-  const rect = targetEl.getBoundingClientRect();
-  tapModalEl.style.cssText = `
-    position: absolute;
-    top: ${rect.top - 50 + window.scrollY}px;
-    left: ${rect.left}px;
-    background: rgba(20,20,30,0.95);
-    color: #fff;
-    padding: 10px 16px;
-    border-radius: 12px;
-    font-size: 14px;
-    display: flex;
-    gap: 12px;
-    align-items: center;
-    z-index: 99999;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.6);
-    border: 1px solid rgba(255,0,110,0.3);
-  `;
+ tapModalEl.style.cssText = `
+  position: absolute;
+  top: ${rect.top - 50 + window.scrollY}px;
+  left: ${rect.left}px;
+  background: rgba(10,10,20,0.95);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  color: #fff;
+  padding: 12px 18px;
+  border-radius: 16px;
+  font-size: 14px;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  z-index: 99999;
+  box-shadow: 
+    0 12px 40px rgba(0,0,0,0.7),
+    inset 0 1px 0 rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,0,110,0.4); /* THIN NEON PINK OUTLINE */
+  animation: popIn 0.25s ease-out;
+`;
 
   // Auto-remove after 4 seconds
   setTimeout(() => {

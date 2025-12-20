@@ -3081,7 +3081,7 @@ fetchFeaturedHosts();
 
 /* ---------- STAR HOSTS BUTTON — PURE ELEGANCE EDITION ---------- */
 if (openBtn) {
-  openBtn.onclick = async () => {
+  openBtn1.onclick = async () => {
     // If no hosts yet → try to fetch silently (no visual feedback)
     if (!hosts || hosts.length === 0) {
       await fetchFeaturedHosts();
@@ -4226,6 +4226,8 @@ document.addEventListener('DOMContentLoaded', () => {
       liveModal.style.display = 'block';
       livePostersSection.classList.remove('fading');
       liveCloseBtn.classList.remove('hidden');
+
+       currentPlaybackId = null;
 
       liveTabBtns.forEach(b => b.classList.remove('active'));
       const regularBtn = document.querySelector('.live-tab-btn[data-content="regular"]');

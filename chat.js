@@ -4147,8 +4147,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Fixed permanent playback IDs (replace with your real ones from Mux dashboard)
   const PLAYBACK_IDS = {
-    regular: 'He8OOiyK3dFE3BHaZAP9WNzK2KpN8kbCct3d5W02o5oA',
-    adult: 'He8OOiyK3dFE3BHaZAP9WNzK2KpN8kbCct3d5W02o5oA' // optional: same or different
+    regular: 'Axivoz5pQogAcjLdJF01FjJHDNbhEMFd4K00V01Gixz02nk',
+    adult: 'Axivoz5pQogAcjLdJF01FjJHDNbhEMFd4K00V01Gixz02nk' // optional: same or different
   };
 
   // === FUNCTIONS ===

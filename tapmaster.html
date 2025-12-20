@@ -272,88 +272,25 @@ body {display:flex;justify-content:center;align-items:flex-start;padding:18px 0 
 @keyframes starBoom {
   to { transform: translate(var(--dx), var(--dy)) rotate(360deg) scale(2); opacity:0; }
 }
-/* MODAL BACKDROP – PERFECTLY CENTERED + SMOOTH FADE */
-.modal-backdrop {
-  position: fixed;
-  inset: 0; /* top:0; left:0; right:0; bottom:0; */
-  background: rgba(0, 0, 0, 0.75); /* slightly darker for better focus */
-  display: none;                    /* hidden by default */
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-  padding: 20px;                    /* prevents edges on small screens */
-  box-sizing: border-box;
-  overflow-y: auto;                 /* scroll if modal taller than screen */
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.3s ease, visibility 0.3s ease;
+/* modal (normal fade-in centered) */
+  .modal-backdrop {
+    position:fixed; inset:0; background: rgba(0,0,0,0.6); display:none; align-items:center; justify-content:center; z-index:9999;
+  }
+  .modal {
+  width:92%; max-width:420px; background:#0f0f0f; border-radius:12px; padding:16px; border:1px solid rgba(255,255,255,0.06);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
 }
+.modal h3{ margin:0 0 8px 0; color:var(--accent1); font-size:16px; }
+.modal .list { text-align:left; margin-top:12px; max-height:320px; overflow:auto; }
+.modal .list li { padding:8px 6px; border-bottom:1px dashed rgba(255,255,255,0.03); font-weight:700; }
 
-/* Active state – use class toggle (recommended) or inline display:flex */
-.modal-backdrop.active,
-.modal-backdrop[style*="flex"] {    /* fallback for inline style toggles */
-  display: flex !important;
-  opacity: 1;
-  visibility: visible;
-}
+/* result panel (small) */
+#resultModalInner { display:none; margin-top:18px; }
 
-/* MODAL CONTENT – CLEAN & CONSISTENT */
-.modal {
-  width: 92%;
-  max-width: 420px;
-  background: #0f0f0f;
-  border-radius: 18px;              /* slightly rounder, modern feel */
-  padding: 20px 18px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7);
-  display: flex;
-  flex-direction: column;
-  max-height: 88vh;                  /* prevent overflow on small screens */
-  overflow: hidden;                 /* inner scroll if needed */
-}
+/* small helpers */
+.hidden { display:none!important; }
+button, input { font-size:16px; } /* prevents iOS zoom on tap */
 
-/* Optional: add inner scrollable area for long content */
-.modal .modal-content {
-  flex: 1;
-  overflow-y: auto;
-  padding-right: 4px;               /* space for scrollbar */
-  margin: 8px 0;
-}
-
-/* Headers */
-.modal h3 {
-  margin: 0 0 12px 0;
-  color: var(--accent1, #FFD700);
-  font-size: 18px;
-  font-weight: 800;
-  text-align: center;
-}
-
-/* Lists */
-.modal .list {
-  text-align: left;
-  margin-top: 12px;
-  max-height: 340px;
-  overflow-y: auto;
-  padding-right: 6px;
-}
-
-.modal .list li {
-  padding: 10px 6px;
-  border-bottom: 1px dashed rgba(255, 255, 255, 0.05);
-  font-weight: 700;
-  color: #eee;
-}
-
-/* RESULT PANEL (small) */
-#resultModalInner {
-  display: none;
-  margin-top: 18px;
-}
-
-/* SMALL HELPERS */
-.hidden { display: none !important; }
-button, input { font-size: 16px; } /* prevents iOS zoom on tap */
 /* ——— ACTIVE TAB: COLD GOLD UNDERLINE + SHIMMER ——— */
 .lb-tab.active {
   background: #222 !important;
@@ -799,6 +736,7 @@ body.start-mode div[style*="max-width:420px"][style*="box-shadow:0 8px 32px"] {
 </style>
 </head>
 </body>
+
 <div id="appWrapper">
   
 
@@ -902,7 +840,7 @@ body.start-mode div[style*="max-width:420px"][style*="box-shadow:0 8px 32px"] {
       <div class="stats-row" style="margin-top:10px">
         <div class="stat">
           <div class="label">TAP LVL</div>
-          <div class="value" id="bonusLevelVal"></div>
+          <div class="value" id="bonusLevelVal">1</div>
         </div>
         <div class="stat">
           <div class="label">SPEED</div>
@@ -964,6 +902,10 @@ body.start-mode div[style*="max-width:420px"][style*="box-shadow:0 8px 32px"] {
   </div>
 </div>
 
+
+
+
+
 <!-- FINAL UNIFORM GOLDEN LEADERBOARD MODAL – SCROLLABLE + BIGGER SLIDER -->
 <div id="leaderboardModal" class="modal-backdrop" style="display:none;">
   <div class="modal" style="width:88%;max-width:360px;max-height:88vh;display:flex;flex-direction:column;background:#0f0f0f;border:2px solid #FFD700;border-radius:18px;box-shadow:0 0 60px rgba(255,215,0,0.55);">
@@ -1010,11 +952,11 @@ body.start-mode div[style*="max-width:420px"][style*="box-shadow:0 8px 32px"] {
   <div class="slider-track" 
        style="display:flex;width:100%;height:100%;transition:transform 0.6s ease;">
     
-    <img src="https://cdn.shopify.com/s/files/1/0962/6648/6067/files/128_x_128_px_Instagram_Post_45.jpg?v=1765857356" 
+    <img src="https://cdn.shopify.com/s/files/1/0962/6648/6067/files/LIVE_ON_FRIDAYS.png?v=1763616110" 
          class="leaderboard-slide" 
          style="width:100%;height:100%;object-fit:contain;flex-shrink:0;">
     
-    <img src="https://cdn.shopify.com/s/files/1/0962/6648/6067/files/128_x_128_px_Instagram_Post_45.jpg?v=1765857356" 
+    <img src="https://cdn.shopify.com/s/files/1/0962/6648/6067/files/LIVE_ON_FRIDAYS.png?v=1763616110" 
          class="leaderboard-slide" 
          style="width:100%;height:100%;object-fit:contain;flex-shrink:0;">
     
@@ -1323,10 +1265,10 @@ body.start-mode div[style*="max-width:420px"][style*="box-shadow:0 8px 32px"] {
 </div>
 
 
-<!-- 4. STAR MARKET MODAL -->
-<div id="starMarketModal" class="modal-backdrop">
-  <div class="modal" style="background:#0f0f0f;border:3px solid #00ff88;border-radius:20px;box-shadow:0 0 70px rgba(0,255,136,0.4);padding:20px 18px;text-align:center;">
-
+<!-- STAR MARKET / BANK MODAL -->
+<div id="starMarketModal" class="modal-backdrop" style="display:none;">
+  <div class="modal" style="width:92%;max-width:380px;background:#0f0f0f;border:3px solid #00ff88;border-radius:20px;box-shadow:0 0 70px rgba(0,255,136,0.4);padding:20px 18px;text-align:center;">
+    
     <h2 style="margin:0 0 16px;color:#00ff88;font-size:18px;font-family:'Press Start 2P',cursive;letter-spacing:1px;text-shadow:0 0 12px #00ff88;">
       스트리즈 은행 지구 최고의 은행
     </h2>
@@ -1443,7 +1385,7 @@ body.start-mode div[style*="max-width:420px"][style*="box-shadow:0 8px 32px"] {
 </div>
   
   <!-- FAST TRACK CONFIRM MODAL -->
-<div id="fastTrackConfirmModal" class="" style="display:none;z-index:999999;">
+<div id="fastTrackConfirmModal" class="modal-backdrop" style="display:none;z-index:999999;">
   <div class="modal" style="width:88%;max-width:320px;background:#0f0f0f;border:3px solid #FFD700;border-radius:18px;padding:24px 20px;text-align:center;box-shadow:0 0 80px rgba(255,215,0,0.6);">
     
     <h3 style="margin:0 0 16px;color:#FFD700;font-size:17px;font-family:'Press Start 2P',cursive;">
@@ -1488,7 +1430,7 @@ body.start-mode div[style*="max-width:420px"][style*="box-shadow:0 8px 32px"] {
 <audio id="uiClickSound" src="https://raw.githubusercontent.com/golalaland/1010/main/click-sound-432501.mp3" preload="auto"></audio>
 
    <!-- Your game HTML above -->
-<script type="module" src="tapmaster.js?t=20251123"></script>
+<script type="module" src="tm1.js?t=20251123"></script>
 </body>
 </html>
   

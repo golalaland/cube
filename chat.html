@@ -1966,202 +1966,234 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
   justify-content: center;
   text-align: center;
 }
-/* LIVE MODAL ONLY - all selectors prefixed to avoid conflicts with other .tab-btn, .content-tabs, etc. */
+/* LIVE MODAL - Fullscreen cinematic experience */
 .live-modal {
   display: none;
   position: fixed;
   z-index: 9999;
   inset: 0;
-  background-color: #000;
-  overflow-y: auto; /* allow scrolling if content is tall */
+  background: #000;
+  overflow-y: auto;
   overflow-x: hidden;
+  scroll-behavior: smooth;
 }
 
 .live-modal .live-modal-content {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  padding: 60px 20px 40px;
+  padding: 80px 20px 60px;
   box-sizing: border-box;
-  position: relative;
+  gap: 20px;
 }
 
-/* Close button */
+/* Close button - premium feel */
 .live-modal .live-close {
-  position: absolute;
+  position: fixed;
   top: 20px;
-  right: 30px;
-  color: #fff;
-  font-size: 48px;
-  font-weight: 300;
-  cursor: pointer;
-  z-index: 20;
-  opacity: 0.7;
-  transition: opacity 0.3s;
+  right: 20px;
   width: 60px;
   height: 60px;
+  background: rgba(255,255,255,0.1);
+  backdrop-filter: blur(12px);
+  border-radius: 50%;
+  color: #fff;
+  font-size: 36px;
+  font-weight: 200;
   display: flex;
   align-items: center;
   justify-content: center;
-  pointer-events: auto !important;
-  user-select: none;
-  line-height: 1;
+  cursor: pointer;
+  z-index: 30;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
 }
 .live-modal .live-close:hover {
-  opacity: 1;
+  background: rgba(255,255,255,0.2);
+  transform: scale(1.1);
 }
 .live-modal .live-close.hidden {
   opacity: 0;
   pointer-events: none;
 }
 
-/* Livestream Tab Switcher (unique classes) */
+/* Tabs - glassmorphism with glow */
 .live-modal .live-content-tabs {
   display: flex;
   justify-content: center;
-  gap: 24px;
-  margin: 0 0 20px 0;
-  z-index: 10;
-  flex-wrap: wrap; /* mobile friendly */
+  gap: 16px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
 }
 .live-modal .live-tab-btn {
-  padding: 12px 28px;
-  background: rgba(255,255,255,0.1);
+  min-width: 160px;
+  padding: 16px 32px;
+  background: rgba(255,255,255,0.08);
   color: #fff;
-  border: none;
-  border-radius: 30px;
-  font-size: 16px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s;
-  backdrop-filter: blur(10px);
-}
-.live-modal .live-tab-btn.active,
-.live-modal .live-tab-btn:hover {
-  background: rgba(255,255,255,0.25);
-}
-.live-modal .live-tab-btn[data-content="adult"] {
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 50px;
+  font-size: 18px;
   font-weight: 600;
+  cursor: pointer;
+  transition: all 0.4s ease;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+.live-modal .live-tab-btn:hover {
+  background: rgba(255,255,255,0.15);
+  transform: translateY(-2px);
+}
+.live-modal .live-tab-btn.active {
+  background: linear-gradient(135deg, #ff3366, #ff6600);
+  box-shadow: 0 0 30px rgba(255,51,102,0.6);
+  transform: translateY(-4px);
 }
 
-/* Player */
+/* Player - cinematic, centered, letterboxed */
 .live-modal .live-player {
   width: 100%;
-  max-width: 100%;
-  margin: 0 auto 20px;
+  max-width: 1000px;
+  margin: 0 auto;
+  aspect-ratio: 16 / 9;
   background: #000;
-  border-radius: 12px;
+  border-radius: 20px;
   overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+  border: 1px solid rgba(255,255,255,0.1);
 }
-.live-modal .live-player.portrait { aspect-ratio: 9 / 16; }
-.live-modal .live-player.landscape { aspect-ratio: 16 / 9; }
 .live-modal .live-player mux-player {
   width: 100% !important;
   height: 100% !important;
-  object-fit: cover;
+  object-fit: contain; /* letterbox for perfect fit */
 }
 
-/* Upcoming Posters */
+/* Posters - elegant fade, compact */
 .live-modal .upcoming-posters {
   width: 100%;
-  padding: 20px 0 10px;
+  padding: 30px 0;
   text-align: center;
-  color: #aaa;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  transition: opacity 1s ease-out, transform 1s ease-out;
-  z-index: 5;
+  opacity: 1;
+  transition: opacity 1.5s ease, transform 1.5s ease;
 }
 .live-modal .upcoming-posters.fading {
   opacity: 0;
-  transform: translateY(20px);
+  transform: translateY(30px);
 }
 .live-modal .poster-grid {
   display: flex;
   overflow-x: auto;
   gap: 20px;
-  padding: 0 10px;
+  padding: 0 20px 20px;
   scrollbar-width: none;
 }
 .live-modal .poster-grid::-webkit-scrollbar { display: none; }
 .live-modal .poster {
-  flex: 0 0 180px;
+  flex: 0 0 170px;
   text-align: center;
 }
 .live-modal .poster img {
   width: 100%;
-  height: auto;
-  aspect-ratio: 2 / 3;
+  aspect-ratio: 3 / 4;
   object-fit: cover;
-  border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-  transition: transform 0.3s;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+  transition: transform 0.4s ease;
 }
-.live-modal .poster:hover img {
-  transform: scale(1.05);
+.live-modal .poster:hover img, .live-modal .poster:active img {
+  transform: scale(1.08);
 }
 .live-modal .poster-title {
   margin-top: 12px;
-  font-size: 14px;
-  font-weight: 500;
-  color: #ccc;
+  font-size: 15px;
+  font-weight: 600;
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.8);
 }
 
-/* Consent Modal */
+/* Consent Modal - clean, modern */
 .live-modal .consent-modal {
   display: none;
   position: fixed;
   z-index: 10000;
   inset: 0;
-  background-color: rgba(0,0,0,0.9);
+  background: rgba(0,0,0,0.95);
   align-items: center;
   justify-content: center;
+  padding: 20px;
 }
 .live-modal .consent-content {
-  background: #111;
-  padding: 40px;
-  border-radius: 20px;
+  background: linear-gradient(135deg, #111, #222);
+  padding: 40px 30px;
+  border-radius: 24px;
   max-width: 90%;
-  width: 500px;
+  width: 480px;
   text-align: center;
   color: #eee;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+  border: 1px solid rgba(255,255,255,0.1);
 }
 .live-modal .consent-content h2 {
+  font-size: 30px;
   margin-bottom: 20px;
-  font-size: 28px;
-  color: #fff;
+  background: linear-gradient(90deg, #ff3366, #ff6600);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 .live-modal .consent-content ul {
   text-align: left;
-  margin: 20px 0;
-  padding-left: 20px;
+  font-size: 17px;
   line-height: 1.8;
 }
 .live-modal .consent-buttons {
-  margin-top: 30px;
+  margin-top: 40px;
   display: flex;
-  gap: 20px;
-  justify-content: center;
+  flex-direction: column;
+  gap: 16px;
 }
 .live-modal .consent-buttons button {
-  padding: 14px 32px;
+  padding: 18px;
   border: none;
-  border-radius: 30px;
-  font-size: 16px;
-  font-weight: 600;
+  border-radius: 50px;
+  font-size: 18px;
+  font-weight: 700;
   cursor: pointer;
-  transition: 0.3s;
+  transition: all 0.3s ease;
 }
 .live-modal #consentAgree {
-  background: #ff3366;
+  background: linear-gradient(90deg, #ff3366, #ff6600);
   color: white;
+  box-shadow: 0 8px 30px rgba(255,51,102,0.5);
 }
-.live-modal #consentAgree:hover { background: #ff1744; }
+.live-modal #consentAgree:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 40px rgba(255,51,102,0.7);
+}
 .live-modal #consentCancel {
-  background: rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.1);
   color: white;
+  backdrop-filter: blur(10px);
 }
-.live-modal #consentCancel:hover { background: rgba(255,255,255,0.3); }
+.live-modal #consentCancel:hover {
+  background: rgba(255,255,255,0.2);
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .live-modal .live-modal-content {
+    padding: 70px 16px 40px;
+  }
+  .live-modal .live-tab-btn {
+    min-width: 140px;
+    padding: 14px 24px;
+    font-size: 17px;
+  }
+  .live-modal .live-player {
+    aspect-ratio: 9 / 16; /* portrait priority on mobile */
+  }
+  .live-modal .poster {
+    flex: 0 0 150px;
+  }
+}
 </style>
 </head>
 <body>

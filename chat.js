@@ -1169,6 +1169,7 @@ function showTapModal(targetEl, msgData) {
     tapModalEl = null;
   };
 
+
   tapModalEl.append(replyBtn, reportBtn, cancelBtn);
   document.body.appendChild(tapModalEl);
  const rect = targetEl.getBoundingClientRect();
@@ -1192,6 +1193,39 @@ function showTapModal(targetEl, msgData) {
     inset 0 1px 0 rgba(255,255,255,0.1);
   border: 1px solid rgba(255,0,110,0.4); /* THIN NEON PINK OUTLINE */
   animation: popIn 0.25s ease-out;
+`;
+
+
+  // Inside showTapModal — update button styles
+replyBtn.style.cssText = `
+  background: rgba(255,255,255,0.1);
+  color: #00ffea;
+  border: 1px solid rgba(0,255,234,0.3);
+  padding: 10px 16px;
+  border-radius: 12px;
+  font-weight: 700;
+  cursor: pointer;
+`;
+
+reportBtn.style.cssText = `
+  background: rgba(255,255,255,0.1);
+  color: #ff6600;
+  border: 1px solid rgba(255,102,0,0.3);
+  padding: 10px 16px;
+  border-radius: 12px;
+  font-weight: 700;
+  cursor: pointer;
+`;
+
+cancelBtn.style.cssText = `
+  background: transparent;
+  color: #ccc;
+  font-size: 20px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
 `;
 
   // Auto-remove after 4 seconds

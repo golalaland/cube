@@ -4130,16 +4130,6 @@ document.querySelectorAll(".tag-btn").forEach(btn => {
 
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Load Mux Player script if not already
-  if (!customElements.get('mux-player')) {
-    const script = document.createElement('script');
-    script.src = 'https://src.mux.com/mux-player/latest/mux-player.js';
-    script.async = true;
-    document.head.appendChild(script);
-  }
-
- document.addEventListener('DOMContentLoaded', () => {
-   
   // === LIVESTREAM MODAL: VARIABLES & CONSTANTS ===
   const liveModal = document.getElementById('liveModal');
   const liveConsentModal = document.getElementById('adultConsentModal');
@@ -4155,10 +4145,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const STREAM_ORIENTATION = 'portrait'; // or 'landscape'
 
-  // === FIXED PLAYBACK IDs (one permanent stream per tab) ===
+  // Fixed permanent playback IDs (replace with your real ones from Mux dashboard)
   const PLAYBACK_IDS = {
-    regular: 'He8OOiyK3dFE3BHaZAP9WNzK2KpN8kbCct3d5W02o5oA', // Paste your main stream ID
-    adult:   'YOUR_ADULT_PERMANENT_PLAYBACK_ID_HERE'    // Optional: separate for adult
+    regular: 'YOUR_REGULAR_PLAYBACK_ID',
+    adult: 'YOUR_ADULT_PLAYBACK_ID' // optional: same or different
   };
 
   // === FUNCTIONS ===
@@ -4177,7 +4167,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const playbackId = PLAYBACK_IDS[type];
 
-    if (!playbackId) {
+    if (!playbackId || playbackId.includes('YOUR_')) {
       livePlayerContainer.innerHTML = '<div style="color:#ccc;text-align:center;padding:60px;">Stream not configured</div>';
       return;
     }
@@ -4213,7 +4203,6 @@ document.addEventListener('DOMContentLoaded', () => {
       livePostersSection.classList.remove('fading');
       liveCloseBtn.classList.remove('hidden');
 
-      // Always start on Regular
       liveTabBtns.forEach(b => b.classList.remove('active'));
       const regularBtn = document.querySelector('.live-tab-btn[data-content="regular"]');
       if (regularBtn) regularBtn.classList.add('active');
@@ -4227,7 +4216,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
-  // Tab switching with consent
   liveTabBtns.forEach(btn => {
     btn.onclick = () => {
       const target = btn.dataset.content;
@@ -4240,7 +4228,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      // Adult — show consent
       const regularBtn = document.querySelector('.live-tab-btn[data-content="regular"]');
       if (regularBtn) regularBtn.classList.add('active');
 
@@ -4249,7 +4236,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   });
 
-  // I Agree
   if (liveAgreeBtn) {
     liveAgreeBtn.onclick = () => {
       liveConsentModal.style.display = 'none';
@@ -4263,7 +4249,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
-  // Cancel
   if (liveCancelBtn) {
     liveCancelBtn.onclick = () => {
       liveConsentModal.style.display = 'none';
@@ -4277,7 +4262,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
-  // Backdrop
   if (liveConsentModal) {
     liveConsentModal.onclick = (e) => {
       if (e.target === liveConsentModal) {
@@ -4293,14 +4277,15 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
-  // Close
   if (liveCloseBtn) liveCloseBtn.onclick = closeAllLiveModal;
+
   if (liveModal) {
     liveModal.onclick = (e) => {
       if (e.target === liveModal) closeAllLiveModal();
     };
   }
-});
+}); // <-- This closing }); is critical — it was probably missing
+
   
 // ---------- DEBUGGABLE HOST INIT (drop-in) ----------
 (function () {

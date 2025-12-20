@@ -1171,7 +1171,7 @@ function showTapModal(targetEl, msgData) {
 
   tapModalEl.append(replyBtn, reportBtn, cancelBtn);
   document.body.appendChild(tapModalEl);
-
+ const rect = targetEl.getBoundingClientRect();
  tapModalEl.style.cssText = `
   position: absolute;
   top: ${rect.top - 50 + window.scrollY}px;

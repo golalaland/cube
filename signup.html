@@ -766,18 +766,45 @@ vipToggle.onclick = () => {
 
       await setDoc(userRef, userData);
 
-      // Update inviter
-      if (inviterDocId) {
-        const bonusStars = isVIP ? 100 : 50;
-        await updateDoc(doc(db, "users", inviterDocId), {
-          hostFriendsLastUpdated: serverTimestamp(),
-          stars: increment(bonusStars),
-          referralCount: increment(1),
-          vipCount: isVIP ? increment(1) : increment(0),
-          hostReferralCount: !isVIP ? increment(1) : increment(0)
-        }).catch(err => console.warn("Failed to update inviter:", err));
-      }
+     // === UPDATE INVITER ON SIGNUP ===
+if (inviterDocId) {
+  if (isVIP) {
+    // VIP signup: Only count toward total referrals and VIP counter
+    // (Actual STRZ reward happens on successful payment in vipPayBtn)
+    await updateDoc(doc(db, "users", inviterDocId), {
+      referralCount: increment(1),
+      vipCount: increment(1),  // Tracks pending VIPs (limit check already passed)
+      lastUpdated: serverTimestamp()
+    }).catch(err => console.warn("Inviter VIP count update failed:", err));
 
+  } else {
+    // Non-VIP signup (new Host/Fan): Give 100 STRZ + count as Host referral
+    const hostInviteBonus = 100;
+
+    await updateDoc(doc(db, "users", inviterDocId), {
+      stars: increment(hostInviteBonus),
+      referralCount: increment(1),
+      hostReferralCount: increment(1),
+      lastUpdated: serverTimestamp()
+    }).catch(err => console.warn("Inviter host bonus failed:", err));
+
+    // Optional: Notification (add if you want instant feedback)
+    try {
+      await addDoc(collection(db, "notifications"), {
+        type: "new_host_join",
+        title: "New Host in Your Network!",
+        message: `@${chatId} just joined as a Host! +${hostInviteBonus} STRZ ✨`,
+        recipientId: inviterDocId,
+        newUserId: userCredential.user.uid,
+        newUserName: chatId,
+        read: false,
+        createdAt: serverTimestamp()
+      });
+    } catch (notifErr) {
+      console.warn("Host join notification failed:", notifErr);
+    }
+  }
+}
       // Success
       messageEl.textContent = `Welcome ${fullName}!`;
       localStorage.setItem("vipUser", JSON.stringify({ email, chatId }));
@@ -803,34 +830,90 @@ vipToggle.onclick = () => {
   };
 
   // === VIP PAYSTACK PAYMENT ===
-  vipPayBtn.onclick = () => {
-    const email = emailInput.value.trim().toLowerCase();
-    if (!email || !/@/.test(email)) {
-      showPopup('Enter a valid email before paying');
-      return;
-    }
+vipPayBtn.onclick = () => {
+  const email = emailInput.value.trim().toLowerCase();
+  if (!email || !/@/.test(email)) {
+    showPopup('Enter a valid email before paying');
+    return;
+  }
 
-    vipPayBtn.classList.add('loading');
+  vipPayBtn.classList.add('loading');
 
-    const handler = PaystackPop.setup({
-      key: 'pk_live_b1f53de46eded7175f91c345548365902b4b6d67',
-      email: email,
-      amount: 999900,
-      currency: 'NGN',
-      ref: 'VIP_' + Date.now(),
-      callback: function(response) {
-        vipPayBtn.classList.remove('loading');
-        messageEl.textContent = "VIP Activated 🪩";
+  const handler = PaystackPop.setup({
+    key: 'pk_live_b1f53de46eded7175f91c345548365902b4b6d67',
+    email: email,
+    amount: 999900,
+    currency: 'NGN',
+    ref: 'VIP_' + Date.now(),
+    callback: async function(response) {
+      vipPayBtn.classList.remove('loading');
+      messageEl.textContent = "VIP Activated 🪩";
+
+      const docId = sanitizeKey(email);
+      const userRef = doc(db, "users", docId);
+
+      try {
+        const userSnap = await getDoc(userRef);
+        if (!userSnap.exists()) throw new Error("User not found after payment");
+
+        const userData = userSnap.data();
+        const inviterId = userData.invitedBy;
+
+        // === GIVE 2,500 STRZ TO THE NEW VIP ===
+        await updateDoc(userRef, {
+          isVIP: true,
+          stars: increment(2500),
+          vipActivatedAt: serverTimestamp(),
+          lastUpdated: serverTimestamp()
+        });
+
+        // === GIVE 250 STRZ TO INVITER (HOST) ===
+        if (inviterId) {
+          await updateDoc(doc(db, "users", inviterId), {
+            stars: increment(250),
+            vipCount: increment(1),
+            lastUpdated: serverTimestamp()
+          });
+
+          // Notification to inviter
+          await addDoc(collection(db, "notifications"), {
+            type: "vip_activated",
+            title: "VIP Activated in Your Network!",
+            message: `@${userData.chatId} just went VIP! You earned 250 STRZ 💎`,
+            recipientId: inviterId,
+            vipUserId: userData.uid,
+            vipUserName: userData.chatId,
+            read: false,
+            createdAt: serverTimestamp()
+          });
+        }
+
+        // Optional: Notify the new VIP they got 2,500 STRZ
+        await addDoc(collection(db, "notifications"), {
+          type: "vip_bonus",
+          title: "Welcome to VIP! 🎉",
+          message: "You received 2,500 STRZ as a VIP welcome bonus!",
+          recipientId: userData.uid,
+          read: false,
+          createdAt: serverTimestamp()
+        });
+
         setTimeout(() => window.location.href = "shop.html", 1500);
-      },
-      onClose: function() {
-        vipPayBtn.classList.remove('loading');
-        messageEl.textContent = "Payment cancelled";
-      }
-    });
 
-    handler.openIframe();
-  };
+      } catch (err) {
+        console.error("VIP reward processing failed:", err);
+        // Still redirect — payment succeeded
+        setTimeout(() => window.location.href = "shop.html", 1500);
+      }
+    },
+    onClose: function() {
+      vipPayBtn.classList.remove('loading');
+      messageEl.textContent = "Payment cancelled";
+    }
+  });
+
+  handler.openIframe();
+};
 });
 </script>
 </body>

@@ -769,57 +769,41 @@ vipToggle.onclick = () => {
 
       await setDoc(userRef, userData);
 
-// === UPDATE INVITER ON SIGNUP ===
+// === UPDATE INVITER ON SIGNUP (REFERRAL REWARDS + NOTIFICATION) ===
 if (inviterDocId) {
   if (isVIP) {
-    // VIP signup: Only count toward total referrals and VIP counter
-    // (Actual STRZ reward happens on successful payment in vipPayBtn)
+    // VIP signup: Just count it (rewards on payment)
     await updateDoc(doc(db, "users", inviterDocId), {
       referralCount: increment(1),
       vipCount: increment(1),
       lastUpdated: serverTimestamp()
     }).catch(err => console.warn("Inviter VIP count update failed:", err));
 
-    // Optional: VIP signup notification (if you want one now)
-    try {
-      await addDoc(collection(db, "notifications"), {
-        userId: inviterDocId,                  // ← Must be "userId"
-        type: "new_vip_pending",
-        title: "New VIP in Your Network!",
-        message: `@${chatId} just signed up as VIP! Rewards coming on payment 💎`,
-        vipUserId: userCredential.user.uid,
-        vipUserName: chatId,
-        read: false,
-        timestamp: serverTimestamp()           // ← Must be "timestamp"
-      });
-    } catch (notifErr) {
-      console.warn("VIP pending notification failed:", notifErr);
-    }
   } else {
-    // Non-VIP signup (new Host/Fan): Give 100 STRZ + count as Host referral
+    // Non-VIP signup: Immediate 100 STRZ reward + notification
     const hostInviteBonus = 100;
 
-    await updateDoc(doc(db, "users", inviterId), {
+    await updateDoc(doc(db, "users", inviterDocId), {
       stars: increment(hostInviteBonus),
       referralCount: increment(1),
       hostReferralCount: increment(1),
       lastUpdated: serverTimestamp()
     }).catch(err => console.warn("Inviter host bonus failed:", err));
 
-    // === NOTIFICATION TO INVITER – NOW MATCHES LISTENER ===
+    // === THIS NOTIFICATION WILL NOW SHOW IN BELL ===
     try {
       await addDoc(collection(db, "notifications"), {
-        userId: inviterDocId,                  // ← Fixed to "userId"
+        userId: inviterDocId,                    // ← Correct field
         type: "new_host_join",
-        title: "New Host in Your Network!",
-        message: `@${chatId} just joined as a Host! +${hostInviteBonus} STRZ ✨`,
+        title: "New Host Joined!",
+        message: `@${chatId} just joined using your link! +${hostInviteBonus} STRZ ✨`,
         newUserId: userCredential.user.uid,
         newUserName: chatId,
         read: false,
-        timestamp: serverTimestamp()           // ← Fixed to "timestamp"
+        timestamp: serverTimestamp()             // ← Correct field
       });
     } catch (notifErr) {
-      console.warn("Host join notification failed:", notifErr);
+      console.warn("Signup notification failed:", notifErr);
     }
   }
 }

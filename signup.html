@@ -799,7 +799,7 @@ if (inviterDocId) {
     // Non-VIP signup (new Host/Fan): Give 100 STRZ + count as Host referral
     const hostInviteBonus = 100;
 
-    await updateDoc(doc(db, "users", inviterId), {
+  await updateDoc(doc(db, "users", inviterDocId), {
       stars: increment(hostInviteBonus),
       referralCount: increment(1),
       hostReferralCount: increment(1),

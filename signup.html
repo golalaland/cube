@@ -352,8 +352,7 @@
   <div class="form-group"><input type="text" placeholder="Choose Username" id="chatId"></div>
   <div class="form-group"><input type="tel" placeholder="Phone Number" id="phone"></div>
   <div class="form-group"><input type="email" placeholder="Email Address" id="email"></div>
-  <div class="form-group"><input type="password" placeholder="Create Password (8+ characters)" id="password"></div>
-  <div class="form-group"><input type="password" placeholder="Confirm Password" id="confirmPassword"></div>
+  <div class="form-group"><input type="password" placeholder="Create Password (min 8 chars)" id="password"></div>
 
   <div class="gender-label" style="text-align:center;margin:1.5rem 0;color:#e0ff80;">Select Your Gender</div>
   <div class="gender-select">
@@ -386,74 +385,30 @@
 </body>
 </html>
 
-<script src="https://js.paystack.co/v1/inline.js"></script>
+<script src="https://js.paystack.co/v2/inline.js"></script>
 
 <script type="module">
-import{ initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, where, getDocs, query, arrayUnion, serverTimestamp, increment } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, where, getDocs, query, serverTimestamp, increment } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
- const firebaseConfig = {
-      apiKey: "AIzaSyD_GjkTox5tum9o4AupO0LeWzjTocJg8RI",
-      authDomain: "dettyverse.firebaseapp.com",
-      projectId: "dettyverse",
-      storageBucket: "dettyverse.firebasestorage.app",
-      messagingSenderId: "1036459652488",
-      appId: "1:1036459652488:web:e8910172ed16e9cac9b63d",
-      measurementId: "G-NX2KWZW85V"
-    };
-  
+const firebaseConfig = {
+  apiKey: "AIzaSyD_GjkTox5tum9o4AupO0LeWzjTocJg8RI",
+  authDomain: "dettyverse.firebaseapp.com",
+  projectId: "dettyverse",
+  storageBucket: "dettyverse.firebasestorage.app",
+  messagingSenderId: "1036459652488",
+  appId: "1:1036459652488:web:e8910172ed16e9cac9b63d",
+  measurementId: "G-NX2KWZW85V"
+};
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-document.addEventListener('DOMContentLoaded', () => {
-  let isVIP = false;
-  let gender = '';
-
-  // DOM
-  const vipToggle = document.getElementById('vipToggle');
-  const femaleBtn = document.getElementById('femaleBtn');
-  const maleBtn = document.getElementById('maleBtn');
-  const submitBtn = document.getElementById('submitBtn');
-  const spinner = document.getElementById('spinner');
-  const btnText = submitBtn.querySelector('.btn-text');
-  const messageEl = document.getElementById('message');
-  const nameInput = document.getElementById('name');
-  const chatIdInput = document.getElementById('chatId');
-  const phoneInput = document.getElementById('phone');
-  const emailInput = document.getElementById('email');
-  const dobInput = document.getElementById('dob');
-  const passwordInput = document.getElementById('password');
-
-  // GET AND CLEAN REFERRAL CODE
-  const urlParams = new URLSearchParams(window.location.search);
-  let rawRef = urlParams.get('ref') || '';
-  rawRef = rawRef.trim();
-
-  // Normalize: remove @, case-insensitive
-  let cleanRef = rawRef.replace(/^@+/i, '').trim().toLowerCase();
-
-  // Utility
-  const sanitizeKey = email => email.trim().toLowerCase().replace(/[@.]/g, '_').replace(/[,\\/*[\]]/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '');
-  const cleanChatId = input => input.toLowerCase().replace(/[^a-z0-9_]/g, '');
-
-  const calculateAge = dobStr => {
-    if (!dobStr) return 0;
-    const dob = new Date(dobStr);
-    const diff = Date.now() - dob.getTime();
-    return Math.abs(new Date(diff).getUTCFullYear() - 1970);
-  };
-
-  const isChatIdTaken = async chatId => {
-    const q = query(collection(db, "users"), where("chatIdLower", "==", chatId.toLowerCase()));
-    return !(await getDocs(q)).empty;
-  };
-
-  // Simple themed popup toast
-function showPopup(message, duration = 3000) {
-  // Remove any existing popup
+// === TOAST POPUP FUNCTION ===
+function showPopup(message, duration = 3500) {
   const existing = document.getElementById('toastPopup');
   if (existing) existing.remove();
 
@@ -482,7 +437,6 @@ function showPopup(message, duration = 3000) {
   `;
   document.body.appendChild(popup);
 
-  // Trigger animation
   requestAnimationFrame(() => {
     popup.style.opacity = '1';
     popup.style.transform = 'translateX(-50%) translateY(-10px)';
@@ -495,34 +449,59 @@ function showPopup(message, duration = 3000) {
   }, duration);
 }
 
-  // MAIN FIX: Find inviter by username OR email → return REAL docId
+document.addEventListener('DOMContentLoaded', () => {
+  let isVIP = false;
+  let gender = '';
+
+  // DOM Elements
+  const vipToggle = document.getElementById('vipToggle');
+  const femaleBtn = document.getElementById('femaleBtn');
+  const maleBtn = document.getElementById('maleBtn');
+  const submitBtn = document.getElementById('submitBtn');
+  const vipPayBtn = document.getElementById('vipPayBtn');
+  const messageEl = document.getElementById('message');
+  const nameInput = document.getElementById('name');
+  const chatIdInput = document.getElementById('chatId');
+  const phoneInput = document.getElementById('phone');
+  const emailInput = document.getElementById('email');
+  const dobInput = document.getElementById('dob');
+  const passwordInput = document.getElementById('password');
+  const confirmPasswordInput = document.getElementById('confirmPassword');
+
+  // Referral handling
+  const urlParams = new URLSearchParams(window.location.search);
+  let rawRef = urlParams.get('ref') || '';
+  rawRef = rawRef.trim();
+  const cleanRef = rawRef.replace(/^@+/i, '').trim().toLowerCase();
+
+  // Utility functions (keep your existing ones)
+  const sanitizeKey = email => email.trim().toLowerCase().replace(/[@.]/g, '_').replace(/[,\\/*[\]]/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '');
+  const cleanChatId = input => input.toLowerCase().replace(/[^a-z0-9_]/g, '');
+  const calculateAge = dobStr => {
+    if (!dobStr) return 0;
+    const dob = new Date(dobStr);
+    const diff = Date.now() - dob.getTime();
+    return Math.abs(new Date(diff).getUTCFullYear() - 1970);
+  };
+  const isChatIdTaken = async chatId => {
+    const q = query(collection(db, "users"), where("chatIdLower", "==", chatId.toLowerCase()));
+    return !(await getDocs(q)).empty;
+  };
+
   async function getInviterDocId(ref) {
     if (!ref) return null;
-
-    // 1. Try as email
     if (ref.includes('@')) {
       const docId = sanitizeKey(ref);
       const snap = await getDoc(doc(db, "users", docId));
       if (snap.exists()) return docId;
     }
-
-    // 2. Try as username (most common case)
     const q = query(collection(db, "users"), where("chatIdLower", "==", ref));
     const snapshot = await getDocs(q);
-    if (!snapshot.empty) {
-      return snapshot.docs[0].id;
-    }
-
+    if (!snapshot.empty) return snapshot.docs[0].id;
     return null;
   }
 
-  // Confetti (unchanged)
-  function triggerSprayConfetti() {
-    // ... your existing confetti code ...
-  }
-
-  // UI
-  phoneInput.addEventListener('input', () => phoneInput.value = phoneInput.value.replace(/\D/g, ''));
+  // Gender & VIP toggle
   femaleBtn.onclick = () => { gender = 'Female'; femaleBtn.classList.add('selected'); maleBtn.classList.remove('selected'); };
   maleBtn.onclick = () => { gender = 'Male'; maleBtn.classList.add('selected'); femaleBtn.classList.remove('selected'); };
   vipToggle.onclick = () => {
@@ -533,237 +512,222 @@ function showPopup(message, duration = 3000) {
     if (isVIP) triggerSprayConfetti();
   };
 
-submitBtn.onclick = async () => {
-  const fullName = nameInput.value.trim();
-  const chatId = cleanChatId(chatIdInput.value.trim());
-  const phone = phoneInput.value.trim();
-  const email = emailInput.value.trim().toLowerCase();
-  const dob = dobInput.value;
-  const password = passwordInput.value.trim();
-  const confirmPassword = document.getElementById('confirmPassword')?.value.trim() || '';
+  // === MAIN SIGNUP BUTTON ===
+  submitBtn.onclick = async () => {
+    const fullName = nameInput.value.trim();
+    const chatId = cleanChatId(chatIdInput.value.trim());
+    const phone = phoneInput.value.trim();
+    const email = emailInput.value.trim().toLowerCase();
+    const dob = dobInput.value;
+    const password = passwordInput.value.trim();
+    const confirmPassword = confirmPasswordInput?.value.trim() || '';
 
-  // === CLIENT-SIDE VALIDATIONS WITH POPUPS ===
-  if (!fullName || !chatId || !phone || !email || !gender || !dob || !password || !confirmPassword) {
-    showPopup('Please fill all fields');
-    return;
-  }
-
-  if (chatId.length < 5 || chatId.length > 15) {
-    showPopup('Username must be 5–15 characters');
-    return;
-  }
-
-  if (password.length < 8) {
-    showPopup('Password must be at least 8 characters');
-    return;
-  }
-
-  if (password !== confirmPassword) {
-    showPopup('Passwords do not match');
-    return;
-  }
-
-  if (calculateAge(dob) < 18) {
-    showPopup('You must be 18 or older');
-    return;
-  }
-
-  if (!/@(gmail|yahoo|icloud|proton|hotmail|outlook)\.(com|me)$/.test(email)) {
-    showPopup('Please use a valid email provider');
-    return;
-  }
-
-  // Start loading
-  submitBtn.classList.add('loading');
-  messageEl.textContent = 'Creating your empire...';
-
-  const docId = sanitizeKey(email);
-  const userRef = doc(db, "users", docId);
-
-  try {
-    // === CHECK FOR DUPLICATES ===
-    const [docSnap, chatTaken] = await Promise.all([
-      getDoc(userRef),
-      isChatIdTaken(chatId)
-    ]);
-
-    if (docSnap.exists()) {
-      showPopup('Email already registered');
+    // === VALIDATIONS WITH POPUPS ===
+    if (!fullName || !chatId || !phone || !email || !gender || !dob || !password || !confirmPassword) {
+      showPopup('Please fill all fields');
+      return;
+    }
+    if (chatId.length < 5 || chatId.length > 15) {
+      showPopup('Username must be 5–15 characters');
+      return;
+    }
+    if (password.length < 8) {
+      showPopup('Password must be at least 8 characters');
+      return;
+    }
+    if (password !== confirmPassword) {
+      showPopup('Passwords do not match');
+      return;
+    }
+    if (calculateAge(dob) < 18) {
+      showPopup('You must be 18 or older');
+      return;
+    }
+    if (!/@(gmail|yahoo|icloud|proton|hotmail|outlook)\.(com|me)$/.test(email)) {
+      showPopup('Please use a valid email provider');
       return;
     }
 
-    if (chatTaken) {
-      showPopup('Username already taken');
-      return;
-    }
+    submitBtn.classList.add('loading');
+    messageEl.textContent = 'Creating your empire...';
 
-    // === REFERRAL VALIDATION & LIMIT CHECK (MAX 5) ===
-    let inviterDocId = null;
-    let hiveName = '';
+    const docId = sanitizeKey(email);
+    const userRef = doc(db, "users", docId);
 
-    if (cleanRef) {
-      inviterDocId = await getInviterDocId(cleanRef);
+    try {
+      // Check duplicates
+      const [docSnap, chatTaken] = await Promise.all([
+        getDoc(userRef),
+        isChatIdTaken(chatId)
+      ]);
 
-      if (inviterDocId) {
-        const invSnap = await getDoc(doc(db, 'users', inviterDocId));
-        if (invSnap.exists()) {
-          const inviterData = invSnap.data();
-          const currentReferralCount = inviterData.referralCount || 0;
+      if (docSnap.exists()) {
+        showPopup('Email already registered');
+        return;
+      }
+      if (chatTaken) {
+        showPopup('Username already taken');
+        return;
+      }
 
-          if (currentReferralCount >= 5) {
-            showPopup('This host has reached their invite limit (5 max)');
-            submitBtn.classList.remove('loading');
-            return;
+      // === REFERRAL CHECK + LIMIT (MAX 5) ===
+      let inviterDocId = null;
+      let hiveName = '';
+
+      if (cleanRef) {
+        inviterDocId = await getInviterDocId(cleanRef);
+        if (inviterDocId) {
+          const invSnap = await getDoc(doc(db, 'users', inviterDocId));
+          if (invSnap.exists()) {
+            const inviterData = invSnap.data();
+            const currentRefs = inviterData.referralCount || 0;
+
+            if (currentRefs >= 5) {
+              showPopup('This host has reached their invite limit (5 max)');
+              submitBtn.classList.remove('loading');
+              return;
+            }
+
+            if (!isVIP && inviterData.isHost && inviterData.hiveName) {
+              hiveName = inviterData.hiveName;
+            }
+          } else {
+            inviterDocId = null;
           }
-
-          // Hive assignment logic (only for non-VIP joining a host)
-          if (!isVIP && inviterData.isHost && inviterData.hiveName) {
-            hiveName = inviterData.hiveName;
-          }
-        } else {
-          inviterDocId = null; // Invalid inviter
         }
       }
-    }
 
-    // === CREATE FIREBASE AUTH USER ===
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      // Create Firebase Auth user
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
 
-    // === DETECT COUNTRY ===
-    let country = 'Unknown';
-    try {
-      const res = await fetch('https://ipapi.co/json/');
-      const data = await res.json();
-      country = data.country_name || 'Unknown';
-    } catch (e) {
-      console.warn('Country detection failed:', e);
-    }
+      // Country detection
+      let country = 'Unknown';
+      try {
+        const res = await fetch('https://ipapi.co/json/');
+        const data = await res.json();
+        country = data.country_name || 'Unknown';
+      } catch (e) {}
 
-    // === BUILD USER DATA ===
-    const userData = {
-      uid: userCredential.user.uid,
-      fullName,
-      chatId,
-      chatIdLower: chatId,
-      email,
-      phone,
-      dob,
-      age: calculateAge(dob),
-      gender,
-      country,
-      city: "",
-      location: "",
-      bankName: "",
-      bankAccountNumber: "",
-      instagram: "",
-      tiktok: "",
-      whatsapp: "",
-      telegram: "",
-      bioPick: "",
-      naturePick: "",
-      fruitPick: "",
-      videoUrl: "",
-      popupPhoto: "",
-      isVIP: !!isVIP,
-      isHost: gender === 'Female' && !isVIP,
-      isTrending: false,
-      isAdmin: false,
-      featuredHosts: false,
-      invitedBy: inviterDocId,
-      referral: rawRef || null,
-      hiveName,
-      hostLink: (!isVIP && gender === 'Female')
-        ? `https://cube.xixi.com/signup?ref=${chatId}`
-        : null,
-      vipName: isVIP ? chatId : null,
-      socialShare: gender === 'Female' && !isVIP,
-      stars: 50,
-      starsToday: 0,
-      starsGifted: 0,
-      lastStarDate: new Date().toISOString().split("T")[0],
-      cash: 0,
-      points: 0,
-      gifts: 0,
-      views: 0,
-      inviteeGiftStars: 0,
-      inviteeGiftShown: false,
-      hostFriends: [],
-      usernameColor: '#' + Math.floor(Math.random() * 16777215).toString(16),
-      createdAt: serverTimestamp(),
-      lastUpdated: serverTimestamp()
-    };
+      // User data
+      const userData = {
+        uid: userCredential.user.uid,
+        fullName,
+        chatId,
+        chatIdLower: chatId,
+        email,
+        phone,
+        dob,
+        age: calculateAge(dob),
+        gender,
+        country,
+        city: "",
+        location: "",
+        bankName: "",
+        bankAccountNumber: "",
+        instagram: "",
+        tiktok: "",
+        whatsapp: "",
+        telegram: "",
+        bioPick: "",
+        naturePick: "",
+        fruitPick: "",
+        videoUrl: "",
+        popupPhoto: "",
+        isVIP: !!isVIP,
+        isHost: gender === 'Female' && !isVIP,
+        isTrending: false,
+        isAdmin: false,
+        featuredHosts: false,
+        invitedBy: inviterDocId,
+        referral: rawRef || null,
+        hiveName,
+        hostLink: (!isVIP && gender === 'Female') ? `https://cube.xixi.com/signup?ref=${chatId}` : null,
+        vipName: isVIP ? chatId : null,
+        socialShare: gender === 'Female' && !isVIP,
+        stars: 50,
+        starsToday: 0,
+        starsGifted: 0,
+        lastStarDate: new Date().toISOString().split("T")[0],
+        cash: 0,
+        points: 0,
+        gifts: 0,
+        views: 0,
+        inviteeGiftStars: 0,
+        inviteeGiftShown: false,
+        hostFriends: [],
+        usernameColor: '#' + Math.floor(Math.random() * 16777215).toString(16),
+        createdAt: serverTimestamp(),
+        lastUpdated: serverTimestamp()
+      };
 
-    await setDoc(userRef, userData);
+      await setDoc(userRef, userData);
 
-    // === UPDATE INVITER (BONUS + COUNTERS) ===
-    if (inviterDocId) {
-      const bonusStars = isVIP ? 100 : 50;
-      await updateDoc(doc(db, "users", inviterDocId), {
-        hostFriendsLastUpdated: serverTimestamp(),
-        stars: increment(bonusStars),
-        referralCount: increment(1),
-        vipCount: isVIP ? increment(1) : increment(0),
-        hostReferralCount: !isVIP ? increment(1) : increment(0)
-      }).catch(err => console.warn("Failed to update inviter:", err));
-    }
+      // Update inviter
+      if (inviterDocId) {
+        const bonusStars = isVIP ? 100 : 50;
+        await updateDoc(doc(db, "users", inviterDocId), {
+          hostFriendsLastUpdated: serverTimestamp(),
+          stars: increment(bonusStars),
+          referralCount: increment(1),
+          vipCount: isVIP ? increment(1) : increment(0),
+          hostReferralCount: !isVIP ? increment(1) : increment(0)
+        }).catch(err => console.warn("Failed to update inviter:", err));
+      }
 
-    // === SUCCESS FLOW ===
-    messageEl.textContent = `Welcome ${fullName}!`;
-    localStorage.setItem("vipUser", JSON.stringify({ email, chatId }));
+      // Success
+      messageEl.textContent = `Welcome ${fullName}!`;
+      localStorage.setItem("vipUser", JSON.stringify({ email, chatId }));
 
-    if (isVIP) {
-      triggerSprayConfetti();
+      if (isVIP) {
+        triggerSprayConfetti();
+        submitBtn.classList.remove('loading');
+        submitBtn.classList.add('hidden');
+        vipPayBtn.classList.remove('hidden');
+        messageEl.textContent = "Your VIP slot is reserved 🔒";
+      } else {
+        setTimeout(() => window.location.href = "shop.html", 1800);
+      }
+
+    } catch (err) {
+      console.error(err);
+      const errorMsg = err.code === 'auth/email-already-in-use'
+        ? 'Email already registered'
+        : 'Signup failed — please try again';
+      showPopup(errorMsg);
       submitBtn.classList.remove('loading');
-      submitBtn.classList.add('hidden');
-      vipPayBtn.classList.remove('hidden');
-      messageEl.textContent = "Your VIP slot is reserved 🔒";
-    } else {
-      setTimeout(() => {
-        window.location.href = "shop.html";
-      }, 1800);
+    }
+  };
+
+  // === VIP PAYSTACK PAYMENT ===
+  vipPayBtn.onclick = () => {
+    const email = emailInput.value.trim().toLowerCase();
+    if (!email || !/@/.test(email)) {
+      showPopup('Enter a valid email before paying');
+      return;
     }
 
-  } catch (err) {
-    console.error(err);
-    const errorMsg = err.code === 'auth/email-already-in-use'
-      ? 'Email already registered'
-      : 'Signup failed — please try again';
-    showPopup(errorMsg);
-    submitBtn.classList.remove('loading');
-  }
-};
+    vipPayBtn.classList.add('loading');
 
-// === VIP PAYSTACK BUTTON (unchanged, just cleaned up) ===
-vipPayBtn.onclick = () => {
-  const email = emailInput.value.trim().toLowerCase();
-  if (!email || !/@/.test(email)) {
-    showPopup('Enter a valid email before paying');
-    return;
-  }
+    const handler = PaystackPop.setup({
+      key: 'pk_live_b1f53de46eded7175f91c345548365902b4b6d67',
+      email: email,
+      amount: 999900,
+      currency: 'NGN',
+      ref: 'VIP_' + Date.now(),
+      callback: function(response) {
+        vipPayBtn.classList.remove('loading');
+        messageEl.textContent = "VIP Activated 🪩";
+        setTimeout(() => window.location.href = "shop.html", 1500);
+      },
+      onClose: function() {
+        vipPayBtn.classList.remove('loading');
+        messageEl.textContent = "Payment cancelled";
+      }
+    });
 
-  vipPayBtn.classList.add('loading');
-
-  const handler = PaystackPop.setup({
-    key: 'pk_live_b1f53de46eded7175f91c345548365902b4b6d67',
-    email: email,
-    amount: 999900, // ₦9999.00
-    currency: 'NGN',
-    ref: 'VIP_' + Date.now(),
-    callback: function(response) {
-      vipPayBtn.classList.remove('loading');
-      messageEl.textContent = "VIP Activated 🪩";
-      setTimeout(() => {
-        window.location.href = "shop.html";
-      }, 1500);
-    },
-    onClose: function() {
-      vipPayBtn.classList.remove('loading');
-      messageEl.textContent = "Payment cancelled";
-    }
-  });
-
-  handler.openIframe();
-};
+    handler.openIframe();
+  };
+});
 </script>
 </body>
 </html>

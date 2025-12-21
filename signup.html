@@ -388,7 +388,6 @@
 <script src="https://js.paystack.co/v2/inline.js"></script>
 
 <script type="module">
-<script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, where, getDocs, query, serverTimestamp, increment } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
@@ -407,7 +406,6 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-// === TOAST POPUP FUNCTION ===
 function showPopup(message, duration = 3500) {
   const existing = document.getElementById('toastPopup');
   if (existing) existing.remove();
@@ -415,26 +413,7 @@ function showPopup(message, duration = 3500) {
   const popup = document.createElement('div');
   popup.id = 'toastPopup';
   popup.textContent = message;
-  popup.style.cssText = `
-    position: fixed;
-    top: 120px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(10,25,0,0.95);
-    color: #c3f60c;
-    padding: 1rem 2rem;
-    border: 2px solid #c3f60c;
-    border-radius: 50px;
-    font-size: 1.1rem;
-    font-weight: 700;
-    text-shadow: 0 0 20px #c3f60c;
-    box-shadow: 0 0 40px rgba(195,246,12,0.6);
-    backdrop-filter: blur(15px);
-    z-index: 9999;
-    opacity: 0;
-    transition: all 0.6s;
-    pointer-events: none;
-  `;
+  popup.style.cssText = 'position:fixed;top:120px;left:50%;transform:translateX(-50%);background:rgba(10,25,0,0.95);color:#c3f60c;padding:1rem 2rem;border:2px solid #c3f60c;border-radius:50px;font-size:1.1rem;font-weight:700;text-shadow:0 0 20px #c3f60c;box-shadow:0 0 40px rgba(195,246,12,0.6);backdrop-filter:blur(15px);z-index:9999;opacity:0;transition:all 0.6s;pointer-events:none;';
   document.body.appendChild(popup);
 
   requestAnimationFrame(() => {
@@ -453,7 +432,6 @@ document.addEventListener('DOMContentLoaded', () => {
   let isVIP = false;
   let gender = '';
 
-  // DOM Elements
   const vipToggle = document.getElementById('vipToggle');
   const femaleBtn = document.getElementById('femaleBtn');
   const maleBtn = document.getElementById('maleBtn');
@@ -468,13 +446,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const passwordInput = document.getElementById('password');
   const confirmPasswordInput = document.getElementById('confirmPassword');
 
-  // Referral handling
   const urlParams = new URLSearchParams(window.location.search);
   let rawRef = urlParams.get('ref') || '';
   rawRef = rawRef.trim();
   const cleanRef = rawRef.replace(/^@+/i, '').trim().toLowerCase();
 
-  // Utility functions (keep your existing ones)
   const sanitizeKey = email => email.trim().toLowerCase().replace(/[@.]/g, '_').replace(/[,\\/*[\]]/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '');
   const cleanChatId = input => input.toLowerCase().replace(/[^a-z0-9_]/g, '');
   const calculateAge = dobStr => {
@@ -483,6 +459,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const diff = Date.now() - dob.getTime();
     return Math.abs(new Date(diff).getUTCFullYear() - 1970);
   };
+
   const isChatIdTaken = async chatId => {
     const q = query(collection(db, "users"), where("chatIdLower", "==", chatId.toLowerCase()));
     return !(await getDocs(q)).empty;
@@ -501,9 +478,9 @@ document.addEventListener('DOMContentLoaded', () => {
     return null;
   }
 
-  // Gender & VIP toggle
   femaleBtn.onclick = () => { gender = 'Female'; femaleBtn.classList.add('selected'); maleBtn.classList.remove('selected'); };
   maleBtn.onclick = () => { gender = 'Male'; maleBtn.classList.add('selected'); femaleBtn.classList.remove('selected'); };
+
   vipToggle.onclick = () => {
     isVIP = !isVIP;
     vipToggle.classList.toggle('on', isVIP);

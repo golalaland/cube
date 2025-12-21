@@ -352,7 +352,8 @@
   <div class="form-group"><input type="text" placeholder="Choose Username" id="chatId"></div>
   <div class="form-group"><input type="tel" placeholder="Phone Number" id="phone"></div>
   <div class="form-group"><input type="email" placeholder="Email Address" id="email"></div>
-  <div class="form-group"><input type="password" placeholder="Create Password (min 8 chars)" id="password"></div>
+  <div class="form-group"><input type="password" placeholder="Create Password (8+ characters)" id="password"></div>
+  <div class="form-group"><input type="password" placeholder="Confirm Password" id="confirmPassword"></div>
 
   <div class="gender-label" style="text-align:center;margin:1.5rem 0;color:#e0ff80;">Select Your Gender</div>
   <div class="gender-select">
@@ -450,6 +451,50 @@ document.addEventListener('DOMContentLoaded', () => {
     return !(await getDocs(q)).empty;
   };
 
+  // Simple themed popup toast
+function showPopup(message, duration = 3000) {
+  // Remove any existing popup
+  const existing = document.getElementById('toastPopup');
+  if (existing) existing.remove();
+
+  const popup = document.createElement('div');
+  popup.id = 'toastPopup';
+  popup.textContent = message;
+  popup.style.cssText = `
+    position: fixed;
+    top: 120px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(10,25,0,0.95);
+    color: #c3f60c;
+    padding: 1rem 2rem;
+    border: 2px solid #c3f60c;
+    border-radius: 50px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-shadow: 0 0 20px #c3f60c;
+    box-shadow: 0 0 40px rgba(195,246,12,0.6);
+    backdrop-filter: blur(15px);
+    z-index: 9999;
+    opacity: 0;
+    transition: all 0.6s;
+    pointer-events: none;
+  `;
+  document.body.appendChild(popup);
+
+  // Trigger animation
+  requestAnimationFrame(() => {
+    popup.style.opacity = '1';
+    popup.style.transform = 'translateX(-50%) translateY(-10px)';
+  });
+
+  setTimeout(() => {
+    popup.style.opacity = '0';
+    popup.style.transform = 'translateX(-50%) translateY(10px)';
+    setTimeout(() => popup.remove(), 600);
+  }, duration);
+}
+
   // MAIN FIX: Find inviter by username OR email → return REAL docId
   async function getInviterDocId(ref) {
     if (!ref) return null;
@@ -495,28 +540,40 @@ submitBtn.onclick = async () => {
   const email = emailInput.value.trim().toLowerCase();
   const dob = dobInput.value;
   const password = passwordInput.value.trim();
+  const confirmPassword = document.getElementById('confirmPassword')?.value.trim() || '';
 
-  if (!fullName || !chatId || !phone || !email || !gender || !dob || !password) {
-    messageEl.textContent = 'Fill all fields';
+  // === CLIENT-SIDE VALIDATIONS WITH POPUPS ===
+  if (!fullName || !chatId || !phone || !email || !gender || !dob || !password || !confirmPassword) {
+    showPopup('Please fill all fields');
     return;
   }
+
   if (chatId.length < 5 || chatId.length > 15) {
-    messageEl.textContent = 'Username 5–15 characters';
-    return;
-  }
-  if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#^])/.test(password)) {
-    messageEl.textContent = 'Password too weak';
-    return;
-  }
-  if (calculateAge(dob) < 18) {
-    messageEl.textContent = 'Must be 18+';
-    return;
-  }
-  if (!/@(gmail|yahoo|icloud|proton|hotmail|outlook)\.(com|me)$/.test(email)) {
-    messageEl.textContent = 'Invalid email';
+    showPopup('Username must be 5–15 characters');
     return;
   }
 
+  if (password.length < 8) {
+    showPopup('Password must be at least 8 characters');
+    return;
+  }
+
+  if (password !== confirmPassword) {
+    showPopup('Passwords do not match');
+    return;
+  }
+
+  if (calculateAge(dob) < 18) {
+    showPopup('You must be 18 or older');
+    return;
+  }
+
+  if (!/@(gmail|yahoo|icloud|proton|hotmail|outlook)\.(com|me)$/.test(email)) {
+    showPopup('Please use a valid email provider');
+    return;
+  }
+
+  // Start loading
   submitBtn.classList.add('loading');
   messageEl.textContent = 'Creating your empire...';
 
@@ -524,48 +581,65 @@ submitBtn.onclick = async () => {
   const userRef = doc(db, "users", docId);
 
   try {
-    // Check duplicates
+    // === CHECK FOR DUPLICATES ===
     const [docSnap, chatTaken] = await Promise.all([
       getDoc(userRef),
       isChatIdTaken(chatId)
     ]);
-    if (docSnap.exists() || chatTaken) {
-      throw new Error("exists");
+
+    if (docSnap.exists()) {
+      showPopup('Email already registered');
+      return;
     }
 
-    // Create Auth user
+    if (chatTaken) {
+      showPopup('Username already taken');
+      return;
+    }
+
+    // === REFERRAL VALIDATION & LIMIT CHECK (MAX 5) ===
+    let inviterDocId = null;
+    let hiveName = '';
+
+    if (cleanRef) {
+      inviterDocId = await getInviterDocId(cleanRef);
+
+      if (inviterDocId) {
+        const invSnap = await getDoc(doc(db, 'users', inviterDocId));
+        if (invSnap.exists()) {
+          const inviterData = invSnap.data();
+          const currentReferralCount = inviterData.referralCount || 0;
+
+          if (currentReferralCount >= 5) {
+            showPopup('This host has reached their invite limit (5 max)');
+            submitBtn.classList.remove('loading');
+            return;
+          }
+
+          // Hive assignment logic (only for non-VIP joining a host)
+          if (!isVIP && inviterData.isHost && inviterData.hiveName) {
+            hiveName = inviterData.hiveName;
+          }
+        } else {
+          inviterDocId = null; // Invalid inviter
+        }
+      }
+    }
+
+    // === CREATE FIREBASE AUTH USER ===
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
 
-   // Resolve inviter + hiveName (HOSTS ONLY!)
-let inviterDocId = null;
-let hiveName = '';  // ← Default blank for VIPs
-
-if (cleanRef) {
-  inviterDocId = await getInviterDocId(cleanRef);
-  if (inviterDocId) {
-    const invSnap = await getDoc(doc(db, 'users', inviterDocId));
-    if (invSnap.exists()) {
-      const inviterData = invSnap.data();
-
-      // ONLY assign hiveName if:
-      // 1. New user is NOT VIP
-      // 2. Inviter is a Host and has a hiveName
-      if (!isVIP && inviterData.isHost && inviterData.hiveName) {
-        hiveName = inviterData.hiveName;
-      }
-      // Otherwise → stays blank ('')
-    }
-  }
-}
-    // Country
+    // === DETECT COUNTRY ===
     let country = 'Unknown';
     try {
       const res = await fetch('https://ipapi.co/json/');
       const data = await res.json();
       country = data.country_name || 'Unknown';
-    } catch (e) {}
+    } catch (e) {
+      console.warn('Country detection failed:', e);
+    }
 
-    // FULL USER DATA — ALL FIELDS RESTORED
+    // === BUILD USER DATA ===
     const userData = {
       uid: userCredential.user.uid,
       fullName,
@@ -597,7 +671,7 @@ if (cleanRef) {
       featuredHosts: false,
       invitedBy: inviterDocId,
       referral: rawRef || null,
-      hiveName, // Your hive system
+      hiveName,
       hostLink: (!isVIP && gender === 'Female')
         ? `https://cube.xixi.com/signup?ref=${chatId}`
         : null,
@@ -621,66 +695,49 @@ if (cleanRef) {
 
     await setDoc(userRef, userData);
 
+    // === UPDATE INVITER (BONUS + COUNTERS) ===
+    if (inviterDocId) {
+      const bonusStars = isVIP ? 100 : 50;
+      await updateDoc(doc(db, "users", inviterDocId), {
+        hostFriendsLastUpdated: serverTimestamp(),
+        stars: increment(bonusStars),
+        referralCount: increment(1),
+        vipCount: isVIP ? increment(1) : increment(0),
+        hostReferralCount: !isVIP ? increment(1) : increment(0)
+      }).catch(err => console.warn("Failed to update inviter:", err));
+    }
 
- // ======================================================
-// INVITER UPDATE (SAFE)
-// ======================================================
-if (inviterDocId) {
-  const bonusStars = isVIP ? 100 : 50;
+    // === SUCCESS FLOW ===
+    messageEl.textContent = `Welcome ${fullName}!`;
+    localStorage.setItem("vipUser", JSON.stringify({ email, chatId }));
 
-  await updateDoc(doc(db, "users", inviterDocId), {
-    hostFriendsLastUpdated: serverTimestamp(),
-    stars: increment(bonusStars),
-    referralCount: increment(1),
-    vipCount: isVIP ? increment(1) : increment(0),
-    hostReferralCount: !isVIP ? increment(1) : increment(0)
-  }).catch(err => {
-    console.warn("Failed to update inviter:", err);
-  });
-}
-
-// ======================================================
-// SUCCESS — POST SIGNUP FLOW
-// ======================================================
-messageEl.textContent = `Welcome ${fullName}!`;
-localStorage.setItem("vipUser", JSON.stringify({ email, chatId }));
-
-if (isVIP) {
-  triggerSprayConfetti();
-
-  submitBtn.classList.remove('loading');
-  submitBtn.classList.add('hidden');
-
-  vipPayBtn.classList.remove('hidden');
-
-  messageEl.textContent = "Your VIP slot is reserved 🔒";
-} else {
-  setTimeout(() => {
-    window.location.href = "shop.html";
-  }, 1800);
-}
+    if (isVIP) {
+      triggerSprayConfetti();
+      submitBtn.classList.remove('loading');
+      submitBtn.classList.add('hidden');
+      vipPayBtn.classList.remove('hidden');
+      messageEl.textContent = "Your VIP slot is reserved 🔒";
+    } else {
+      setTimeout(() => {
+        window.location.href = "shop.html";
+      }, 1800);
+    }
 
   } catch (err) {
     console.error(err);
-    messageEl.textContent = err.message?.includes("exists")
-      ? "Account already exists"
-      : "Signup failed — try again";
-  } finally {
+    const errorMsg = err.code === 'auth/email-already-in-use'
+      ? 'Email already registered'
+      : 'Signup failed — please try again';
+    showPopup(errorMsg);
     submitBtn.classList.remove('loading');
   }
 };
-});
-// DOM references first
-const vipPayBtn = document.getElementById('vipPayBtn');
-const messageEl = document.getElementById('message');
-const emailInput = document.getElementById('email');
-// ... all other DOM elements ...
 
-// THEN define the Paystack button click
+// === VIP PAYSTACK BUTTON (unchanged, just cleaned up) ===
 vipPayBtn.onclick = () => {
   const email = emailInput.value.trim().toLowerCase();
   if (!email || !/@/.test(email)) {
-    messageEl.textContent = "Enter a valid email before paying";
+    showPopup('Enter a valid email before paying');
     return;
   }
 
@@ -689,13 +746,15 @@ vipPayBtn.onclick = () => {
   const handler = PaystackPop.setup({
     key: 'pk_live_b1f53de46eded7175f91c345548365902b4b6d67',
     email: email,
-    amount: 999900,
+    amount: 999900, // ₦9999.00
     currency: 'NGN',
     ref: 'VIP_' + Date.now(),
     callback: function(response) {
       vipPayBtn.classList.remove('loading');
       messageEl.textContent = "VIP Activated 🪩";
-      window.location.href = "shop.html";
+      setTimeout(() => {
+        window.location.href = "shop.html";
+      }, 1500);
     },
     onClose: function() {
       vipPayBtn.classList.remove('loading');
@@ -705,8 +764,6 @@ vipPayBtn.onclick = () => {
 
   handler.openIframe();
 };
-
-
 </script>
 </body>
 </html>

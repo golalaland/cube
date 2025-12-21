@@ -2952,7 +2952,27 @@ function extractColorsFromGradient(gradient) {
     showHint("Tap to unmute", 1500);
   });
 })();
+  // INVITE FOLKS!!!!!
+document.getElementById('inviteFriendsToolBtn')?.addEventListener('click', () => {
+  if (!currentUser?.chatId) {
+    showGoldAlert('Error', 'User not loaded yet');
+    return;
+  }
 
+  const chatId = currentUser.chatId || 'friend';
+  const prettyHandle = chatId.startsWith('@') ? chatId : `@${chatId}`;
+  const message = `Hey! I'm hosting on xixi live, join my tab and let’s win together! Sign up using my link: `;
+  const link = `https://cube.xixi.live/signup?ref=${encodeURIComponent(prettyHandle)}`;
+  const fullText = message + link;
+
+  navigator.clipboard.writeText(fullText)
+    .then(() => {
+      showGoldAlert('Copied!', 'Your invite link is ready to share!', 2500);
+    })
+    .catch(() => {
+      showGoldAlert('Error', 'Could not copy link — try again', 3000);
+    });
+});
 
 // URL of your custom star SVG hosted on Shopify
 const customStarURL = "https://cdn.shopify.com/s/files/1/0962/6648/6067/files/starssvg.svg?v=1761770774";

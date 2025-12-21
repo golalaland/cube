@@ -769,58 +769,58 @@ if (cleanRef) {
 
       await setDoc(userRef, userData);
 
-// === UPDATE INVITER ON SIGNUP ===
+// === UPDATE INVITER ON SIGNUP (WORKS LIKE RIPPLE) ===
 if (inviterDocId) {
   if (isVIP) {
-    // VIP signup: Only count toward total referrals and VIP counter
-    // (Actual STRZ reward happens on successful payment in vipPayBtn)
+    // VIP signup: Only count — rewards on payment
     await updateDoc(doc(db, "users", inviterDocId), {
       referralCount: increment(1),
       vipCount: increment(1),
       lastUpdated: serverTimestamp()
     }).catch(err => console.warn("Inviter VIP count update failed:", err));
 
-    // Optional: VIP signup notification (if you want one now)
+    // Optional: Immediate pending notification (visible like ripple)
     try {
       await addDoc(collection(db, "notifications"), {
-        userId: inviterDocId,                  // ← Must be "userId"
+        recipientId: inviterDocId,             // ← Same as ripple
         type: "new_vip_pending",
         title: "New VIP in Your Network!",
-        message: `@${chatId} just signed up as VIP! Rewards coming on payment 💎`,
+        message: `@${chatId} just signed up as VIP!\nRewards on payment 💎`,
         vipUserId: userCredential.user.uid,
         vipUserName: chatId,
         read: false,
-        timestamp: serverTimestamp()           // ← Must be "timestamp"
+        createdAt: serverTimestamp()           // ← Same as ripple
       });
     } catch (notifErr) {
       console.warn("VIP pending notification failed:", notifErr);
     }
+
   } else {
-    // Non-VIP signup (new Host/Fan): Give 100 STRZ + count as Host referral
+    // Non-VIP signup: Give 100 STRZ + visible notification
     const hostInviteBonus = 100;
 
-  await updateDoc(doc(db, "users", inviterDocId), {
+    await updateDoc(doc(db, "users", inviterDocId), {
       stars: increment(hostInviteBonus),
       referralCount: increment(1),
       hostReferralCount: increment(1),
       lastUpdated: serverTimestamp()
     }).catch(err => console.warn("Inviter host bonus failed:", err));
 
-   // === SEND VISIBLE NOTIFICATION TO INVITER ON NON-VIP SIGNUP ===
-try {
-  await addDoc(collection(db, "notifications"), {
-    userId: inviterDocId,                  // ← Must be "userId" to match listener
-    type: "new_host_join",
-    title: "New Host Joined Your Network!",
-    message: `@${chatId} just joined as a Host! +100 STRZ ✨`,
-    newUserId: userCredential.user.uid,
-    newUserName: chatId,
-    read: false,
-    timestamp: serverTimestamp()           // ← Must be "timestamp"
-  });
-} catch (notifErr) {
-  console.warn("Signup notification failed:", notifErr);
-}
+    // === VISIBLE NOTIFICATION — EXACTLY LIKE RIPPLE ===
+    try {
+      await addDoc(collection(db, "notifications"), {
+        recipientId: inviterDocId,             // ← Matches ripple
+        type: "new_host_join",
+        title: "New Host Joined Your Network!",
+        message: `@${chatId} just joined as a Host using your link!\n+${hostInviteBonus} STRZ ✨`,
+        newUserId: userCredential.user.uid,
+        newUserName: chatId,
+        read: false,
+        createdAt: serverTimestamp()           // ← Matches ripple
+      });
+    } catch (notifErr) {
+      console.warn("Host join notification failed:", notifErr);
+    }
   }
 }
       // Success
@@ -902,29 +902,44 @@ vipPayBtn.onclick = () => {
             lastUpdated: serverTimestamp()
           });
 
-          // Inviter notification (now visible!)
-          await addDoc(collection(db, "notifications"), {
-            userId: inviterId,
-            type: "vip_activated",
-            title: "VIP Activated in Your Network!",
-            message: `@${userData.chatId} just went VIP! +250 STRZ 💎`,
-            vipUserId: userData.uid,
-            vipUserName: userData.chatId,
-            read: false,
-            timestamp: serverTimestamp()
-          });
-        }
+       // === INVITER NOTIFICATION — VISIBLE LIKE RIPPLE ===
+if (inviterId) {
+  await updateDoc(doc(db, "users", inviterId), {
+    stars: increment(250),
+    vipCount: increment(1),
+    lastUpdated: serverTimestamp()
+  });
 
-        // 3. Welcome bonus notification to new VIP
-        await addDoc(collection(db, "notifications"), {
-          userId: userData.uid,
-          type: "vip_bonus",
-          title: "Welcome to VIP! 🎉",
-          message: "You received 2,500 STRZ as a welcome bonus!\nEnjoy your elite status 🪩",
-          read: false,
-          timestamp: serverTimestamp()
-        });
+  try {
+    await addDoc(collection(db, "notifications"), {
+      recipientId: inviterId,                  // ← Same as ripple
+      type: "vip_activated",
+      title: "VIP Activated in Your Network!",
+      message: `@${userData.chatId} just went VIP!\nYou earned +250 STRZ 💎`,
+      vipUserId: userData.uid,
+      vipUserName: userData.chatId,
+      read: false,
+      createdAt: serverTimestamp()             // ← Same as ripple
+    });
+  } catch (err) {
+    console.warn("Inviter VIP notification failed:", err);
+  }
+}
 
+// === WELCOME NOTIFICATION TO NEW VIP — VISIBLE LIKE RIPPLE ===
+try {
+  await addDoc(collection(db, "notifications"), {
+    recipientId: userData.uid,                 // ← Same as ripple
+    type: "vip_bonus",
+    title: "Welcome to VIP! 🎉",
+    message: "You received 2,500 STRZ as a welcome bonus!\nEnjoy your elite status 🪩",
+    read: false,
+    createdAt: serverTimestamp()               // ← Same as ripple
+  });
+} catch (err) {
+  console.warn("VIP welcome notification failed:", err);
+  }
+}
         // Success redirect
         setTimeout(() => {
           window.location.href = "shop.html";

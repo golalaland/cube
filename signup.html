@@ -405,7 +405,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
-
 function showPopup(message, duration = 3500) {
   const existing = document.getElementById('toastPopup');
   if (existing) existing.remove();
@@ -413,17 +412,47 @@ function showPopup(message, duration = 3500) {
   const popup = document.createElement('div');
   popup.id = 'toastPopup';
   popup.textContent = message;
-  popup.style.cssText = 'position:fixed;top:120px;left:50%;transform:translateX(-50%);background:rgba(10,25,0,0.95);color:#c3f60c;padding:1rem 2rem;border:2px solid #c3f60c;border-radius:50px;font-size:1.1rem;font-weight:700;text-shadow:0 0 20px #c3f60c;box-shadow:0 0 40px rgba(195,246,12,0.6);backdrop-filter:blur(15px);z-index:9999;opacity:0;transition:all 0.6s;pointer-events:none;';
+
+  popup.style.cssText = `
+    position: fixed;
+    top: 120px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.92);
+    color: #c3f60c;
+    padding: 0.9rem 2.5rem;
+    border: 1px solid #c3f60c;
+    border-radius: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-shadow: none;
+    box-shadow: none;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    z-index: 9999;
+    opacity: 0;
+    transition: all 0.5s ease;
+    pointer-events: none;
+    min-width: 300px;
+    max-width: 90vw;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  `;
+
   document.body.appendChild(popup);
 
+  // Fade in + slight lift
   requestAnimationFrame(() => {
     popup.style.opacity = '1';
-    popup.style.transform = 'translateX(-50%) translateY(-10px)';
+    popup.style.transform = 'translateX(-50%) translateY(-8px)';
   });
 
+  // Fade out + drop
   setTimeout(() => {
     popup.style.opacity = '0';
-    popup.style.transform = 'translateX(-50%) translateY(10px)';
+    popup.style.transform = 'translateX(-50%) translateY(8px)';
     setTimeout(() => popup.remove(), 600);
   }, duration);
 }
@@ -545,16 +574,47 @@ document.addEventListener('DOMContentLoaded', () => {
     return null;
   }
 
-  femaleBtn.onclick = () => { gender = 'Female'; femaleBtn.classList.add('selected'); maleBtn.classList.remove('selected'); };
-  maleBtn.onclick = () => { gender = 'Male'; maleBtn.classList.add('selected'); femaleBtn.classList.remove('selected'); };
+femaleBtn.onclick = () => {
+  gender = 'Female';
+  femaleBtn.classList.add('selected');
+  maleBtn.classList.remove('selected');
 
-  vipToggle.onclick = () => {
+  // Auto-disable VIP for females
+  isVIP = false;
+  vipToggle.classList.remove('on');
+  document.getElementById('vipLabel').classList.remove('on');
+  document.getElementById('vipMessage').style.opacity = '0';
+};
+
+maleBtn.onclick = () => {
+  gender = 'Male';
+  maleBtn.classList.add('selected');
+  femaleBtn.classList.remove('selected');
+  // Males can use VIP toggle normally
+};
+  
+vipToggle.onclick = () => {
+  if (gender === 'Female') {
+    showPopup('Females can only join as Hosts');
+    vipToggle.classList.remove('on');
+    document.getElementById('vipLabel').classList.remove('on');
+    document.getElementById('vipMessage').style.opacity = '0';
+    isVIP = false;
+    return;
+  }
+
+  if (gender === 'Male') {
+    // Males can toggle VIP freely
     isVIP = !isVIP;
     vipToggle.classList.toggle('on', isVIP);
     document.getElementById('vipLabel').classList.toggle('on', isVIP);
     document.getElementById('vipMessage').style.opacity = isVIP ? '1' : '0';
+    document.getElementById('vipMessage').textContent = isVIP 
+      ? "VIP mode activated — you're elite now" 
+      : "VIP off";
     if (isVIP) triggerSprayConfetti();
-  };
+  }
+};
 
   // === MAIN SIGNUP BUTTON ===
   submitBtn.onclick = async () => {

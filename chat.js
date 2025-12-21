@@ -5399,7 +5399,7 @@ document.getElementById('inviteFriendsToolBtn')?.addEventListener('click', () =>
   const chatId = currentUser.chatId || 'friend';
   const prettyHandle = chatId.startsWith('@') ? chatId : `@${chatId}`;
   const message = `Hey! I'm hosting on xixi live, join my tab and let’s win together! Sign up using my link: `;
-  const link = `https://golalaland?ref=${encodeURIComponent(prettyHandle)}`;
+  const link = `https://golalaland.github.io/cube/signup.html?ref=${encodeURIComponent(prettyHandle)}`;
   const fullText = message + link;
 
   navigator.clipboard.writeText(fullText)

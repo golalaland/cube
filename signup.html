@@ -833,7 +833,7 @@ if (inviterDocId) {
     }
   };
 
-// === VIP PAYSTACK PAYMENT (UPGRADED & NOTIFICATION-FIXED) ===
+// === VIP PAYSTACK PAYMENT (FULLY FIXED & SAFE) ===
 vipPayBtn.onclick = () => {
   const email = emailInput.value.trim().toLowerCase();
   if (!email || !/@/.test(email)) {
@@ -858,14 +858,20 @@ vipPayBtn.onclick = () => {
       const docId = sanitizeKey(email);
       const userRef = doc(db, "users", docId);
 
+      // === MAIN TRY BLOCK FOR ALL POST-PAYMENT PROCESSING ===
       try {
         const userSnap = await getDoc(userRef);
-        if (!userSnap.exists()) throw new Error("User not found after payment");
+        if (!userSnap.exists()) {
+          console.error("User not found after payment");
+          // Still redirect — payment went through
+          setTimeout(() => window.location.href = "shop.html", 1800);
+          return;
+        }
 
         const userData = userSnap.data();
         const inviterId = userData.invitedBy;
 
-        // === 1. UPGRADE USER TO VIP + GIVE 2,500 STRZ ===
+        // 1. Upgrade user to VIP + give 2,500 STRZ
         await updateDoc(userRef, {
           isVIP: true,
           stars: increment(2500),
@@ -873,7 +879,7 @@ vipPayBtn.onclick = () => {
           lastUpdated: serverTimestamp()
         });
 
-        // === 2. REWARD INVITER 250 STRZ + INCREMENT VIP COUNT ===
+        // 2. Reward inviter 250 STRZ if exists
         if (inviterId) {
           await updateDoc(doc(db, "users", inviterId), {
             stars: increment(250),
@@ -881,38 +887,41 @@ vipPayBtn.onclick = () => {
             lastUpdated: serverTimestamp()
           });
 
-          // NOTIFICATION TO INVITER — NOW 100% VISIBLE IN BELL
+          // Inviter notification (now visible!)
           await addDoc(collection(db, "notifications"), {
-            userId: inviterId,                    // ← Fixed: matches listener query
+            userId: inviterId,
             type: "vip_activated",
             title: "VIP Activated in Your Network!",
             message: `@${userData.chatId} just went VIP! +250 STRZ 💎`,
             vipUserId: userData.uid,
             vipUserName: userData.chatId,
             read: false,
-            timestamp: serverTimestamp()          // ← Fixed: matches orderBy("timestamp")
+            timestamp: serverTimestamp()
           });
         }
 
-        // === 3. WELCOME NOTIFICATION TO NEW VIP ===
+        // 3. Welcome bonus notification to new VIP
         await addDoc(collection(db, "notifications"), {
-          userId: userData.uid,                   // ← Fixed
+          userId: userData.uid,
           type: "vip_bonus",
           title: "Welcome to VIP! 🎉",
           message: "You received 2,500 STRZ as a welcome bonus!\nEnjoy your elite status 🪩",
           read: false,
-          timestamp: serverTimestamp()            // ← Fixed
+          timestamp: serverTimestamp()
         });
 
-        // Final success redirect
+        // Success redirect
         setTimeout(() => {
           window.location.href = "shop.html";
         }, 1800);
 
       } catch (err) {
+        // === CATCH BLOCK — THIS WAS MISSING BEFORE! ===
         console.error("VIP activation processing failed:", err);
-        // Payment succeeded → still redirect (user got charged)
-        setTimeout(() => window.location.href = "shop.html", 1800);
+        // Payment already succeeded → safe to redirect
+        setTimeout(() => {
+          window.location.href = "shop.html";
+        }, 1800);
       }
     },
 

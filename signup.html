@@ -387,7 +387,6 @@
 
 <script src="https://js.paystack.co/v2/inline.js"></script>
 
-
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore, doc, setDoc, getDoc, updateDoc, addDoc, collection, where, getDocs, query, serverTimestamp, increment } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
@@ -716,112 +715,126 @@ if (cleanRef) {
         country = data.country_name || 'Unknown';
       } catch (e) {}
 
-      // User data
-      const userData = {
-        uid: userCredential.user.uid,
-        fullName,
-        chatId,
-        chatIdLower: chatId,
-        email,
-        phone,
-        dob,
-        age: calculateAge(dob),
-        gender,
-        country,
-        city: "",
-        location: "",
-        bankName: "",
-        bankAccountNumber: "",
-        instagram: "",
-        tiktok: "",
-        whatsapp: "",
-        telegram: "",
-        bioPick: "",
-        naturePick: "",
-        fruitPick: "",
-        videoUrl: "",
-        popupPhoto: "",
-        isVIP: !!isVIP,
-        isHost: gender === 'Female' && !isVIP,
-        isTrending: false,
-        isAdmin: false,
-        featuredHosts: false,
-        invitedBy: inviterDocId,
-        referral: rawRef || null,
-        hiveName,
-        hostLink: (!isVIP && gender === 'Female') ? `https://cube.xixi.com/signup?ref=${chatId}` : null,
-        vipName: isVIP ? chatId : null,
-        socialShare: gender === 'Female' && !isVIP,
-        stars: 50,
-        starsToday: 0,
-        starsGifted: 0,
-        lastStarDate: new Date().toISOString().split("T")[0],
-        cash: 0,
-        points: 0,
-        gifts: 0,
-        views: 0,
-        inviteeGiftStars: 0,
-        inviteeGiftShown: false,
-        hostFriends: [],
-        usernameColor: '#' + Math.floor(Math.random() * 16777215).toString(16),
-        createdAt: serverTimestamp(),
-        lastUpdated: serverTimestamp()
-      };
+    // === CREATE NEW USER ===
+const userData = {
+  uid: userCredential.user.uid,
+  fullName,
+  chatId,
+  chatIdLower: chatId,
+  email,
+  phone,
+  dob,
+  age: calculateAge(dob),
+  gender,
+  country,
+  city: "",
+  location: "",
+  bankName: "",
+  bankAccountNumber: "",
+  instagram: "",
+  tiktok: "",
+  whatsapp: "",
+  telegram: "",
+  bioPick: "",
+  naturePick: "",
+  fruitPick: "",
+  videoUrl: "",
+  popupPhoto: "",
+  isVIP: !!isVIP,                              // true if they toggled VIP (payment pending)
+  hasPaid: false,                              // ← NEW: only true after successful payment
+  isHost: gender === 'Female' && !isVIP,
+  isTrending: false,
+  isAdmin: false,
+  featuredHosts: false,
+  invitedBy: inviterDocId,
+  referral: rawRef || null,
+  hiveName,
+  hostLink: (!isVIP && gender === 'Female') 
+    ? `https://cube.xixi.com/signup?ref=${chatId}` 
+    : null,
+  vipName: isVIP ? chatId : null,
+  socialShare: gender === 'Female' && !isVIP,
+  stars: 50,
+  starsToday: 0,
+  starsGifted: 0,
+  lastStarDate: new Date().toISOString().split("T")[0],
+  cash: 0,
+  points: 0,
+  gifts: 0,
+  views: 0,
+  inviteeGiftStars: 0,
+  inviteeGiftShown: false,
+  hostFriends: [],                             // ← Starts empty — populated below
+  usernameColor: '#' + Math.floor(Math.random() * 16777215).toString(16),
+  createdAt: serverTimestamp(),
+  lastUpdated: serverTimestamp()
+};
 
-      await setDoc(userRef, userData);
+await setDoc(userRef, userData);
 
-// === UPDATE INVITER ON SIGNUP ===
+// === UPDATE INVITER ON SIGNUP (SAFE ARRAY + TIMER FIELDS READY) ===
 if (inviterDocId) {
   if (isVIP) {
-    // VIP signup: Only count toward total referrals and VIP counter
-    // (Actual STRZ reward happens on successful payment in vipPayBtn)
+    // VIP signup: Only count — full rewards + timer on payment
     await updateDoc(doc(db, "users", inviterDocId), {
       referralCount: increment(1),
       vipCount: increment(1),
       lastUpdated: serverTimestamp()
     }).catch(err => console.warn("Inviter VIP count update failed:", err));
 
-    // Optional: VIP signup notification (if you want one now)
+    // Pending notification
     try {
       await addDoc(collection(db, "notifications"), {
-        userId: inviterDocId,                  // ← Must be "userId"
+        recipientId: inviterDocId,
         type: "new_vip_pending",
         title: "New VIP in Your Network!",
-        message: `@${chatId} just signed up as VIP! Rewards coming on payment 💎`,
+        message: `@${chatId} just signed up as VIP!\nRewards on payment 💎`,
         vipUserId: userCredential.user.uid,
         vipUserName: chatId,
         read: false,
-        timestamp: serverTimestamp()           // ← Must be "timestamp"
+        createdAt: serverTimestamp()
       });
     } catch (notifErr) {
       console.warn("VIP pending notification failed:", notifErr);
     }
+
   } else {
-    // Non-VIP signup (new Host/Fan): Give 100 STRZ + count as Host referral
+    // Non-VIP (Host/Fan): Immediate reward + add to hostFriends array
     const hostInviteBonus = 100;
 
-  await updateDoc(doc(db, "users", inviterDocId), {
+    await updateDoc(doc(db, "users", inviterDocId), {
+      // Safe arrayUnion — no serverTimestamp() inside object
+      hostFriends: arrayUnion({
+        chatId,
+        fullName,
+        email,
+        phone,
+        isVIP: false,
+        isHost: gender === 'Female',
+        joinedAt: Date.now()  // client timestamp — safe & works
+      }),
       stars: increment(hostInviteBonus),
       referralCount: increment(1),
       hostReferralCount: increment(1),
+      hostFriendsLastUpdated: serverTimestamp(),
       lastUpdated: serverTimestamp()
     }).catch(err => console.warn("Inviter host bonus failed:", err));
 
-   // === SEND VISIBLE NOTIFICATION TO INVITER ON NON-VIP SIGNUP ===
-try {
-  await addDoc(collection(db, "notifications"), {
-    userId: inviterDocId,                  // ← Must be "userId" to match listener
-    type: "new_host_join",
-    title: "New Host Joined Your Network!",
-    message: `@${chatId} just joined as a Host! +100 STRZ ✨`,
-    newUserId: userCredential.user.uid,
-    newUserName: chatId,
-    read: false,
-    timestamp: serverTimestamp()           // ← Must be "timestamp"
-  });
-} catch (notifErr) {
-  console.warn("Signup notification failed:", notifErr);
-}
+    // Visible notification (like ripple)
+    try {
+      await addDoc(collection(db, "notifications"), {
+        recipientId: inviterDocId,
+        type: "new_host_join",
+        title: "New Host Joined Your Network!",
+        message: `@${chatId} just joined as a Host using your link!\n+${hostInviteBonus} STRZ ✨`,
+        newUserId: userCredential.user.uid,
+        newUserName: chatId,
+        read: false,
+        createdAt: serverTimestamp()
+      });
+    } catch (notifErr) {
+      console.warn("Host join notification failed:", notifErr);
+    }
   }
 }
       // Success
@@ -886,15 +899,14 @@ vipPayBtn.onclick = () => {
         const userData = userSnap.data();
         const inviterId = userData.invitedBy;
 
-        // 1. Upgrade user to VIP + give 2,500 STRZ
-        await updateDoc(userRef, {
-          isVIP: true,
-          hasPaid: true,  // ← Add this
-          stars: increment(2500),
-          vipActivatedAt: serverTimestamp(),
-          lastUpdated: serverTimestamp()
-        });
-
+       await updateDoc(userRef, {
+  isVIP: true,
+  hasPaid: true,
+  vipActivatedAt: serverTimestamp(),
+  vipExpiresAt: new Date(Date.now() + 31 * 24 * 60 * 60 * 1000), // +31 days
+  stars: increment(2500),
+  lastUpdated: serverTimestamp()
+});
         // 2. Reward inviter 250 STRZ if exists
         if (inviterId) {
           await updateDoc(doc(db, "users", inviterId), {
@@ -903,29 +915,44 @@ vipPayBtn.onclick = () => {
             lastUpdated: serverTimestamp()
           });
 
-          // Inviter notification (now visible!)
-          await addDoc(collection(db, "notifications"), {
-            userId: inviterId,
-            type: "vip_activated",
-            title: "VIP Activated in Your Network!",
-            message: `@${userData.chatId} just went VIP! +250 STRZ 💎`,
-            vipUserId: userData.uid,
-            vipUserName: userData.chatId,
-            read: false,
-            timestamp: serverTimestamp()
-          });
-        }
+       // === INVITER NOTIFICATION — VISIBLE LIKE RIPPLE ===
+if (inviterId) {
+  await updateDoc(doc(db, "users", inviterId), {
+    stars: increment(250),
+    vipCount: increment(1),
+    lastUpdated: serverTimestamp()
+  });
 
-        // 3. Welcome bonus notification to new VIP
-        await addDoc(collection(db, "notifications"), {
-          userId: userData.uid,
-          type: "vip_bonus",
-          title: "Welcome to VIP! 🎉",
-          message: "You received 2,500 STRZ as a welcome bonus!\nEnjoy your elite status 🪩",
-          read: false,
-          timestamp: serverTimestamp()
-        });
+  try {
+    await addDoc(collection(db, "notifications"), {
+      recipientId: inviterId,                  // ← Same as ripple
+      type: "vip_activated",
+      title: "VIP Activated in Your Network!",
+      message: `@${userData.chatId} just went VIP!\nYou earned +250 STRZ 💎`,
+      vipUserId: userData.uid,
+      vipUserName: userData.chatId,
+      read: false,
+      createdAt: serverTimestamp()             // ← Same as ripple
+    });
+  } catch (err) {
+    console.warn("Inviter VIP notification failed:", err);
+  }
+}
 
+// === WELCOME NOTIFICATION TO NEW VIP — VISIBLE LIKE RIPPLE ===
+try {
+  await addDoc(collection(db, "notifications"), {
+    recipientId: userData.uid,                 // ← Same as ripple
+    type: "vip_bonus",
+    title: "Welcome to VIP! 🎉",
+    message: "You received 2,500 STRZ as a welcome bonus!\nEnjoy your elite status 🪩",
+    read: false,
+    createdAt: serverTimestamp()               // ← Same as ripple
+  });
+} catch (err) {
+  console.warn("VIP welcome notification failed:", err);
+  }
+}
         // Success redirect
         setTimeout(() => {
           window.location.href = "shop.html";
@@ -947,7 +974,7 @@ vipPayBtn.onclick = () => {
     }
   });
 
-handler.openIframe();
+ handler.open();  // ← New way
 };
 });
 </script>

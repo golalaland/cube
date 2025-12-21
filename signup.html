@@ -352,9 +352,9 @@
   <div class="form-group"><input type="text" placeholder="Choose Username" id="chatId"></div>
   <div class="form-group"><input type="tel" placeholder="Phone Number" id="phone"></div>
   <div class="form-group"><input type="email" placeholder="Email Address" id="email"></div>
-  <div class="form-group"><input type="password" placeholder="Create Password (min 8 chars)" id="password"></div>
-
-  <div class="gender-label" style="text-align:center;margin:1.5rem 0;color:#e0ff80;">Select Your Gender</div>
+<div class="form-group"><input type="password" placeholder="Create Password (8+ characters)" id="password"></div>
+<div class="form-group"><input type="password" placeholder="Confirm Password" id="confirmPassword"></div>  <!-- ADD THIS LINE -->
+<div class="gender-label" style="text-align:center;margin:1.5rem 0;color:#e0ff80;">Select Your Gender</div>
   <div class="gender-select">
     <button id="femaleBtn">F</button>
     <button id="maleBtn">M</button>
@@ -427,7 +427,74 @@ function showPopup(message, duration = 3500) {
     setTimeout(() => popup.remove(), 600);
   }, duration);
 }
+// === CONFETTI SPRAY EFFECT ===
+function triggerSprayConfetti() {
+  // Simple built-in confetti using canvas (no external library needed)
+  const canvas = document.createElement('canvas');
+  canvas.style.position = 'fixed';
+  canvas.style.top = '0';
+  canvas.style.left = '0';
+  canvas.style.width = '100vw';
+  canvas.style.height = '100vh';
+  canvas.style.pointerEvents = 'none';
+  canvas.style.zIndex = '9999';
+  document.body.appendChild(canvas);
 
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  const confetti = [];
+  const colors = ['#c3f60c', '#e0ff4a', '#a0d00a', '#ffffff'];
+
+  for (let i = 0; i < 300; i++) {
+    confetti.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height - canvas.height,
+      r: Math.random() * 6 + 2,
+      d: Math.random() * 10 + 5,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      tilt: Math.random() * 10 - 5,
+      tiltAngle: 0
+    });
+  }
+
+  let animationFrame;
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    confetti.forEach((c, i) => {
+      c.tiltAngle += 0.1;
+      c.y += c.d;
+      c.tilt = Math.sin(c.tiltAngle) * 15;
+
+      ctx.beginPath();
+      ctx.lineWidth = c.r;
+      ctx.strokeStyle = c.color;
+      ctx.moveTo(c.x + c.tilt + c.r, c.y);
+      ctx.lineTo(c.x + c.tilt, c.y + c.tilt + c.r);
+      ctx.stroke();
+
+      // Remove if off screen
+      if (c.y > canvas.height) confetti.splice(i, 1);
+    });
+
+    if (confetti.length > 0) {
+      animationFrame = requestAnimationFrame(draw);
+    } else {
+      canvas.remove();
+      cancelAnimationFrame(animationFrame);
+    }
+  }
+
+  draw();
+
+  // Auto cleanup after 5 seconds
+  setTimeout(() => {
+    canvas.remove();
+  }, 5000);
+}
+  
 document.addEventListener('DOMContentLoaded', () => {
   let isVIP = false;
   let gender = '';

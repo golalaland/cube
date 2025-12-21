@@ -677,33 +677,33 @@ vipToggle.onclick = () => {
         return;
       }
 
-      // === REFERRAL CHECK + LIMIT (MAX 5) ===
-      let inviterDocId = null;
-      let hiveName = '';
+     // === REFERRAL CHECK + LIMIT (MAX 5 VIPs ONLY) ===
+let inviterDocId = null;
+let hiveName = '';
+if (cleanRef) {
+  inviterDocId = await getInviterDocId(cleanRef);
+  if (inviterDocId) {
+    const invSnap = await getDoc(doc(db, 'users', inviterDocId));
+    if (invSnap.exists()) {
+      const inviterData = invSnap.data();
+      const currentVIPs = inviterData.vipCount || 0;  // ← Changed to vipCount
 
-      if (cleanRef) {
-        inviterDocId = await getInviterDocId(cleanRef);
-        if (inviterDocId) {
-          const invSnap = await getDoc(doc(db, 'users', inviterDocId));
-          if (invSnap.exists()) {
-            const inviterData = invSnap.data();
-            const currentRefs = inviterData.referralCount || 0;
-
-            if (currentRefs >= 5) {
-              showPopup('This host has reached their invite limit (5 max)');
-              submitBtn.classList.remove('loading');
-              return;
-            }
-
-            if (!isVIP && inviterData.isHost && inviterData.hiveName) {
-              hiveName = inviterData.hiveName;
-            }
-          } else {
-            inviterDocId = null;
-          }
-        }
+      // Only block if they're trying to sign up as VIP and limit reached
+      if (isVIP && currentVIPs >= 5) {
+        showPopup('This host has reached their VIP invite limit (5 max)');
+        submitBtn.classList.remove('loading');
+        return;
       }
 
+      // Hive logic unchanged
+      if (!isVIP && inviterData.isHost && inviterData.hiveName) {
+        hiveName = inviterData.hiveName;
+      }
+    } else {
+      inviterDocId = null;
+    }
+  }
+}
       // Create Firebase Auth user
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
 
@@ -867,7 +867,7 @@ vipPayBtn.onclick = () => {
 
     callback: async function(response) {
       vipPayBtn.classList.remove('loading');
-      messageEl.textContent = "VIP Activated 🪩";
+      messageEl.textContent = "VIP Activated ✌︎㋡";
 
       const docId = sanitizeKey(email);
       const userRef = doc(db, "users", docId);
@@ -878,7 +878,7 @@ vipPayBtn.onclick = () => {
         if (!userSnap.exists()) {
           console.error("User not found after payment");
           // Still redirect — payment went through
-          setTimeout(() => window.location.href = "shop.html", 1800);
+          setTimeout(() => window.location.href = "ep.html", 1800);
           return;
         }
 
@@ -888,6 +888,7 @@ vipPayBtn.onclick = () => {
         // 1. Upgrade user to VIP + give 2,500 STRZ
         await updateDoc(userRef, {
           isVIP: true,
+          hasPaid: true,  // ← Add this
           stars: increment(2500),
           vipActivatedAt: serverTimestamp(),
           lastUpdated: serverTimestamp()
@@ -945,7 +946,7 @@ vipPayBtn.onclick = () => {
     }
   });
 
-  handler.openIframe();
+ handler.open();  // ← New way
 };
 });
 </script>

@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -263,36 +264,54 @@
     top: 24px;
     left: 20px;
     z-index: 9999;
-  }
- .hamburger-btn {
-  background: rgba(10,25,0,0.8);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(195,246,12,0.4);
+.hamburger-btn {
+  background: rgba(10, 25, 0, 0.85);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(195, 246, 12, 0.5);
   border-radius: 50%;
-  width: 56px;      /* ← reduced from 64px */
-  height: 56px;     /* ← reduced from 64px */
-  gap: 6px;         /* ← slightly tighter lines */
-  box-shadow: 0 0 30px rgba(195,246,12,0.4); /* slightly less shadow */
+  width: 56px;                    /* ← smaller, more elegant */
+  height: 56px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;                       /* ← tighter spacing */
+  cursor: pointer;
+  transition: all 0.4s ease;
+  box-shadow: 0 0 30px rgba(195, 246, 12, 0.35);
+  position: relative;
+  z-index: 1;
 }
 
 .hamburger-btn:hover {
-  box-shadow: 0 0 45px rgba(195,246,12,0.7);
-  transform: scale(1.08); /* slightly smaller hover scale */
+  box-shadow: 0 0 50px rgba(195, 246, 12, 0.7);
+  transform: scale(1.08);         /* ← subtle hover grow */
+}
+
+.hamburger-btn:active {
+  transform: scale(0.95);         /* ← nice tap feedback */
 }
 
 .hamburger-line {
-  width: 28px;      /* ← reduced from 32px */
+  width: 28px;                    /* ← shorter lines for balance */
   height: 3px;
-  box-shadow: 0 0 12px #c3f60c; /* toned down a touch */
+  background: #c3f60c;
+  border-radius: 2px;
+  transition: all 0.4s ease;
+  box-shadow: 0 0 12px #c3f60c;
 }
 
-/* Adjust the X morph for smaller size */
+/* Morph to X — adjusted for smaller size */
 .hamburger-btn.active .hamburger-line:nth-child(1) {
-  transform: rotate(45deg) translate(7px, 7px); /* was 9px */
+  transform: rotate(45deg) translate(7px, 7px);
+}
+.hamburger-btn.active .hamburger-line:nth-child(2) {
+  opacity: 0;
 }
 .hamburger-btn.active .hamburger-line:nth-child(3) {
-  transform: rotate(-45deg) translate(7px, -7px); /* was 9px */
+  transform: rotate(-45deg) translate(7px, -7px);
 }
+
   /* Mobile Menu */
   .mobile-menu {
     position: fixed;
@@ -415,11 +434,11 @@
     display: inline-block;
     padding: 1.2rem 3.5rem;
     font-size: 1.4rem;
-    font-weight: 900;
+    font-weight: 700;
     text-transform: uppercase;
     background: linear-gradient(135deg, #c3f60c, #a0d00a);
     color: #000;
-    border-radius: 60px;
+    border-radius: 44px;
     text-decoration: none;
     box-shadow: 0 10px 40px rgba(195,246,12,0.6);
     transition: all 0.4s;
@@ -443,7 +462,20 @@
   
 <!-- CUTIE OF THE MONTH EXPANDED SECTION -->
 <section class="cutie-section">
-  <h2 class="section-title">CUTIE OF THE MONTH</h2>
+  <h2 class="section-title">UNLOCK YOUR EXPERIENCE</h2>
+  
+  <div class="cutie-bio">
+    <p>Meet <strong>Zarah</strong> — December's reigning queen of the Cube. With her electric energy and unmatched vibe, she's been lighting up streams, dominating leaderboards, and turning heads across the platform.</p>
+    <p>From late-night raids to exclusive VIP parties, Zarah brings the heat every time. She's earned over 50K STRZ this month alone and holds the #1 spot in TapMaster.</p>
+    <p>"Cube isn't just a place — it's where legends are made. Come play, come win, come rule." — Zarah</p>
+  </div>
+
+
+
+
+  <!-- CUTIE OF THE MONTH EXPANDED SECTION -->
+<section class="cutie-section">
+  <h2 class="section-title">FEATURED</h2>
   
   <div class="cutie-bio">
     <p>Meet <strong>Zarah</strong> — December's reigning queen of the Cube. With her electric energy and unmatched vibe, she's been lighting up streams, dominating leaderboards, and turning heads across the platform.</p>
@@ -483,6 +515,7 @@
     <button class="next">›</button>
   </div>
 </section>
+
 
 <!-- FEATURES GRID — SMALLER CARDS + DOPE SCROLL & TAP ANIMATIONS -->
 <section class="features">

@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CUBE • Elite Access</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script>AOS.init({once: true});</script>
 <style>
   :root {
     --neon: #c3f60c;
@@ -223,6 +226,148 @@
     <div class="particle" style="left:80%;animation-delay:3s;"></div>
     <div class="particle" style="left:90%;animation-delay:5s;"></div>
   </div>
+  <!-- DOPE HAMBURGER MENU -->
+<div class="hamburger-container">
+  <button class="hamburger-btn" aria-label="Menu">
+    <span class="hamburger-line"></span>
+    <span class="hamburger-line"></span>
+    <span class="hamburger-line"></span>
+  </button>
+</div>
+
+<nav class="mobile-menu" data-aos="fade-left">
+  <div class="menu-header">
+    <h3>CUBE MENU</h3>
+    <button class="close-btn" aria-label="Close">×</button>
+  </div>
+  <ul class="menu-links">
+    <li><a href="#cutie">Cutie of the Month</a></li>
+    <li><a href="#tapmaster">TapMaster</a></li>
+    <li><a href="#cuties">Cuties Live</a></li>
+    <li><a href="#siphouse">SipHouse</a></li>
+    <li><a href="#lounge">Lounge</a></li>
+    <li><a href="#rewards">Rewards</a></li>
+    <li><a href="#events">Secret Events</a></li>
+    <li><a href="signup.html" class="menu-cta">JOIN THE EMPIRE</a></li>
+  </ul>
+</nav>
+
+<style>
+  /* Hamburger Button */
+  .hamburger-container {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 9999;
+  }
+  .hamburger-btn {
+    background: rgba(10,25,0,0.7);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(195,246,12,0.3);
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: all 0.4s;
+    box-shadow: 0 0 30px rgba(195,246,12,0.3);
+  }
+  .hamburger-btn:hover, .hamburger-btn.active {
+    background: rgba(195,246,12,0.2);
+    box-shadow: 0 0 50px rgba(195,246,12,0.7);
+  }
+  .hamburger-line {
+    width: 30px;
+    height: 3px;
+    background: #c3f60c;
+    border-radius: 2px;
+    transition: all 0.4s;
+    box-shadow: 0 0 15px #c3f60c;
+  }
+  .hamburger-btn.active .hamburger-line:nth-child(1) {
+    transform: rotate(45deg) translate(8px, 8px);
+  }
+  .hamburger-btn.active .hamburger-line:nth-child(2) {
+    opacity: 0;
+  }
+  .hamburger-btn.active .hamburger-line:nth-child(3) {
+    transform: rotate(-45deg) translate(8px, -8px);
+  }
+
+  /* Mobile Menu */
+  .mobile-menu {
+    position: fixed;
+    top: 0;
+    left: -100%;
+    width: 80%;
+    max-width: 350px;
+    height: 100vh;
+    background: rgba(10,20,0,0.95);
+    backdrop-filter: blur(20px);
+    border-right: 1px solid rgba(195,246,12,0.4);
+    box-shadow: 0 0 80px rgba(195,246,12,0.3);
+    transition: left 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: 9998;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+  }
+  .mobile-menu.active {
+    left: 0;
+  }
+  .menu-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 3rem;
+  }
+  .menu-header h3 {
+    font-size: 1.8rem;
+    color: #c3f60c;
+    text-shadow: 0 0 30px #c3f60c;
+  }
+  .close-btn {
+    background: none;
+    border: none;
+    color: #c3f60c;
+    font-size: 2.5rem;
+    cursor: pointer;
+  }
+  .menu-links {
+    list-style: none;
+    flex: 1;
+  }
+  .menu-links li {
+    margin: 1.5rem 0;
+  }
+  .menu-links a {
+    color: #ddd;
+    font-size: 1.4rem;
+    text-decoration: none;
+    transition: all 0.3s;
+    display: block;
+    padding: 0.5rem 0;
+  }
+  .menu-links a:hover {
+    color: #c3f60c;
+    text-shadow: 0 0 20px #c3f60c;
+    transform: translateX(10px);
+  }
+  .menu-cta {
+    display: inline-block;
+    margin-top: 2rem;
+    padding: 1rem 2.5rem;
+    background: linear-gradient(135deg, #c3f60c, #a0d00a);
+    color: #000;
+    border-radius: 50px;
+    font-weight: 900;
+    text-align: center;
+  }
+</style>
 
  <header style="
   text-align: center;
@@ -330,64 +475,125 @@
   </div>
 </section>
 
-<!-- FEATURES GRID — NOW WITH SCROLL ANIMATIONS & ICONS -->
+<!-- FEATURES GRID — SMALLER CARDS + DOPE SCROLL & TAP ANIMATIONS -->
 <section class="features">
   <div class="features-grid">
-    <!-- TAPMASTER -->
-    <div class="feature-card" data-aos="fade-up" data-aos-delay="100">
-      <div class="feature-icon">
-        <img src="https://www.shutterstock.com/shutterstock/videos/3794936831/thumb/1.jpg?ip=x480" alt="TapMaster Icon">
-      </div>
+    <div class="feature-card">
       <h3>TAPMASTER</h3>
       <p>Zero lag battles. Climb ranks. Win real STRZ rewards.</p>
     </div>
-
-    <!-- CUTIES LIVE -->
-    <div class="feature-card" data-aos="fade-up" data-aos-delay="200">
-      <div class="feature-icon">
-        <img src="https://www.shutterstock.com/image-illustration/neon-glowing-green-color-live-260nw-2648369637.jpg" alt="Live Streaming Icon">
-      </div>
+    <div class="feature-card">
       <h3>CUTIES LIVE</h3>
       <p>Exclusive streams from the hottest hosts. VIP access only.</p>
     </div>
-
-    <!-- SIPHOUSE -->
-    <div class="feature-card" data-aos="fade-up" data-aos-delay="300">
-      <div class="feature-icon">
-        <img src="https://www.shutterstock.com/shutterstock/videos/3668664643/thumb/11.jpg?ip=x480" alt="SipHouse Icon">
-      </div>
+    <div class="feature-card">
       <h3>SIPHOUSE</h3>
       <p>Drink unlocks, real deliveries, and wild party games.</p>
     </div>
-
-    <!-- LOUNGE -->
-    <div class="feature-card" data-aos="fade-up" data-aos-delay="400">
-      <div class="feature-icon">
-        <img src="https://www.shutterstock.com/image-illustration/neon-currency-rising-icons-bright-260nw-2634161151.jpg" alt="Lounge Icon">
-      </div>
+    <div class="feature-card">
       <h3>LOUNGE</h3>
       <p>Elite chat. Voice rooms. Private parties.</p>
     </div>
-
-    <!-- REWARDS -->
-    <div class="feature-card" data-aos="fade-up" data-aos-delay="500">
-      <div class="feature-icon">
-        <img src="https://www.shutterstock.com/image-illustration/neon-green-glowing-trophy-cup-260nw-2698285171.jpg" alt="Rewards Icon">
-      </div>
+    <div class="feature-card">
       <h3>REWARDS</h3>
       <p>Daily quests. Leaderboard prizes. Ripple earnings.</p>
     </div>
-
-    <!-- SECRET EVENTS -->
-    <div class="feature-card" data-aos="fade-up" data-aos-delay="600">
-      <div class="feature-icon">
-        <img src="https://corporateentertainmentagency.com/wp-content/uploads/2015/06/LED-Laser-Duo2.jpg" alt="Secret Events Icon">
-      </div>
+    <div class="feature-card">
       <h3>SECRET EVENTS</h3>
       <p>Invite-only nights. Celebrity drops. Unforgettable vibes.</p>
     </div>
   </div>
 </section>
+
+<!-- AOS for Scroll Animations -->
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script>
+  AOS.init({
+    duration: 900,
+    easing: 'ease-out-back',
+    once: false,     // Animate every time they scroll past
+    mirror: true     // Animate back out when scrolling up
+  });
+</script>
+
+<style>
+  .features {
+    padding: 4rem 1rem;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); /* Smaller cards */
+    gap: 2rem;
+  }
+  .feature-card {
+    background: rgba(10, 20, 0, 0.65);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(195,246,12,0.2);
+    border-radius: 20px;
+    padding: 2rem 1.5rem;
+    text-align: center;
+    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  /* Scroll Animation (AOS) */
+  .feature-card[data-aos="fade-up"] {
+    opacity: 0;
+    transform: translateY(60px) scale(0.9);
+  }
+  .feature-card[data-aos="fade-up"].aos-animate {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  /* Hover Lift + Glow */
+  .feature-card:hover {
+    transform: translateY(-20px) scale(1.05);
+    border-color: #c3f60c;
+    box-shadow: 0 30px 80px rgba(195,246,12,0.4);
+  }
+  /* Tap Glow (Mobile Touch) */
+  .feature-card:active {
+    transform: translateY(-10px) scale(1.03);
+    box-shadow: 
+      0 0 60px rgba(195,246,12,0.8),
+      0 0 100px rgba(195,246,12,0.5);
+    border-color: #c3f60c;
+    animation: tapPulse 0.6s ease-out;
+  }
+  @keyframes tapPulse {
+    0% { box-shadow: 0 0 0 0 rgba(195,246,12,0.7); }
+    70% { box-shadow: 0 0 0 40px rgba(195,246,12,0); }
+    100% { box-shadow: 0 0 0 0 rgba(195,246,12,0); }
+  }
+  .feature-card h3 {
+    font-size: 1.6rem;
+    margin: 1rem 0;
+    background: linear-gradient(90deg, #c3f60c, #e0ff4a);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 30px rgba(195,246,12,0.5);
+    transition: all 0.4s;
+  }
+  .feature-card:hover h3,
+  .feature-card:active h3 {
+    text-shadow: 0 0 40px rgba(195,246,12,0.9);
+    transform: translateY(-5px);
+  }
+  .feature-card p {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #ddd;
+    opacity: 0.9;
+    transition: opacity 0.4s;
+  }
+  .feature-card:hover p {
+    opacity: 1;
+  }
+</style>
 
 <!-- AOS Library (Add to <head>) -->
 <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
@@ -468,6 +674,28 @@
     setInterval(() => {
       document.querySelector('.next').click();
     }, 6000);
+
+  const hamburgerBtn = document.querySelector('.hamburger-btn');
+  const mobileMenu = document.querySelector('.mobile-menu');
+  const closeBtn = document.querySelector('.close-btn');
+
+  hamburgerBtn.addEventListener('click', () => {
+    hamburgerBtn.classList.toggle('active');
+    mobileMenu.classList.toggle('active');
+  });
+
+  closeBtn.addEventListener('click', () => {
+    hamburgerBtn.classList.remove('active');
+    mobileMenu.classList.remove('active');
+  });
+
+  // Close on link click
+  document.querySelectorAll('.menu-links a').forEach(link => {
+    link.addEventListener('click', () => {
+      hamburgerBtn.classList.remove('active');
+      mobileMenu.classList.remove('active');
+    });
+  });
   </script>
 </body>
 </html>

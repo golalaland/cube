@@ -227,7 +227,7 @@
     <div class="particle" style="left:90%;animation-delay:5s;"></div>
   </div>
   
-<!-- CLEAN DOPE HAMBURGER MENU -->
+<!-- REFINED HAMBURGER MENU -->
 <div class="hamburger-container">
   <button class="hamburger-btn" aria-label="Menu">
     <span class="hamburger-line"></span>
@@ -237,10 +237,14 @@
 </div>
 
 <nav class="mobile-menu">
+  <!-- Logo instead of text -->
   <div class="menu-header">
-    <h3>CUBE MENU</h3>
-    <!-- NO EXTRA CLOSE BUTTON — hamburger becomes X -->
+    <img src="https://cdn.shopify.com/s/files/1/0962/6648/6067/files/HABA_HOUSE.png?v=1765412962"
+         alt="CUBE"
+         class="menu-logo">
   </div>
+
+  <!-- Scrollable links -->
   <ul class="menu-links">
     <li><a href="#cutie">Cutie of the Month</a></li>
     <li><a href="#tapmaster">TapMaster</a></li>
@@ -289,7 +293,6 @@
     transition: all 0.4s ease;
     box-shadow: 0 0 15px #c3f60c;
   }
-  /* Morph to X */
   .hamburger-btn.active .hamburger-line:nth-child(1) {
     transform: rotate(45deg) translate(9px, 9px);
   }
@@ -314,54 +317,72 @@
     box-shadow: 0 0 100px rgba(195,246,12,0.4);
     transition: left 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     z-index: 9998;
-    padding: 3rem 2rem;
     display: flex;
     flex-direction: column;
+    padding: 2rem;
   }
   .mobile-menu.active {
     left: 0;
   }
+
+  /* Logo in Header */
   .menu-header {
-    margin-bottom: 3rem;
     text-align: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(195,246,12,0.2);
   }
-  .menu-header h3 {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 2.2rem;
-    color: #c3f60c;
-    text-shadow: 0 0 40px #c3f60c;
-    letter-spacing: 6px;
+  .menu-logo {
+    height: 120px;
+    width: auto;
+    filter: drop-shadow(0 0 30px #c3f60c);
   }
+
+  /* Scrollable Links */
   .menu-links {
     list-style: none;
     flex: 1;
+    overflow-y: auto;                 /* ← Internal scroller */
+    -webkit-overflow-scrolling: touch; /* Smooth on iOS */
+    padding-right: 10px;
+  }
+  .menu-links::-webkit-scrollbar {
+    width: 6px;
+  }
+  .menu-links::-webkit-scrollbar-track {
+    background: rgba(0,0,0,0.3);
+    border-radius: 10px;
+  }
+  .menu-links::-webkit-scrollbar-thumb {
+    background: rgba(195,246,12,0.6);
+    border-radius: 10px;
   }
   .menu-links li {
-    margin: 1.8rem 0;
+    margin: 1.2rem 0;
   }
   .menu-links a {
-    color: #ddd;
-    font-size: 1.5rem;
-    font-weight: 600;
+    color: #ccc;
+    font-size: 1.3rem;           /* ← Smaller, not bold */
+    font-weight: 500;
     text-decoration: none;
     transition: all 0.4s;
     display: block;
-    padding: 0.6rem 0;
+    padding: 0.8rem 0;
   }
   .menu-links a:hover {
     color: #c3f60c;
-    text-shadow: 0 0 25px #c3f60c;
-    transform: translateX(12px);
+    text-shadow: 0 0 20px #c3f60c;
+    transform: translateX(10px);
   }
   .menu-cta {
     display: inline-block;
-    margin-top: 3rem;
-    padding: 1.2rem 3rem;
+    margin: 2rem auto 0;
+    padding: 1rem 3rem;
     background: linear-gradient(135deg, #c3f60c, #a0d00a);
     color: #000;
     border-radius: 60px;
-    font-weight: 900;
-    font-size: 1.3rem;
+    font-weight: 800;
+    font-size: 1.2rem;
     text-align: center;
     box-shadow: 0 10px 40px rgba(195,246,12,0.6);
   }
@@ -675,19 +696,13 @@
 
   const hamburgerBtn = document.querySelector('.hamburger-btn');
   const mobileMenu = document.querySelector('.mobile-menu');
-  const closeBtn = document.querySelector('.close-btn');
 
   hamburgerBtn.addEventListener('click', () => {
     hamburgerBtn.classList.toggle('active');
     mobileMenu.classList.toggle('active');
   });
 
-  closeBtn.addEventListener('click', () => {
-    hamburgerBtn.classList.remove('active');
-    mobileMenu.classList.remove('active');
-  });
-
-  // Close on link click
+  // Close on link tap
   document.querySelectorAll('.menu-links a').forEach(link => {
     link.addEventListener('click', () => {
       hamburgerBtn.classList.remove('active');

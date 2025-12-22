@@ -5398,15 +5398,15 @@ document.getElementById('inviteFriendsToolBtn')?.addEventListener('click', () =>
 
   const chatId = currentUser.chatId || 'friend';
   const prettyHandle = chatId.startsWith('@') ? chatId : `@${chatId}`;
-  const message = `Hey! I'm hosting on xixi live, join my tab and let’s win together! Sign up using my link: `;
+  const message = `Hey! I'm on cube, join my tab and let’s win some together! Sign up using my link: `;
   const link = `https://golalaland.github.io/cube/signup.html?ref=${encodeURIComponent(prettyHandle)}`;
   const fullText = message + link;
 
   navigator.clipboard.writeText(fullText)
     .then(() => {
-      showGoldAlert('Copied!', 'Your invite link is ready to share!', 2500);
+      showStarPopup('Copied!', 'Your invite link is ready to share!', 2500);
     })
     .catch(() => {
-      showGoldAlert('Error', 'Could not copy link — try again', 3000);
+      showStarPopup('Error', 'Could not copy link — try again', 3000);
     });
 });

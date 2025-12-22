@@ -286,7 +286,7 @@ body {
 </head>
 <body>
   <video class="hero-video" autoplay muted loop playsinline>
-    <source src="https://cdn.shopify.com/videos/c/o/v/e8ea13a3833c4f069d6349e179eb1cef.mp4" type="video/mp4">
+    <source src="https://cdn.shopify.com/videos/c/o/v/e5d9d2c38f48413fbcfa4b2e0e5500c2.mp4" type="video/mp4">
   </video>
   <div class="hero-overlay"></div>
   <div class="particles">
@@ -467,41 +467,41 @@ body {
     box-shadow: 0 10px 40px rgba(195,246,12,0.6);
   }
 
-  /* CENTERED SECTION HEADERS — "What's Your Edge" & "Featured" */
+ /* CENTERED SECTION HEADERS — "What's Your Edge" & "Featured" */
 .edge-header,
 .featured-header {
   text-align: center;
-  margin: 3rem 0 2rem;
+  margin: 2.5rem 0 1.8rem;
   padding: 0 1rem;
 }
 
 .edge-header h2,
 .featured-header h2 {
-  font-family: 'Rajdhani', sans-serif; /* or your preferred dope font */
-  font-size: clamp(2.8rem, 8vw, 4.5rem);
+  font-family: 'Rajdhani', sans-serif; /* Change to any handwriting font if you want */
+  font-size: clamp(2.2rem, 6.5vw, 3.6rem);   /* ← REDUCED: smaller on all screens */
   font-weight: 700;
   background: linear-gradient(90deg, #c3f60c, #e0ff4a, #c3f60c);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  text-shadow: 0 0 50px rgba(195,246,12,0.6);
-  letter-spacing: 8px;
+  text-shadow: 0 0 40px rgba(195,246,12,0.5); /* ← slightly softer glow */
+  letter-spacing: 6px;                       /* ← reduced spacing for tighter look */
   display: inline-block;
   position: relative;
 }
 
-/* Optional subtle underline glow */
+/* Optional subtle underline glow — made thinner & shorter */
 .edge-header h2::after,
 .featured-header h2::after {
   content: '';
   position: absolute;
-  bottom: -10px;
+  bottom: -8px;
   left: 50%;
   transform: translateX(-50%);
-  width: 60%;
-  height: 3px;
+  width: 50%;                    /* ← shorter line */
+  height: 2px;                   /* ← thinner */
   background: linear-gradient(90deg, transparent, #c3f60c, transparent);
-  box-shadow: 0 0 20px #c3f60c;
+  box-shadow: 0 0 15px #c3f60c;
   border-radius: 2px;
 }
 

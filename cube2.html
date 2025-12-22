@@ -458,6 +458,44 @@ family=Rajdhani:wght@500;600;700
     box-shadow: 0 10px 40px rgba(195,246,12,0.6);
   }
 
+  /* CENTERED SECTION HEADERS — "What's Your Edge" & "Featured" */
+.edge-header,
+.featured-header {
+  text-align: center;
+  margin: 3rem 0 2rem;
+  padding: 0 1rem;
+}
+
+.edge-header h2,
+.featured-header h2 {
+  font-family: 'Rajdhani', sans-serif; /* or your preferred dope font */
+  font-size: clamp(2.8rem, 8vw, 4.5rem);
+  font-weight: 700;
+  background: linear-gradient(90deg, #c3f60c, #e0ff4a, #c3f60c);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 50px rgba(195,246,12,0.6);
+  letter-spacing: 8px;
+  display: inline-block;
+  position: relative;
+}
+
+/* Optional subtle underline glow */
+.edge-header h2::after,
+.featured-header h2::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #c3f60c, transparent);
+  box-shadow: 0 0 20px #c3f60c;
+  border-radius: 2px;
+}
+
 </style>
 
  <header style="
@@ -526,8 +564,10 @@ family=Rajdhani:wght@500;600;700
 </style>
 
 <!-- CUTIE OF THE MONTH EXPANDED SECTION -->
-<section class="cutie-section">
-  <h2 class="section-title">WHAT'S YOUR EDGE?</h2>
+<!-- WHAT'S YOUR EDGE -->
+<div class="edge-header">
+  <h2>WHAT'S YOUR EDGE</h2>
+</div>
 
 <div class="cutie-bio">
     <p>Meet <strong>Zarah</strong> — December's reigning queen of the Cube. With her electric energy and unmatched vibe, she's been lighting up streams, dominating leaderboards, and turning heads across the platform.</p>
@@ -539,8 +579,10 @@ family=Rajdhani:wght@500;600;700
 
   
 <!-- CUTIE OF THE MONTH EXPANDED SECTION -->
-<section class="cutie-section">
-  <h2 class="section-title">FEATURED</h2>
+<!-- FEATURED / CUTIE OF THE MONTH -->
+<div class="featured-header">
+  <h2>FEATURED</h2>
+</div>
   
   <div class="cutie-bio">
     <p>Meet <strong>Zarah</strong> — December's reigning queen of the Cube. With her electric energy and unmatched vibe, she's been lighting up streams, dominating leaderboards, and turning heads across the platform.</p>

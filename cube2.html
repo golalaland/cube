@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CUBE • Elite Access</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --neon: #c3f60c;
+    --neon-glow: rgba(195,246,12,0.6);
+    --deep-bg: #0a1400;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #0a1400, #111900, #000000);
+    font-family: 'Poppins', sans-serif;
+    color: #fff;
+    overflow-x: hidden;
+  }
+  .hero-video {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    z-index: -3;
+    opacity: 0.35;
+    filter: brightness(0.6) contrast(1.3);
+  }
+  .hero-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: linear-gradient(180deg, transparent 0%, #000 90%);
+    z-index: -2;
+  }
+  .particles {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: -1;
+  }
+  .particle {
+    position: absolute;
+    width: 5px; height: 5px;
+    background: var(--neon);
+    border-radius: 50%;
+    box-shadow: 0 0 20px var(--neon);
+    animation: float 15s infinite linear;
+  }
+  @keyframes float {
+    0% { transform: translateY(100vh) translateX(0); opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { transform: translateY(-100px) translateX(120px); opacity: 0; }
+  }
+  header {
+    text-align: center;
+    padding: 3rem 1rem 2rem;
+    position: relative;
+    z-index: 2;
+  }
+  .logo {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(4rem, 12vw, 7rem);
+    font-weight: 900;
+    background: linear-gradient(90deg, var(--neon), #e0ff4a, var(--neon));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 60px var(--neon-glow);
+    letter-spacing: 10px;
+    margin-bottom: 0.5rem;
+  }
+  .tagline {
+    font-size: clamp(1.2rem, 4vw, 1.8rem);
+    color: #e0ff80;
+    letter-spacing: 4px;
+    text-shadow: 0 0 20px var(--neon);
+    margin-bottom: 2rem;
+  }
+  .cta-btn {
+    display: inline-block;
+    padding: 1.2rem 3.5rem;
+    font-size: 1.4rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    background: linear-gradient(135deg, var(--neon), #a0d00a);
+    color: #000;
+    border-radius: 60px;
+    text-decoration: none;
+    box-shadow: 0 10px 40px var(--neon-glow);
+    transition: all 0.4s;
+  }
+  .cta-btn:hover {
+    transform: translateY(-8px) scale(1.05);
+    box-shadow: 0 20px 60px var(--neon-glow);
+  }
+  /* Cutie of the Month Section */
+  .cutie-section {
+    padding: 4rem 1rem;
+    text-align: center;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  .section-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(2.5rem, 8vw, 4rem);
+    margin-bottom: 2rem;
+    background: linear-gradient(90deg, var(--neon), #e0ff4a);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 40px var(--neon-glow);
+  }
+  .cutie-bio {
+    max-width: 800px;
+    margin: 0 auto 3rem;
+    font-size: 1.2rem;
+    line-height: 1.8;
+    color: #ddd;
+  }
+  .cutie-slider {
+    position: relative;
+    max-width: 900px;
+    margin: 0 auto;
+    overflow: hidden;
+    border-radius: 20px;
+    box-shadow: 0 0 60px var(--neon-glow);
+  }
+  .slides {
+    display: flex;
+    transition: transform 0.6s ease;
+  }
+  .slide {
+    min-width: 100%;
+    position: relative;
+  }
+  .slide img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  .slide video {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  .slide-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 2rem;
+    background: linear-gradient(transparent, #000);
+    color: #fff;
+  }
+  .prev, .next {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0,0,0,0.5);
+    color: var(--neon);
+    border: none;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    font-size: 2rem;
+    cursor: pointer;
+    z-index: 10;
+  }
+  .prev { left: 20px; }
+  .next { right: 20px; }
+  /* Features Grid */
+  .features {
+    padding: 4rem 1rem;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+  }
+  .feature-card {
+    background: rgba(10,25,0,0.6);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(195,246,12,0.3);
+    border-radius: 20px;
+    padding: 2rem;
+    text-align: center;
+    transition: all 0.4s;
+  }
+  .feature-card:hover {
+    transform: translateY(-15px);
+    border-color: var(--neon);
+    box-shadow: 0 20px 50px var(--neon-glow);
+  }
+  .feature-card h3 {
+    font-size: 1.6rem;
+    margin: 1.5rem 0;
+    color: var(--neon);
+    text-shadow: 0 0 20px var(--neon-glow);
+  }
+  /* Responsive Adjustments */
+  @media (max-width: 768px) {
+    .cutie-bio { font-size: 1.1rem; padding: 0 1rem; }
+    .prev, .next { width: 50px; height: 50px; font-size: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+  <video class="hero-video" autoplay muted loop playsinline>
+    <source src="https://cdn.shopify.com/videos/c/o/v/62abbaf7c3a549e5a65e7f9ea67b1c09.mov" type="video/mp4">
+  </video>
+  <div class="hero-overlay"></div>
+  <div class="particles">
+    <div class="particle" style="left:10%;animation-delay:0s;"></div>
+    <div class="particle" style="left:25%;animation-delay:2s;"></div>
+    <div class="particle" style="left:40%;animation-delay:4s;"></div>
+    <div class="particle" style="left:60%;animation-delay:1s;"></div>
+    <div class="particle" style="left:80%;animation-delay:3s;"></div>
+    <div class="particle" style="left:90%;animation-delay:5s;"></div>
+  </div>
+
+  <header>
+    <h1 class="logo">CUBE</h1>
+    <p class="tagline">UNLOCK YOUR EDGE • 18+ ELITE CLUB</p>
+    <a href="signup.html" class="cta-btn">JOIN THE EMPIRE</a>
+  </header>
+
+  <!-- CUTIE OF THE MONTH EXPANDED SECTION -->
+  <section class="cutie-section">
+    <h2 class="section-title">CUTIE OF THE MONTH</h2>
+    <div class="cutie-bio">
+      <p>Meet <strong>Zarah</strong> — December's reigning queen of the Cube. With her electric energy and unmatched vibe, she's been lighting up streams, dominating leaderboards, and turning heads across the platform.</p>
+      <p>From late-night raids to exclusive VIP parties, Zarah brings the heat every time. She's earned over 50K STRZ this month alone and holds the #1 spot in TapMaster.</p>
+      <p>"Cube isn't just a place — it's where legends are made. Come play, come win, come rule." — Zarah</p>
+    </div>
+
+    <div class="cutie-slider">
+      <button class="prev">‹</button>
+      <div class="slides">
+        <div class="slide">
+
+<grok-card data-id="bd982c" data-type="image_card"></grok-card>
+
+        </div>
+        <div class="slide">
+
+<grok-card data-id="64d9bd" data-type="image_card"></grok-card>
+
+        </div>
+        <div class="slide">
+
+<grok-card data-id="78f90c" data-type="image_card"></grok-card>
+
+        </div>
+        <div class="slide">
+
+<grok-card data-id="e8924b" data-type="image_card"></grok-card>
+
+        </div>
+        <div class="slide">
+
+<grok-card data-id="39dffe" data-type="image_card"></grok-card>
+
+        </div>
+        <div class="slide">
+
+<grok-card data-id="bdc1ec" data-type="image_card"></grok-card>
+
+        </div>
+        <div class="slide">
+
+<grok-card data-id="bb2c8f" data-type="image_card"></grok-card>
+
+        </div>
+        <div class="slide">
+
+<grok-card data-id="0c98f3" data-type="image_card"></grok-card>
+
+        </div>
+      </div>
+      <button class="next">›</button>
+    </div>
+  </section>
+
+  <!-- FEATURES GRID -->
+  <section class="features">
+    <div class="features-grid">
+      <div class="feature-card">
+        <h3>TAPMASTER</h3>
+        <p>Zero lag battles. Climb ranks. Win real STRZ rewards.</p>
+      </div>
+      <div class="feature-card">
+        <h3>CUTIES LIVE</h3>
+        <p>Exclusive streams from the hottest hosts. VIP access only.</p>
+      </div>
+      <div class="feature-card">
+        <h3>SIPHOUSE</h3>
+        <p>Drink unlocks, real deliveries, and wild party games.</p>
+      </div>
+      <div class="feature-card">
+        <h3>LOUNGE</h3>
+        <p>Elite chat. Voice rooms. Private parties.</p>
+      </div>
+      <div class="feature-card">
+        <h3>REWARDS</h3>
+        <p>Daily quests. Leaderboard prizes. Ripple earnings.</p>
+      </div>
+      <div class="feature-card">
+        <h3>SECRET EVENTS</h3>
+        <p>Invite-only nights. Celebrity drops. Unforgettable vibes.</p>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    // Simple slider for Cutie of the Month
+    const slides = document.querySelector('.slides');
+    const slideCount = document.querySelectorAll('.slide').length;
+    let currentSlide = 0;
+
+    document.querySelector('.next').addEventListener('click', () => {
+      currentSlide = (currentSlide + 1) % slideCount;
+      slides.style.transform = `translateX(-${currentSlide * 100}%)`;
+    });
+
+    document.querySelector('.prev').addEventListener('click', () => {
+      currentSlide = (currentSlide - 1 + slideCount) % slideCount;
+      slides.style.transform = `translateX(-${currentSlide * 100}%)`;
+    });
+
+    // Auto-advance every 6 seconds
+    setInterval(() => {
+      document.querySelector('.next').click();
+    }, 6000);
+  </script>
+</body>
+</html>

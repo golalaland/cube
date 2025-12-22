@@ -179,13 +179,24 @@ family=Rajdhani:wght@500;600;700
 
 /* ===== QUOTES OR PERSONAL MESSAGES ===== */
 .cutie-quote {
-  font-family: 'Caveat', cursive; /* ← Feels like real handwriting */
+  font-family: 'Caveat', cursive;
   font-size: 1.6rem;
   font-style: italic;
-  color: #c3f60c;
-  opacity: 0.9;
-  margin: 2rem 0;
+  color: #ffffff;
+  opacity: 0.95;
+  margin: 2rem auto;
+  max-width: 720px;
+  text-align: center;
 }
+
+.cutie-quote p {
+  display: inline-block;
+  overflow: hidden;
+  white-space: nowrap;
+  border-right: 2px solid rgba(255,255,255,0.75);
+  margin: 1.2rem 0;
+}
+
   .cutie-slider {
     position: relative;
     max-width: 900px;
@@ -578,55 +589,15 @@ body {
   <h2>WHAT’S YOUR EDGE?</h2>
 </div>
 
-<div class="cutie-quote" style="text-align:center; max-width:720px; margin:0 auto;">
-  
-  <p>
-    In a world saturated with endless noise —
-    <br>
-    fleeting likes. hollow hustles. empty promises.
-  </p>
-
-  <p>
-    Most people are just surviving.
-    <br><br>
-    <strong>You’re here to sharpen.</strong>
-  </p>
-
-  <p>
-    Cube isn’t another platform.
-    <br>
-    It’s a private, invite-only club.
-  </p>
-
-  <p>
-    Where ambition meets allure.
-    <br>
-    Skill turns into real cash.
-    <br>
-    And every move levels you up.
-  </p>
-
-  <p>
-    <strong>Six sides.</strong>
-    <br>
-    <strong>One unbreakable edge.</strong>
-  </p>
-
-  <p>
-    This isn’t about being seen by everyone.
-    <br>
-    It’s about being chosen by the right ones.
-  </p>
-
-  <p>
-    Earn quietly.
-    <br>
-    Build undeniable clout.
-    <br>
-    Step into the spotlight — when you’re ready.
-  </p>
-
+<div class="cutie-quote" id="cutieQuote">
+  <p>In a world saturated with endless noise — fleeting likes, hollow hustles, and platforms that promise everything yet deliver nothing — most people are simply surviving.</p>
+  <p><strong>You’re different.</strong> You’re here to sharpen.</p>
+  <p>Cube isn’t another platform. It’s a private, invite-only club where raw ambition collides with effortless allure. Where skill turns into real cash, connections feel electric, and every move levels you up.</p>
+  <p>Six sides. One unbreakable edge.</p>
+  <p>This isn’t about being seen by everyone. It’s about being chosen by the right ones.</p>
+  <p>Here, you earn passively while others chase exposure. You step into the spotlight when you’re ready, build undeniable clout, and unlock the tools — masterclasses, insights, and the right energy — that elevate your entire life.</p>
 </div>
+
 
 <!-- CUTIE OF THE MONTH EXPANDED SECTION -->
 <!-- FEATURED / CUTIE OF THE MONTH -->
@@ -1127,7 +1098,30 @@ body {
     once: true,
     offset: 100
   });
-</script>
+    const container = document.getElementById("cutieQuote");
+const paragraphs = container.querySelectorAll("p");
+
+let delay = 0;
+
+paragraphs.forEach(p => {
+  const text = p.textContent;
+  p.textContent = "";
+  
+  setTimeout(() => {
+    let i = 0;
+    const interval = setInterval(() => {
+      if (i < text.length) {
+        p.textContent += text[i];
+        i++;
+      } else {
+        clearInterval(interval);
+        p.style.borderRight = "none"; // remove cursor after line finishes
+      }
+    }, 30); // typing speed (ms per character)
+  }, delay);
+
+  delay += text.length * 30 + 500; // stagger lines
+});
   </script>
 </body>
 </html>

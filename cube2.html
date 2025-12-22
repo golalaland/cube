@@ -585,7 +585,7 @@
         <a href="#terms">Terms & Privacy</a>
       </div>
 
-<!-- JOIN THE VIBE — SINGLE TELEGRAM ICON (FULLY ZOOMED OUT) -->
+<!-- JOIN THE VIBE — TELEGRAM ICON (FULL LOGO, ZOOMED OUT PERFECTLY) -->
 <div class="footer-col social-col">
   <h4>Join the Vibe</h4>
   <div class="social-icons">
@@ -593,13 +593,13 @@
       <img src="https://cdn.shopify.com/s/files/1/0962/6648/6067/files/telegram.png?v=1766429753"
            alt="Telegram"
            style="
-             width: 100px;                   /* ← container size */
-             height: 100px;
+             width: 110px;                   /* ← slightly larger circle */
+             height: 110px;
              border-radius: 50%;
              border: 2px solid #c3f60c;
-             padding: 13px;                  /* ← MORE padding = more zoom out */
-             background: rgba(10,20,0,0.7);
-             object-fit: contain;            /* ← shows FULL logo */
+             padding: 22px;                  /* ← MORE padding = logo smaller & centered */
+             background: rgba(10,20,0,0.8);
+             object-fit: contain;            /* ← ensures full image shows */
              box-shadow: 0 0 40px rgba(195,246,12,0.5);
              transition: all 0.4s ease;
            ">
@@ -850,14 +850,6 @@
 <!-- AOS Library (Add to <head>) -->
 <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
 <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-<script>
-  AOS.init({
-    duration: 800,
-    easing: 'ease-out-cubic',
-    once: true,
-    offset: 100
-  });
-</script>
 
 <style>
   .feature-icon {
@@ -948,6 +940,13 @@
     once: false,     // Animate every time they scroll past
     mirror: true     // Animate back out when scrolling up
   });
+  AOS.init({
+    duration: 800,
+    easing: 'ease-out-cubic',
+    once: true,
+    offset: 100
+  });
+</script>
   </script>
 </body>
 </html>

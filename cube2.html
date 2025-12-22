@@ -264,44 +264,35 @@
     left: 20px;
     z-index: 9999;
   }
-  .hamburger-btn {
-    background: rgba(10,25,0,0.8);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(195,246,12,0.4);
-    border-radius: 50%;
-    width: 64px;
-    height: 64px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 7px;
-    cursor: pointer;
-    transition: all 0.4s ease;
-    box-shadow: 0 0 35px rgba(195,246,12,0.4);
-  }
-  .hamburger-btn:hover {
-    box-shadow: 0 0 55px rgba(195,246,12,0.8);
-    transform: scale(1.1);
-  }
-  .hamburger-line {
-    width: 32px;
-    height: 3px;
-    background: #c3f60c;
-    border-radius: 2px;
-    transition: all 0.4s ease;
-    box-shadow: 0 0 15px #c3f60c;
-  }
-  .hamburger-btn.active .hamburger-line:nth-child(1) {
-    transform: rotate(45deg) translate(9px, 9px);
-  }
-  .hamburger-btn.active .hamburger-line:nth-child(2) {
-    opacity: 0;
-  }
-  .hamburger-btn.active .hamburger-line:nth-child(3) {
-    transform: rotate(-45deg) translate(9px, -9px);
-  }
+ .hamburger-btn {
+  background: rgba(10,25,0,0.8);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(195,246,12,0.4);
+  border-radius: 50%;
+  width: 56px;      /* ← reduced from 64px */
+  height: 56px;     /* ← reduced from 64px */
+  gap: 6px;         /* ← slightly tighter lines */
+  box-shadow: 0 0 30px rgba(195,246,12,0.4); /* slightly less shadow */
+}
 
+.hamburger-btn:hover {
+  box-shadow: 0 0 45px rgba(195,246,12,0.7);
+  transform: scale(1.08); /* slightly smaller hover scale */
+}
+
+.hamburger-line {
+  width: 28px;      /* ← reduced from 32px */
+  height: 3px;
+  box-shadow: 0 0 12px #c3f60c; /* toned down a touch */
+}
+
+/* Adjust the X morph for smaller size */
+.hamburger-btn.active .hamburger-line:nth-child(1) {
+  transform: rotate(45deg) translate(7px, 7px); /* was 9px */
+}
+.hamburger-btn.active .hamburger-line:nth-child(3) {
+  transform: rotate(-45deg) translate(7px, -7px); /* was 9px */
+}
   /* Mobile Menu */
   .mobile-menu {
     position: fixed;

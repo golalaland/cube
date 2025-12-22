@@ -588,135 +588,6 @@
   color: #fff;
   letter-spacing: 3px;
 }
-/* MOBILE-OPTIMIZED GOLD REWARDS – NO OVERLAP, NO K */
-.rewards-section {
-  padding: 120px 5% 140px;
-  text-align: center;
-  position: relative;
-  overflow: hidden;
-  background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.95));
-}
-
-.rewards-container {
-  position: relative;
-  display: inline-block;
-  z-index: 2;
-}
-
-.money-text {
-  font-family: 'Inter', sans-serif;
-  font-size: clamp(5.8rem, 16vw, 10rem);   /* perfect scaling */
-  font-weight: 900;
-  letter-spacing: -0.04em;
-  line-height: 0.92;
-  margin: 0;
-  display: flex;
-  align-items: baseline;
-  justify-content: center;
-  gap: 8px;                    /* generous gap so + never touches */
-  text-shadow: 0 10px 40px rgba(0,0,0,0.9);
-}
-
-/* Dollar */
-.dollar {
-  color: #d4af37;
-  font-size: 0.62em;
-  opacity: 0.95;
-  transform: translateY(-8px);
-}
-
-/* Main number – molten gold */
-.amount {
-  background: linear-gradient(90deg,
-    #ffffff 0%,
-    #f5e5a0 15%,
-    #d4af37 40%,
-    #ffe895 50%,
-    #d4af37 60%,
-    #f0d080 85%,
-    #ffffff 100%
-  );
-  background-size: 200% 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: goldFlow 9s ease-in-out infinite;
-  font-variant-numeric: tabular-nums;
-}
-
-/* Just the + – clean and elevated */
-.plus {
-  color: #d4af37;
-  font-size: 0.33em;
-  font-weight: 700;
-  letter-spacing: 9px;
-  opacity: 0.95;
-  transform: translateY(-24px);
-}
-
-/* Subtitle */
-.rewards-subtitle {
-  margin-top: 20px;
-  font-size: 1.25rem;
-  font-weight: 500;
-  letter-spacing: 6px;
-  text-transform: uppercase;
-  color: #aaa;
-  opacity: 0.9;
-  animation: breathe 6s ease-in-out infinite;
-}
-
-/* Shimmer sweep */
-.gold-shimmer {
-  position: absolute;
-  top: -60%;
-  left: -60%;
-  width: 220%;
-  height: 220%;
-  background: linear-gradient(115deg,
-    transparent 35%,
-    rgba(255,255,255,0.1) 50%,
-    transparent 65%
-  );
-  pointer-events: none;
-  animation: shimmer 8s linear infinite;
-  mix-blend-mode: overlay;
-}
-
-/* Tiny drifting glint */
-.gold-glint {
-  position: absolute;
-  top: 30%;
-  left: 0;
-  width: 4px;
-  height: 80px;
-  background: linear-gradient(to bottom, transparent, #d4af37, transparent);
-  border-radius: 50%;
-  opacity: 0;
-  filter: blur(2px);
-  animation: glint 6s ease-in-out infinite;
-}
-
-/* Keyframes */
-@keyframes goldFlow {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-}
-
-@keyframes shimmer {
-  0% { transform: translateX(-80%) translateY(-50%) rotate(20deg); }
-  100% { transform: translateX(80%) translateY(-50%) rotate(20deg); }
-}
-
-@keyframes glint {
-  0%, 100% { opacity: 0; transform: translateX(0) scaleY(0.3); }
-  25% { opacity: 0.8; transform: translateX(200px) scaleY(1); }
-}
-
-@keyframes breathe {
-  0%, 100% { opacity: 0.75; letter-spacing: 6px; }
-  50% { opacity: 1; letter-spacing: 8px; }
-}
   </style>
 </head>
 <body>
@@ -771,24 +642,9 @@
   <p class="frame-caption">LIVE NOW · 12.4K watching</p>
 </div>
 
-<!-- Odometer.js CDN (tiny & perfect) -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/odometer.js/0.4.8/odometer.min.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/odometer.js/0.4.8/odometer-theme-minimal.css" />
 
-  <!-- $10,000+ REWARDS – MOBILE-PERFECT, STATIC, FILTHY RICH -->
-<section class="rewards-section">
-  <div class="rewards-container">
-    <h2 class="money-text">
-      <span class="dollar">$</span>
-      <span class="amount">10,000</span>
-      <span class="plus">+</span>
-    </h2>
-    <p class="rewards-subtitle">in rewards this month</p>
 
-    <!-- Shimmer & glint overlays -->
-    <div class="gold-shimmer"></div>
-    <div class="gold-glint"></div>
-  </div>
+
 </section>
 
   <section class="features">

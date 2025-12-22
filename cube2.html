@@ -396,11 +396,7 @@
     text-align: center;
     box-shadow: 0 10px 40px rgba(195,246,12,0.6);
   }
-  .social-icons a:hover img {
-  transform: translateY(-8px) scale(1.1);
-  box-shadow: 0 0 50px rgba(195,246,12,0.8);
-  border-color: #e0ff4a;
-}
+height: clamp(140px, 25vw, 240px);  /* ← smaller range */
 </style>
 
  <header style="
@@ -589,21 +585,19 @@
         <a href="#terms">Terms & Privacy</a>
       </div>
 
-      <!-- JOIN THE VIBE -->
-<div class="footer-col social-col">
-  <h4>Join the Vibe</h4>
-  <div class="social-icons">
-    <a href="https://t.me/unlockye" aria-label="Telegram">
-      <img src="https://cdn.shopify.com/s/files/1/0962/6648/6067/files/telegram.png?v=1766429753"
-           alt="Telegram"
-           style="
-             width: 60px;
-             height: 60px;
-             border-radius: 50%;
-             border: 2px solid #c3f60c;
-             box-shadow: 0 0 30px rgba(195,246,12,0.4);
-             transition: all 0.4s;
-           ">
+    <!-- LOGO — ZOOMED OUT (FULL LOGO VISIBLE) -->
+<div style="margin-bottom: 1rem;">
+  <img src="https://cdn.shopify.com/s/files/1/0962/6648/6067/files/HABA_HOUSE.png?v=1765412962"
+       alt="CUBE"
+       style="
+         height: clamp(160px, 30vw, 280px);   /* ← Adjust size here if needed */
+         width: auto;
+         max-width: 90vw;
+         object-fit: contain;                /* ← KEY CHANGE: shows full logo, no crop */
+         filter: drop-shadow(0 0 45px #c3f60c)
+                 drop-shadow(0 0 90px rgba(195,246,12,0.7));
+         animation: logoPulse 4s infinite alternate;
+       ">
     </a>
   </div>
 </div>

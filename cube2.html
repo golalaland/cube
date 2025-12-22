@@ -273,11 +273,20 @@ family=Rajdhani:wght@500;600;700
     .cutie-bio { font-size: 1.1rem; padding: 0 1rem; }
     .prev, .next { width: 50px; height: 50px; font-size: 1.5rem; }
   }
+  /* Reduce ALL font sizes by ~15% */
+html {
+  font-size: 90%;   /* ← try 85% for even smaller */
+}
+
+/* Or target only body text */
+body {
+  font-size: 0.95rem;  /* base size */
+}
 </style>
 </head>
 <body>
   <video class="hero-video" autoplay muted loop playsinline>
-    <source src="https://cdn.shopify.com/videos/c/o/v/e5d9d2c38f48413fbcfa4b2e0e5500c2.mp4" type="video/mp4">
+    <source src="https://cdn.shopify.com/videos/c/o/v/e8ea13a3833c4f069d6349e179eb1cef.mp4" type="video/mp4">
   </video>
   <div class="hero-overlay"></div>
   <div class="particles">

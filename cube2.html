@@ -224,98 +224,229 @@
     <div class="particle" style="left:90%;animation-delay:5s;"></div>
   </div>
 
-  <header>
-    <h1 class="logo">CUBE</h1>
-    <p class="tagline">UNLOCK YOUR EDGE • 18+ ELITE CLUB</p>
-    <a href="signup.html" class="cta-btn">JOIN THE EMPIRE</a>
-  </header>
+ <header style="
+  text-align: center;
+  padding: 3rem 1rem 2rem;
+  position: relative;
+  z-index: 2;
+">
+  <!-- MAIN LOGO IMAGE (replaces text "CUBE") -->
+  <div style="margin-bottom: 1rem;">
+    <img src="https://cdn.shopify.com/s/files/1/0962/6648/6067/files/HABA_HOUSE.png?v=1765412962"
+         alt="CUBE"
+         style="
+           height: clamp(180px, 35vw, 320px);
+           width: auto;
+           max-width: 96vw;
+           object-fit: contain;
+           filter: drop-shadow(0 0 45px #c3f60c)
+                   drop-shadow(0 0 90px rgba(195,246,12,0.7));
+           animation: logoPulse 4s infinite alternate;
+         ">
+  </div>
 
-  <!-- CUTIE OF THE MONTH EXPANDED SECTION -->
-  <section class="cutie-section">
-    <h2 class="section-title">CUTIE OF THE MONTH</h2>
-    <div class="cutie-bio">
-      <p>Meet <strong>Zarah</strong> — December's reigning queen of the Cube. With her electric energy and unmatched vibe, she's been lighting up streams, dominating leaderboards, and turning heads across the platform.</p>
-      <p>From late-night raids to exclusive VIP parties, Zarah brings the heat every time. She's earned over 50K STRZ this month alone and holds the #1 spot in TapMaster.</p>
-      <p>"Cube isn't just a place — it's where legends are made. Come play, come win, come rule." — Zarah</p>
+  <!-- TAGLINE -->
+  <p style="
+    font-size: clamp(1.2rem, 4vw, 1.8rem);
+    color: #e0ff80;
+    letter-spacing: 4px;
+    text-shadow: 0 0 20px #c3f60c;
+    margin: 1.5rem 0 2.5rem;
+  ">
+  #SLAY #GETPAID #UNLOCK YOUR EDGE!
+  </p>
+
+  <!-- CTA BUTTON -->
+  <a href="signup.html" style="
+    display: inline-block;
+    padding: 1.2rem 3.5rem;
+    font-size: 1.4rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    background: linear-gradient(135deg, #c3f60c, #a0d00a);
+    color: #000;
+    border-radius: 60px;
+    text-decoration: none;
+    box-shadow: 0 10px 40px rgba(195,246,12,0.6);
+    transition: all 0.4s;
+  ">
+    ENTER
+  </a>
+</header>
+
+<style>
+  @keyframes logoPulse {
+    0% { filter: drop-shadow(0 0 45px #c3f60c) drop-shadow(0 0 90px rgba(195,246,12,0.7)); }
+    100% { filter: drop-shadow(0 0 60px #c3f60c) drop-shadow(0 0 120px rgba(195,246,12,1)); }
+  }
+
+  a:hover {
+    transform: translateY(-8px) scale(1.05);
+    box-shadow: 0 20px 60px rgba(195,246,12,0.8);
+  }
+</style>
+
+  
+<!-- CUTIE OF THE MONTH EXPANDED SECTION -->
+<section class="cutie-section">
+  <h2 class="section-title">CUTIE OF THE MONTH</h2>
+  
+  <div class="cutie-bio">
+    <p>Meet <strong>Zarah</strong> — December's reigning queen of the Cube. With her electric energy and unmatched vibe, she's been lighting up streams, dominating leaderboards, and turning heads across the platform.</p>
+    <p>From late-night raids to exclusive VIP parties, Zarah brings the heat every time. She's earned over 50K STRZ this month alone and holds the #1 spot in TapMaster.</p>
+    <p>"Cube isn't just a place — it's where legends are made. Come play, come win, come rule." — Zarah</p>
+  </div>
+
+  <div class="cutie-slider">
+    <button class="prev">‹</button>
+    <div class="slides">
+      <!-- REAL IMAGES — NO GROK TAGS -->
+      <div class="slide">
+        <img src="https://images.unsplash.com/photo-1616091243766-4d9d0d1b9d9f?w=900&auto=format&fit=crop" alt="Zarah">
+      </div>
+      <div class="slide">
+        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=900&auto=format&fit=crop" alt="Zarah">
+      </div>
+      <div class="slide">
+        <img src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=900&auto=format&fit=crop" alt="Zarah">
+      </div>
+      <div class="slide">
+        <img src="https://images.unsplash.com/photo-1552374196-c4e7ffc6e126?w=900&auto=format&fit=crop" alt="Zarah">
+      </div>
+      <div class="slide">
+        <img src="https://images.unsplash.com/photo-1546961329-78bef0414d7c?w=900&auto=format&fit=crop" alt="Zarah">
+      </div>
+      <div class="slide">
+        <img src="https://images.unsplash.com/photo-1556347961-f9521a1c88d4?w=900&auto=format&fit=crop" alt="Zarah">
+      </div>
+      <div class="slide">
+        <img src="https://images.unsplash.com/photo-1531746790731-6c087fecd65a?w=900&auto=format&fit=crop" alt="Zarah">
+      </div>
+      <div class="slide">
+        <img src="https://images.unsplash.com/photo-1583766391502-4d9d9f8c2e4d?w=900&auto=format&fit=crop" alt="Zarah">
+      </div>
+    </div>
+    <button class="next">›</button>
+  </div>
+</section>
+
+<!-- FEATURES GRID — NOW WITH SCROLL ANIMATIONS & ICONS -->
+<section class="features">
+  <div class="features-grid">
+    <!-- TAPMASTER -->
+    <div class="feature-card" data-aos="fade-up" data-aos-delay="100">
+      <div class="feature-icon">
+        <img src="https://www.shutterstock.com/shutterstock/videos/3794936831/thumb/1.jpg?ip=x480" alt="TapMaster Icon">
+      </div>
+      <h3>TAPMASTER</h3>
+      <p>Zero lag battles. Climb ranks. Win real STRZ rewards.</p>
     </div>
 
-    <div class="cutie-slider">
-      <button class="prev">‹</button>
-      <div class="slides">
-        <div class="slide">
-
-<grok-card data-id="bd982c" data-type="image_card"></grok-card>
-
-        </div>
-        <div class="slide">
-
-<grok-card data-id="64d9bd" data-type="image_card"></grok-card>
-
-        </div>
-        <div class="slide">
-
-<grok-card data-id="78f90c" data-type="image_card"></grok-card>
-
-        </div>
-        <div class="slide">
-
-<grok-card data-id="e8924b" data-type="image_card"></grok-card>
-
-        </div>
-        <div class="slide">
-
-<grok-card data-id="39dffe" data-type="image_card"></grok-card>
-
-        </div>
-        <div class="slide">
-
-<grok-card data-id="bdc1ec" data-type="image_card"></grok-card>
-
-        </div>
-        <div class="slide">
-
-<grok-card data-id="bb2c8f" data-type="image_card"></grok-card>
-
-        </div>
-        <div class="slide">
-
-<grok-card data-id="0c98f3" data-type="image_card"></grok-card>
-
-        </div>
+    <!-- CUTIES LIVE -->
+    <div class="feature-card" data-aos="fade-up" data-aos-delay="200">
+      <div class="feature-icon">
+        <img src="https://www.shutterstock.com/image-illustration/neon-glowing-green-color-live-260nw-2648369637.jpg" alt="Live Streaming Icon">
       </div>
-      <button class="next">›</button>
+      <h3>CUTIES LIVE</h3>
+      <p>Exclusive streams from the hottest hosts. VIP access only.</p>
     </div>
-  </section>
 
-  <!-- FEATURES GRID -->
-  <section class="features">
-    <div class="features-grid">
-      <div class="feature-card">
-        <h3>TAPMASTER</h3>
-        <p>Zero lag battles. Climb ranks. Win real STRZ rewards.</p>
+    <!-- SIPHOUSE -->
+    <div class="feature-card" data-aos="fade-up" data-aos-delay="300">
+      <div class="feature-icon">
+        <img src="https://www.shutterstock.com/shutterstock/videos/3668664643/thumb/11.jpg?ip=x480" alt="SipHouse Icon">
       </div>
-      <div class="feature-card">
-        <h3>CUTIES LIVE</h3>
-        <p>Exclusive streams from the hottest hosts. VIP access only.</p>
-      </div>
-      <div class="feature-card">
-        <h3>SIPHOUSE</h3>
-        <p>Drink unlocks, real deliveries, and wild party games.</p>
-      </div>
-      <div class="feature-card">
-        <h3>LOUNGE</h3>
-        <p>Elite chat. Voice rooms. Private parties.</p>
-      </div>
-      <div class="feature-card">
-        <h3>REWARDS</h3>
-        <p>Daily quests. Leaderboard prizes. Ripple earnings.</p>
-      </div>
-      <div class="feature-card">
-        <h3>SECRET EVENTS</h3>
-        <p>Invite-only nights. Celebrity drops. Unforgettable vibes.</p>
-      </div>
+      <h3>SIPHOUSE</h3>
+      <p>Drink unlocks, real deliveries, and wild party games.</p>
     </div>
-  </section>
+
+    <!-- LOUNGE -->
+    <div class="feature-card" data-aos="fade-up" data-aos-delay="400">
+      <div class="feature-icon">
+        <img src="https://www.shutterstock.com/image-illustration/neon-currency-rising-icons-bright-260nw-2634161151.jpg" alt="Lounge Icon">
+      </div>
+      <h3>LOUNGE</h3>
+      <p>Elite chat. Voice rooms. Private parties.</p>
+    </div>
+
+    <!-- REWARDS -->
+    <div class="feature-card" data-aos="fade-up" data-aos-delay="500">
+      <div class="feature-icon">
+        <img src="https://www.shutterstock.com/image-illustration/neon-green-glowing-trophy-cup-260nw-2698285171.jpg" alt="Rewards Icon">
+      </div>
+      <h3>REWARDS</h3>
+      <p>Daily quests. Leaderboard prizes. Ripple earnings.</p>
+    </div>
+
+    <!-- SECRET EVENTS -->
+    <div class="feature-card" data-aos="fade-up" data-aos-delay="600">
+      <div class="feature-icon">
+        <img src="https://corporateentertainmentagency.com/wp-content/uploads/2015/06/LED-Laser-Duo2.jpg" alt="Secret Events Icon">
+      </div>
+      <h3>SECRET EVENTS</h3>
+      <p>Invite-only nights. Celebrity drops. Unforgettable vibes.</p>
+    </div>
+  </div>
+</section>
+
+<!-- AOS Library (Add to <head>) -->
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script>
+  AOS.init({
+    duration: 800,
+    easing: 'ease-out-cubic',
+    once: true,
+    offset: 100
+  });
+</script>
+
+<style>
+  .feature-icon {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 1.5rem;
+    overflow: hidden;
+    border-radius: 50%;
+    border: 3px solid var(--neon);
+    box-shadow: 0 0 40px var(--neon-glow);
+    transition: all 0.6s;
+  }
+  .feature-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s;
+  }
+  .feature-card:hover .feature-icon {
+    transform: scale(1.15) rotate(5deg);
+    box-shadow: 0 0 60px var(--neon-glow);
+  }
+  .feature-card:hover .feature-icon img {
+    transform: scale(1.2);
+  }
+  .feature-card h3 {
+    font-size: 1.8rem;
+    margin: 1rem 0;
+    background: linear-gradient(90deg, var(--neon), #e0ff4a);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 30px var(--neon-glow);
+    transition: all 0.4s;
+  }
+  .feature-card:hover h3 {
+    transform: translateY(-5px);
+  }
+  .feature-card p {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    opacity: 0.9;
+    transition: opacity 0.4s;
+  }
+  .feature-card:hover p {
+    opacity: 1;
+  }
+</style>
 
   <script>
     // Simple slider for Cutie of the Month

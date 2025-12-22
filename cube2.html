@@ -186,41 +186,83 @@ family=Rajdhani:wght@500;600;700
   opacity: 0.9;
   margin: 2rem 0;
 }
-  .cutie-slider {
-    position: relative;
-    max-width: 900px;
-    margin: 0 auto;
-    overflow: hidden;
-    border-radius: 20px;
-    box-shadow: 0 0 60px var(--neon-glow);
-  }
-  .slides {
-    display: flex;
-    transition: transform 0.6s ease;
-  }
-  .slide {
-    min-width: 100%;
-    position: relative;
-  }
-  .slide img {
-    width: 100%;
-    height: auto;
-    display: block;
-  }
-  .slide video {
-    width: 100%;
-    height: auto;
-    display: block;
-  }
-  .slide-overlay {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    padding: 2rem;
-    background: linear-gradient(transparent, #000);
-    color: #fff;
-  }
+.cutie-slider {
+  position: relative;
+  max-width: 620px;                 /* ← Smaller overall frame (was 900px) */
+  margin: 0 auto 4rem;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 
+    0 20px 60px rgba(0,0,0,0.6),
+    0 0 50px rgba(195,246,12,0.3);   /* ← Soft neon halo */
+  border: 1px solid rgba(195,246,12,0.2);
+  background: #000;
+  transition: all 0.6s ease;
+}
+
+.cutie-slider:hover {
+  box-shadow: 
+    0 30px 80px rgba(0,0,0,0.7),
+    0 0 70px rgba(195,246,12,0.5);
+  transform: translateY(-8px);
+}
+
+.slides {
+  display: flex;
+  transition: transform 0.8s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.slide {
+  min-width: 100%;
+  position: relative;
+}
+
+.slide img {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;                /* ← Clean crop, fills frame elegantly */
+  aspect-ratio: 3 / 4;              /* ← Consistent portrait ratio */
+}
+
+/* Subtle dark overlay for premium feel */
+.slide::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.6) 100%);
+  pointer-events: none;
+}
+
+/* Prev/Next Buttons — Smaller & Classier */
+.prev, .next {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(10px);
+  color: #c3f60c;
+  border: 1px solid rgba(195,246,12,0.4);
+  width: 50px;                      /* ← Smaller */
+  height: 50px;
+  border-radius: 50%;
+  font-size: 1.6rem;
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.4s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.prev:hover, .next:hover {
+  background: rgba(195,246,12,0.2);
+  box-shadow: 0 0 30px rgba(195,246,12,0.6);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.prev { left: 16px; }
+.next { right: 16px; }
   .prev, .next {
     position: absolute;
     top: 50%;

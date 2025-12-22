@@ -344,7 +344,92 @@
 .hidden {
   display: none;
 }
+.cube-footer {
+  background: linear-gradient(135deg, #0f0f1a 0%, #1a0f2e 100%);
+  color: #e0e0ff;
+  padding: 60px 20px 30px;
+  margin-top: 100px;
+  font-family: 'Inter', sans-serif;
+}
 
+.footer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 40px;
+}
+
+.footer-brand .footer-logo {
+  font-size: 2.5rem;
+  font-weight: 900;
+  background: linear-gradient(90deg, #00ff88, #00ccff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin: 0;
+}
+
+.footer-tagline {
+  font-size: 1.1rem;
+  opacity: 0.8;
+  margin-top: 8px;
+}
+
+.footer-links h4 {
+  font-size: 1.2rem;
+  margin-bottom: 16px;
+  color: #00ff88;
+}
+
+.footer-links ul {
+  list-style: none;
+  padding: 0;
+}
+
+.footer-links a {
+  color: #b0b0ff;
+  text-decoration: none;
+  line-height: 2;
+  transition: color 0.3s;
+}
+
+.footer-links a:hover {
+  color: #00ff88;
+}
+
+.social-icons a {
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  background: rgba(0, 255, 136, 0.1);
+  color: #00ff88;
+  text-align: center;
+  line-height: 40px;
+  border-radius: 50%;
+  margin-right: 12px;
+  font-size: 1.2rem;
+  transition: all 0.3s;
+}
+
+.social-icons a:hover {
+  background: #00ff88;
+  color: #000;
+}
+
+.footer-bottom {
+  max-width: 1200px;
+  margin: 50px auto 0;
+  padding-top: 30px;
+  border-top: 1px solid rgba(0, 255, 136, 0.2);
+  text-align: center;
+  font-size: 0.9rem;
+  opacity: 0.7;
+}
+
+.disclaimer {
+  margin-top: 8px;
+  font-style: italic;
+}
 </style>
 
 
@@ -378,10 +463,53 @@
 </button>
 
 
-<div class="message" id="message"></div>
-  <footer>
-    © 2025 CUBE — 18+ • Unlock Your Edge
-  </footer>
+<footer class="cube-footer">
+  <div class="footer-container">
+    <!-- Main Branding -->
+    <div class="footer-brand">
+      <h3 class="footer-logo">CUBE</h3>
+      <p class="footer-tagline">Unlock Your Edge</p>
+    </div>
+
+    <!-- Quick Links -->
+    <div class="footer-links">
+      <h4>Explore</h4>
+      <ul>
+        <li><a href="#tapmaster">TapMaster</a></li>
+        <li><a href="#cuties">Cuties</a></li>
+        <li><a href="#siphouse">SipHouse</a></li>
+        <li><a href="#lounge">Lounge</a></li>
+      </ul>
+    </div>
+
+    <!-- Community -->
+    <div class="footer-links">
+      <h4>Community</h4>
+      <ul>
+        <li><a href="#invite">Get Invited</a></li>
+        <li><a href="#spotlight">Spotlight</a></li>
+        <li><a href="#leaderboard">Leaderboard</a></li>
+        <li><a href="#terms">Terms</a></li>
+      </ul>
+    </div>
+
+    <!-- Socials -->
+    <div class="footer-social">
+      <h4>Join the Vibe</h4>
+      <div class="social-icons">
+        <a href="#" aria-label="Instagram">IG</a>
+        <a href="#" aria-label="X (Twitter)">X</a>
+        <a href="#" aria-label="TikTok">TT</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Bar -->
+  <div class="footer-bottom">
+    <p class="copyright">© 2025 CUBE. All rights reserved. • 18+ Exclusive Club</p>
+    <p class="disclaimer">Play responsibly. Real rewards. Real connections.</p>
+  </div>
+</footer>
 </body>
 </html>
 
@@ -955,7 +1083,7 @@ try {
 }
         // Success redirect
         setTimeout(() => {
-          window.location.href = "shop.html";
+          window.location.href = "chat.html";
         }, 1800);
 
       } catch (err) {
@@ -963,7 +1091,7 @@ try {
         console.error("VIP activation processing failed:", err);
         // Payment already succeeded → safe to redirect
         setTimeout(() => {
-          window.location.href = "shop.html";
+          window.location.href = "ep.html";
         }, 1800);
       }
     },

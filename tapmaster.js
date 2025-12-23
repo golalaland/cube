@@ -266,7 +266,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
-// INFO TAB BALANCE UPDATE — SAFE FOR TAPMASTER PAGE
+// INFO TAB BALANCE UPDATE — SAFE FOR TAPMASTER
 function updateInfoTab() {
   const cashEl = document.getElementById("infoCashBalance");
   const starsEl = document.getElementById("infoStarBalance");
@@ -283,33 +283,7 @@ function updateInfoTab() {
   }
 }
 
-
-
-// GET TOKEN FROM URL
-const urlParams = new URLSearchParams(window.location.search);
-const token = urlParams.get("t");
-
-// DECODE UID FROM TOKEN (if present)
-let urlUid = null;
-if (token) {
-  try {
-    urlUid = atob(token); // base64 decode
-    console.log("Decoded token UID:", urlUid);
-  } catch (e) {
-    console.warn("Invalid token");
-  }
-}
-
-// THEN YOUR SECURITY CHECK
-if (urlUid && loggedInUid && urlUid !== loggedInUid) {
-  alert("Invalid link — not your profile");
-  // Force guest or block
-  currentUser = null;
-  return;
-}
-
-
-// ---------- LOAD USER — FINAL STRICT SECURITY VERSION ----------
+// ---------- LOAD USER — FINAL SECURE + TOKEN VERSION ----------
 async function loadCurrentUserForGame() {
   try {
     let loggedInUid = null;
@@ -328,14 +302,23 @@ async function loadCurrentUserForGame() {
       console.log("%cLogged in user found:", "color:#00ffaa", loggedInUid);
     }
 
-    // GET UID FROM URL
+    // GET TOKEN FROM URL (t=...)
     const urlParams = new URLSearchParams(window.location.search);
-    const urlUid = urlParams.get("uid");
+    const token = urlParams.get("t");
 
-    // STRICT CHECK: URL UID must match logged in user OR no URL UID
+    let urlUid = null;
+    if (token) {
+      try {
+        urlUid = atob(token); // decode base64
+        console.log("Decoded token UID:", urlUid);
+      } catch (e) {
+        console.warn("Invalid token");
+      }
+    }
+
+    // SECURITY: If token UID doesn't match logged in user → block
     if (urlUid && loggedInUid && urlUid !== loggedInUid) {
-      console.warn("UID mismatch — blocking load");
-      alert("Invalid link — login with your own account");
+      alert("Invalid link — this is not your profile");
       currentUser = null;
       profileNameEl && (profileNameEl.textContent = "GUEST 0000");
       starCountEl && (starCountEl.textContent = "50");
@@ -351,17 +334,17 @@ async function loadCurrentUserForGame() {
       starCountEl && (starCountEl.textContent = "50");
       cashCountEl && (cashCountEl.textContent = "₦0");
       persistentBonusLevel = 1;
-      console.log("%cGuest mode — login in chat", "color:#ff6600");
+      console.log("%cGuest mode — login in chat to play", "color:#ff6600");
       return;
     }
 
-    // LOAD LOGGED IN USER
+    // LOAD THE LOGGED IN USER
     const uid = loggedInUid;
     const userRef = doc(db, "users", uid);
     const snap = await getDoc(userRef);
 
     if (!snap.exists()) {
-      alert("Profile error — login again");
+      alert("Profile not found — login again");
       currentUser = null;
       return;
     }

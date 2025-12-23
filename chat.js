@@ -912,13 +912,15 @@ document.addEventListener('DOMContentLoaded', () => {
   // ------------------------------
 function updateRedeemLink() {
   if (!refs.redeemBtn || !currentUser?.uid) return;
-  refs.redeemBtn.href = `tapmaster.html?uid=${currentUser.uid}`;
+  const token = btoa(currentUser.uid); // base64 encode
+  refs.redeemBtn.href = `tapmaster.html?t=${token}`;
   refs.redeemBtn.style.display = "inline-block";
 }
 
 function updateTipLink() {
   if (!refs.tipBtn || !currentUser?.uid) return;
-  refs.tipBtn.href = `tapmaster.html?uid=${currentUser.uid}`;
+  const token = btoa(currentUser.uid);
+  refs.tipBtn.href = `tapmaster.html?t=${token}`;
   refs.tipBtn.style.display = "inline-block";
 }
 /* ----------------------------

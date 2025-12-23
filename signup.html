@@ -733,12 +733,12 @@ if (cleanRef) {
         country = data.country_name || 'Unknown';
       } catch (e) {}
 
-// === CREATE NEW USER ===
+    // === CREATE NEW USER ===
 const userData = {
   uid: userCredential.user.uid,
   fullName,
   chatId,
-  chatIdLower: chatId.toLowerCase(),
+  chatIdLower: chatId,
   email,
   phone,
   dob,
@@ -758,8 +758,8 @@ const userData = {
   fruitPick: "",
   videoUrl: "",
   popupPhoto: "",
-  isVIP: !!isVIP,
-  hasPaid: false, // ← starts false — only true after payment
+  isVIP: !!isVIP,                              // true if they toggled VIP (payment pending)
+  hasPaid: false,                              // ← NEW: only true after successful payment
   isHost: gender === 'Female' && !isVIP,
   isTrending: false,
   isAdmin: false,
@@ -767,8 +767,8 @@ const userData = {
   invitedBy: inviterDocId,
   referral: rawRef || null,
   hiveName,
-  hostLink: (!isVIP && gender === 'Female')
-    ? `https://cube.xixi.com/signup?ref=${chatId}`
+  hostLink: (!isVIP && gender === 'Female') 
+    ? `https://cube.xixi.com/signup?ref=${chatId}` 
     : null,
   vipName: isVIP ? chatId : null,
   socialShare: gender === 'Female' && !isVIP,
@@ -782,7 +782,7 @@ const userData = {
   views: 0,
   inviteeGiftStars: 0,
   inviteeGiftShown: false,
-  hostFriends: [],
+  hostFriends: [],                             // ← Starts empty — populated below
   usernameColor: '#' + Math.floor(Math.random() * 16777215).toString(16),
   createdAt: serverTimestamp(),
   lastUpdated: serverTimestamp()
@@ -790,31 +790,38 @@ const userData = {
 
 await setDoc(userRef, userData);
 
-// === UPDATE INVITER ON SIGNUP ===
+// === UPDATE INVITER ON SIGNUP (SAFE ARRAY + TIMER FIELDS READY) ===
 if (inviterDocId) {
   if (isVIP) {
-    // VIP signup: count only — full rewards on payment
+    // VIP signup: Only count — full rewards + timer on payment
     await updateDoc(doc(db, "users", inviterDocId), {
       referralCount: increment(1),
       vipCount: increment(1),
       lastUpdated: serverTimestamp()
-    });
+    }).catch(err => console.warn("Inviter VIP count update failed:", err));
 
     // Pending notification
-    await addDoc(collection(db, "notifications"), {
-      recipientId: inviterDocId,
-      type: "new_vip_pending",
-      title: "New VIP in Your Network!",
-      message: `@${chatId} just signed up as VIP!\nRewards on payment 💎`,
-      vipUserId: userCredential.user.uid,
-      vipUserName: chatId,
-      read: false,
-      createdAt: serverTimestamp()
-    }).catch(err => console.warn("VIP pending notif failed:", err));
+    try {
+      await addDoc(collection(db, "notifications"), {
+        recipientId: inviterDocId,
+        type: "new_vip_pending",
+        title: "New VIP in Your Network!",
+        message: `@${chatId} just signed up as VIP!\nRewards on payment 💎`,
+        vipUserId: userCredential.user.uid,
+        vipUserName: chatId,
+        read: false,
+        createdAt: serverTimestamp()
+      });
+    } catch (notifErr) {
+      console.warn("VIP pending notification failed:", notifErr);
+    }
+
   } else {
-    // Non-VIP: immediate reward + hostFriends
+    // Non-VIP (Host/Fan): Immediate reward + add to hostFriends array
     const hostInviteBonus = 100;
+
     await updateDoc(doc(db, "users", inviterDocId), {
+      // Safe arrayUnion — no serverTimestamp() inside object
       hostFriends: arrayUnion({
         chatId,
         fullName,
@@ -822,42 +829,58 @@ if (inviterDocId) {
         phone,
         isVIP: false,
         isHost: gender === 'Female',
-        joinedAt: Date.now()
+        joinedAt: Date.now()  // client timestamp — safe & works
       }),
       stars: increment(hostInviteBonus),
       referralCount: increment(1),
       hostReferralCount: increment(1),
+      hostFriendsLastUpdated: serverTimestamp(),
       lastUpdated: serverTimestamp()
-    });
+    }).catch(err => console.warn("Inviter host bonus failed:", err));
 
-    await addDoc(collection(db, "notifications"), {
-      recipientId: inviterDocId,
-      type: "new_host_join",
-      title: "New Host Joined Your Network!",
-      message: `@${chatId} just joined as a Host!\n+${hostInviteBonus} STRZ ✨`,
-      newUserId: userCredential.user.uid,
-      newUserName: chatId,
-      read: false,
-      createdAt: serverTimestamp()
-    }).catch(err => console.warn("Host join notif failed:", err));
+    // Visible notification (like ripple)
+    try {
+      await addDoc(collection(db, "notifications"), {
+        recipientId: inviterDocId,
+        type: "new_host_join",
+        title: "New Host Joined Your Network!",
+        message: `@${chatId} just joined as a Host using your link!\n+${hostInviteBonus} STRZ ✨`,
+        newUserId: userCredential.user.uid,
+        newUserName: chatId,
+        read: false,
+        createdAt: serverTimestamp()
+      });
+    } catch (notifErr) {
+      console.warn("Host join notification failed:", notifErr);
+    }
   }
 }
+      // Success
+      messageEl.textContent = `Welcome ${fullName}!`;
+      localStorage.setItem("vipUser", JSON.stringify({ email, chatId }));
 
-// Success UI
-messageEl.textContent = `Welcome ${fullName}!`;
-localStorage.setItem("vipUser", JSON.stringify({ email, chatId }));
+      if (isVIP) {
+        triggerSprayConfetti();
+        submitBtn.classList.remove('loading');
+        submitBtn.classList.add('hidden');
+        vipPayBtn.classList.remove('hidden');
+        messageEl.textContent = "Your VIP slot is reserved 🔒";
+      } else {
+        setTimeout(() => window.location.href = "shop.html", 1800);
+      }
 
-if (isVIP) {
-  triggerSprayConfetti();
-  submitBtn.classList.add('hidden');
-  vipPayBtn.classList.remove('hidden');
-  messageEl.textContent = "Your VIP slot is reserved 🔒";
-} else {
-  setTimeout(() => window.location.href = "shop.html", 1800);
-}
+    } catch (err) {
+      console.error(err);
+      const errorMsg = err.code === 'auth/email-already-in-use'
+        ? 'Email already registered'
+        : 'Signup failed — please try again';
+      showPopup(errorMsg);
+      submitBtn.classList.remove('loading');
+    }
+  };
 
-// === VIP PAYSTACK PAYMENT — FINAL & SAFE ===
-vipPayBtn.onclick = async () => {
+// === VIP PAYSTACK PAYMENT (FULLY FIXED & SAFE) ===
+vipPayBtn.onclick = () => {
   const email = emailInput.value.trim().toLowerCase();
   if (!email || !/@/.test(email)) {
     showPopup('Enter a valid email before paying');
@@ -873,31 +896,36 @@ vipPayBtn.onclick = async () => {
     currency: 'NGN',
     ref: 'VIP_' + Date.now(),
     metadata: { type: 'vip_activation' },
+
     callback: async function(response) {
       vipPayBtn.classList.remove('loading');
-      messageEl.textContent = "VIP Activated! Welcome to the elite 🎉";
+      messageEl.textContent = "VIP Activated ✌︎㋡";
 
       const docId = sanitizeKey(email);
       const userRef = doc(db, "users", docId);
 
+      // === MAIN TRY BLOCK FOR ALL POST-PAYMENT PROCESSING ===
       try {
         const userSnap = await getDoc(userRef);
-        if (!userSnap.exists()) throw "User not found";
+        if (!userSnap.exists()) {
+          console.error("User not found after payment");
+          // Still redirect — payment went through
+          setTimeout(() => window.location.href = "ep.html", 1800);
+          return;
+        }
 
         const userData = userSnap.data();
         const inviterId = userData.invitedBy;
 
-        // ACTIVATE VIP + GIVE BONUS
-        await updateDoc(userRef, {
-          isVIP: true,
-          hasPaid: true,
-          vipActivatedAt: serverTimestamp(),
-          vipExpiresAt: new Date(Date.now() + 31 * 24 * 60 * 60 * 1000),
-          stars: increment(2500),
-          lastUpdated: serverTimestamp()
-        });
-
-        // INVITER REWARD + NOTIFICATION
+       await updateDoc(userRef, {
+  isVIP: true,
+  hasPaid: true,
+  vipActivatedAt: serverTimestamp(),
+  vipExpiresAt: new Date(Date.now() + 31 * 24 * 60 * 60 * 1000), // +31 days
+  stars: increment(2500),
+  lastUpdated: serverTimestamp()
+});
+        // 2. Reward inviter 250 STRZ if exists
         if (inviterId) {
           await updateDoc(doc(db, "users", inviterId), {
             stars: increment(250),
@@ -905,44 +933,44 @@ vipPayBtn.onclick = async () => {
             lastUpdated: serverTimestamp()
           });
 
-          await addDoc(collection(db, "notifications"), {
-            recipientId: inviterId,
-            type: "vip_activated",
-            title: "VIP Activated in Your Network!",
-            message: `@${userData.chatId} just went VIP!\nYou earned +250 STRZ 💎`,
-            vipUserId: userData.uid,
-            vipUserName: userData.chatId,
-            read: false,
-            createdAt: serverTimestamp()
-          });
-        }
-
-        // WELCOME NOTIFICATION TO NEW VIP
-        await addDoc(collection(db, "notifications"), {
-          recipientId: userData.uid,
-          type: "vip_bonus",
-          title: "Welcome to VIP! 🎉",
-          message: "You received 2,500 STRZ as a welcome bonus!\nEnjoy your elite status 🪩",
-          read: false,
-          createdAt: serverTimestamp()
-        });
-
-        // Redirect
-        setTimeout(() => window.location.href = "ep.html", 1800);
-
-      } catch (err) {
-        console.error("VIP activation failed:", err);
-        showPopup("Activation failed — contact support");
-      }
-    },
-    onClose: function() {
-      vipPayBtn.classList.remove('loading');
-      showPopup("Payment cancelled");
-    }
+       // === INVITER NOTIFICATION — VISIBLE LIKE RIPPLE ===
+if (inviterId) {
+  await updateDoc(doc(db, "users", inviterId), {
+    stars: increment(250),
+    vipCount: increment(1),
+    lastUpdated: serverTimestamp()
   });
 
-  handler.openIframe();
-};
+  try {
+    await addDoc(collection(db, "notifications"), {
+      recipientId: inviterId,                  // ← Same as ripple
+      type: "vip_activated",
+      title: "VIP Activated in Your Network!",
+      message: `@${userData.chatId} just went VIP!\nYou earned +250 STRZ 💎`,
+      vipUserId: userData.uid,
+      vipUserName: userData.chatId,
+      read: false,
+      createdAt: serverTimestamp()             // ← Same as ripple
+    });
+  } catch (err) {
+    console.warn("Inviter VIP notification failed:", err);
+  }
+}
+
+// === WELCOME NOTIFICATION TO NEW VIP — VISIBLE LIKE RIPPLE ===
+try {
+  await addDoc(collection(db, "notifications"), {
+    recipientId: userData.uid,                 // ← Same as ripple
+    type: "vip_bonus",
+    title: "Welcome to VIP! 🎉",
+    message: "You received 2,500 STRZ as a welcome bonus!\nEnjoy your elite status 🪩",
+    read: false,
+    createdAt: serverTimestamp()               // ← Same as ripple
+  });
+} catch (err) {
+  console.warn("VIP welcome notification failed:", err);
+  }
+}
         // Success redirect
         setTimeout(() => {
           window.location.href = "chat.html";

@@ -258,6 +258,32 @@ function randomInt(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
 function formatNumber(n){ return n.toLocaleString(); }
 
 
+// CALL THIS BEFORE ANYTHING ELSE
+document.addEventListener("DOMContentLoaded", () => {
+  loadUserFromUrl();                // ← LOAD FROM URL FIRST
+  loadCurrentUserForGame();         // ← THEN LOAD FULL DATA
+  updateInfoTab();                  // ← BALANCE SHOWS
+});
+
+
+// INFO TAB BALANCE UPDATE — SAFE FOR TAPMASTER PAGE
+function updateInfoTab() {
+  const cashEl = document.getElementById("infoCashBalance");
+  const starsEl = document.getElementById("infoStarBalance");
+  const lastEl = document.getElementById("infoLastEarnings");
+
+  if (currentUser) {
+    if (cashEl) cashEl.textContent = currentUser.cash.toLocaleString();
+    if (starsEl) starsEl.textContent = currentUser.stars.toLocaleString();
+    if (lastEl) lastEl.textContent = (currentUser.lastEarnings || 0).toLocaleString();
+  } else {
+    if (cashEl) cashEl.textContent = "0";
+    if (starsEl) starsEl.textContent = "0";
+    if (lastEl) lastEl.textContent = "0";
+  }
+}
+
+
 
 // LOAD USER FROM URL PARAM (FOR DIRECT LINKS LIKE ?uid=1111_gmail_com)
 function loadUserFromUrl() {
@@ -280,12 +306,6 @@ function loadUserFromUrl() {
   return true;
 }
 
-// CALL THIS BEFORE ANYTHING ELSE
-document.addEventListener("DOMContentLoaded", () => {
-  loadUserFromUrl();                // ← LOAD FROM URL FIRST
-  loadCurrentUserForGame();         // ← THEN LOAD FULL DATA
-  updateInfoTab();                  // ← BALANCE SHOWS
-});
 
 // ---------- LOAD USER — FINAL BULLETPROOF VERSION (2025) ----------
 async function loadCurrentUserForGame() {

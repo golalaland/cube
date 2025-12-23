@@ -324,45 +324,46 @@ onAuthStateChanged(auth, async (firebaseUser) => {
 
     const data = userSnap.data();
 
-    // ——— BUILD CURRENT USER OBJECT ———
-    currentUser = {
-      uid,
-      email,
-      firebaseUid: firebaseUser.uid,
-      chatId: data.chatId || email.split("@")[0],
-      chatIdLower: (data.chatId || email.split("@")[0]).toLowerCase(),
-      fullName: data.fullName || "VIP",
-      gender: data.gender || "person",
-      isVIP: !!data.isVIP,
-      isHost: !!data.isHost,
-      isAdmin: !!data.isAdmin,
-      stars: data.stars || 0,
-      cash: data.cash || 0,
-      starsGifted: data.starsGifted || 0,
-      starsToday: data.starsToday || 0,
-      usernameColor: data.usernameColor || "#ff69b4",
-      subscriptionActive: !!data.subscriptionActive,
-      subscriptionCount: data.subscriptionCount || 0,
-      lastStarDate: data.lastStarDate || todayDate(),
-      unlockedVideos: data.unlockedVideos || [],
-      invitedBy: data.invitedBy || null,
-      inviteeGiftShown: !!data.inviteeGiftShown,
-      hostLink: data.hostLink || null
-    };
+ // ——— BUILD CURRENT USER OBJECT ———
+currentUser = {
+  uid,
+  email,
+  firebaseUid: firebaseUser.uid,
+  chatId: data.chatId || email.split("@")[0],
+  chatIdLower: (data.chatId || email.split("@")[0]).toLowerCase(),
+  fullName: data.fullName || "VIP",
+  gender: data.gender || "person",
+  isVIP: !!data.isVIP,
+  isHost: !!data.isHost,
+  isAdmin: !!data.isAdmin,
+  hasPaid: !!data.hasPaid,  // ← ADD THIS LINE
+  stars: data.stars || 0,
+  cash: data.cash || 0,
+  starsGifted: data.starsGifted || 0,
+  starsToday: data.starsToday || 0,
+  usernameColor: data.usernameColor || "#ff69b4",
+  subscriptionActive: !!data.subscriptionActive,
+  subscriptionCount: data.subscriptionCount || 0,
+  lastStarDate: data.lastStarDate || todayDate(),
+  unlockedVideos: data.unlockedVideos || [],
+  invitedBy: data.invitedBy || null,
+  inviteeGiftShown: !!data.inviteeGiftShown,
+  hostLink: data.hostLink || null
+};
 
-    console.log("WELCOME BACK:", currentUser.chatId.toUpperCase());
-    console.log("[HOST CHECK]", {
+console.log("WELCOME BACK:", currentUser.chatId.toUpperCase());
+console.log("[HOST/VIP CHECK]", {
   uid: currentUser?.uid,
   isHost: currentUser?.isHost,
-  isVIP: currentUser?.isVIP
+  isVIP: currentUser?.isVIP,
+  hasPaid: currentUser?.hasPaid  // ← good for debugging
 });
 
-    // after currentUser is created
+// after currentUser is created
 revealHostTabs();
 
-// ADD THIS LINE — THIS MAKES INFO TAB SHOW CORRECT BALANCE
+// THIS MAKES INFO TAB SHOW CORRECT BALANCE
 updateInfoTab();
-
  // Block Cheaters!
     document.addEventListener("click", (e) => {
   const btn = e.target.closest('.tab-btn[data-tab="infoTab"]');

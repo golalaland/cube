@@ -307,28 +307,19 @@ function loadUserFromUrl() {
 }
 
 
-// ---------- LOAD USER — FINAL BULLETPROOF VERSION (2025) ----------
+// ---------- LOAD USER — FINAL SECURE VERSION (NO UID HACKING) ----------
 async function loadCurrentUserForGame() {
   try {
     let uid = null;
     let source = "none";
 
-    // PRIORITY 1: GLOBAL currentUser (from login system)
+    // PRIORITY 1: GLOBAL currentUser (from actual login — SAFE)
     if (currentUser && currentUser.uid) {
       uid = currentUser.uid;
-      source = "global currentUser";
+      source = "logged in user";
     } 
-    // PRIORITY 2: URL PARAM ?uid=... (direct link)
+    // PRIORITY 2: localStorage (from login — SAFE)
     else {
-      const urlParams = new URLSearchParams(window.location.search);
-      const urlUid = urlParams.get("uid");
-      if (urlUid) {
-        uid = urlUid.trim().toLowerCase();
-        source = "URL param";
-      }
-    }
-    // PRIORITY 3: localStorage (fallback)
-    if (!uid) {
       const vipRaw = localStorage.getItem("vipUser");
       const storedUser = vipRaw ? JSON.parse(vipRaw) : null;
       if (storedUser?.email) {
@@ -338,80 +329,62 @@ async function loadCurrentUserForGame() {
           .replace(/[@.]/g, '_')
           .replace(/_+/g, '_')
           .replace(/^_|_$/g, '');
-        source = "localStorage";
+        source = "localStorage login";
       }
     }
 
-    // GUEST MODE IF NO UID
+    // GUEST MODE IF NOT LOGGED IN
     if (!uid) {
       currentUser = null;
       profileNameEl && (profileNameEl.textContent = "GUEST 0000");
       starCountEl && (starCountEl.textContent = "50");
       cashCountEl && (cashCountEl.textContent = "₦0");
       persistentBonusLevel = 1;
-      console.log("%cGuest mode — no user found", "color:#ff6600");
+      console.log("%cGuest mode — please login to play", "color:#ff6600");
       return;
     }
 
-    console.log(`%cLoading user from ${source}: ${uid}`, "color:#00ffaa;font-weight:bold");
+    console.log(`%cLoading your profile: ${uid}`, "color:#00ffaa;font-weight:bold");
 
     const userRef = doc(db, "users", uid);
     let snap = await getDoc(userRef);
 
-    // CREATE USER IF MISSING (first time)
     if (!snap.exists()) {
-      console.log("User not found — creating new");
-      await setDoc(userRef, {
-        uid,
-        chatId: uid.split('_')[0] || "Player",
-        email: uid.replace(/_/g, "@"),
-        stars: 100,
-        cash: 0,
-        totalTaps: 0,
-        bonusLevel: 1,
-        createdAt: serverTimestamp(),
-        tapsDaily: {},
-        tapsWeekly: {},
-        tapsMonthly: {}
-      });
-      snap = await getDoc(userRef); // fetch fresh
+      console.warn("User doc missing");
+      showStarPopup("Profile error — login again");
+      currentUser = null;
+      return;
     }
 
     const data = snap.data();
 
-    // BUILD currentUser
+    // BUILD currentUser — ONLY YOUR DATA
     currentUser = {
       uid,
       chatId: data.chatId || uid.split('_')[0],
       email: uid.replace(/_/g, "@"),
-      stars: Number(data.stars || 100),
+      stars: Number(data.stars || 0),
       cash: Number(data.cash || 0),
       totalTaps: Number(data.totalTaps || 0),
       bonusLevel: Number(data.bonusLevel || 1)
     };
 
-    // PERSISTENT BONUS LEVEL
-    persistentBonusLevel = currentUser.bonusLevel;
+    persistentBonusLevel = currentUser.bonusLevel || 1;
     if (persistentBonusLevel < 1) persistentBonusLevel = 1;
 
     // UPDATE UI
     profileNameEl && (profileNameEl.textContent = currentUser.chatId);
     starCountEl && (starCountEl.textContent = formatNumber(currentUser.stars));
     cashCountEl && (cashCountEl.textContent = '₦' + formatNumber(currentUser.cash));
-
-    // INFO TAB BALANCE
     updateInfoTab();
 
-    console.log("%cUser loaded successfully — Bonus Level:", "color:#00ffaa;font-weight:bold", persistentBonusLevel);
+    console.log("%cYour game loaded — Bonus Level:", "color:#00ffaa;font-weight:bold", persistentBonusLevel);
 
   } catch (err) {
-    console.warn("Load user error:", err);
-    // Fallback to guest
+    console.warn("Load error:", err);
+    showStarPopup("Game load failed — login again");
     currentUser = null;
     persistentBonusLevel = 1;
-    profileNameEl && (profileNameEl.textContent = "GUEST");
-    starCountEl && (starCountEl.textContent = "50");
-    cashCountEl && (cashCountEl.textContent = "₦0");
   }
 }
 

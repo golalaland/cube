@@ -257,84 +257,93 @@ function initializePot(){
 function randomInt(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
 function formatNumber(n){ return n.toLocaleString(); }
 
-// ---------- LOAD USER (UPDATED FOR BONUS LEVEL PERSISTENCE) ----------
+// ---------- LOAD USER — FINAL FIXED VERSION (WORKS WITH NEW LOGIN) ----------
 async function loadCurrentUserForGame() {
   try {
-    const vipRaw = localStorage.getItem("vipUser");
-    const hostRaw = localStorage.getItem("hostUser");
-    const storedUser = vipRaw ? JSON.parse(vipRaw) : hostRaw ? JSON.parse(hostRaw) : null;
-   
-    if (!storedUser?.email) {
-      currentUser = null;
-      profileNameEl && (profileNameEl.textContent = "GUEST 0000");
-      starCountEl && (starCountEl.textContent = "50");
-      cashCountEl && (cashCountEl.textContent = "₦0");
+    // PRIORITY 1: Use global currentUser (set by login system)
+    if (currentUser && currentUser.uid) {
+      console.log("Using global currentUser");
+      // Fetch fresh data to be safe
+      const userRef = doc(db, "users", currentUser.uid);
+      const snap = await getDoc(userRef);
+      if (snap.exists()) {
+        const data = snap.data();
+        currentUser.stars = Number(data.stars || 0);
+        currentUser.cash = Number(data.cash || 0);
+        currentUser.chatId = data.chatId || currentUser.chatId;
+        currentUser.bonusLevel = Number(data.bonusLevel || 1);
+      }
+    } else {
+      // PRIORITY 2: Fallback to localStorage (old way)
+      const vipRaw = localStorage.getItem("vipUser");
+      const storedUser = vipRaw ? JSON.parse(vipRaw) : null;
 
-      // For guests: start at level 1 (no persistence)
-      persistentBonusLevel = 1;
-      return;
-    }
+      if (!storedUser?.email) {
+        currentUser = null;
+        profileNameEl && (profileNameEl.textContent = "GUEST 0000");
+        starCountEl && (starCountEl.textContent = "50");
+        cashCountEl && (cashCountEl.textContent = "₦0");
+        persistentBonusLevel = 1;
+        return;
+      }
 
-    // Generate the exact same document ID as your signup page
-    const uid = storedUser.email
-      .trim()
-      .toLowerCase()
-      .replace(/[@.]/g, '_')
-      .replace(/_+/g, '_')
-      .replace(/^_|_$/g, '');
+      const uid = storedUser.email
+        .trim()
+        .toLowerCase()
+        .replace(/[@.]/g, '_')
+        .replace(/_+/g, '_')
+        .replace(/^_|_$/g, '');
 
-    const userRef = doc(db, "users", uid);
-    const snap = await getDoc(userRef);
+      const userRef = doc(db, "users", uid);
+      const snap = await getDoc(userRef);
 
-    if (!snap.exists()) {
-      // CREATE USER AUTOMATICALLY — first time only
-      await setDoc(userRef, {
+      if (!snap.exists()) {
+        // Create if missing
+        await setDoc(userRef, {
+          uid,
+          chatId: storedUser.chatId || storedUser.email.split('@')[0],
+          email: storedUser.email,
+          stars: 100,
+          cash: 0,
+          totalTaps: 0,
+          bonusLevel: 1,
+          createdAt: serverTimestamp(),
+          tapsDaily: {},
+          tapsWeekly: {},
+          tapsMonthly: {}
+        });
+      }
+
+      const data = (await getDoc(userRef)).data();
+      currentUser = {
         uid,
-        chatId: storedUser.fullName ||
-                storedUser.displayName ||
-                storedUser.email.split('@')[0] ||
-                "Player",
+        chatId: data.chatId || storedUser.email.split('@')[0],
         email: storedUser.email,
-        stars: 100,
-        cash: 0,
-        totalTaps: 0,
-        bonusLevel: 1,                    // ← new users start at level 1
-        createdAt: serverTimestamp(),
-        tapsDaily: {},
-        tapsWeekly: {},
-        tapsMonthly: {}
-      });
+        stars: Number(data.stars || 100),
+        cash: Number(data.cash || 0),
+        totalTaps: Number(data.totalTaps || 0),
+        bonusLevel: Number(data.bonusLevel || 1)
+      };
     }
 
-    // Always fetch fresh data (even after create)
-    const data = (await getDoc(userRef)).data();
-
-    currentUser = {
-      uid,
-      chatId: data.chatId || storedUser.email.split('@')[0],
-      email: storedUser.email,
-      stars: Number(data.stars || 100),
-      cash: Number(data.cash || 0),
-      totalTaps: Number(data.totalTaps || 0),
-      bonusLevel: Number(data.bonusLevel || 1)   // ← include in currentUser if you need it elsewhere
-    };
-
-    // ==== CRITICAL: SET THE PERSISTENT BONUS LEVEL FOR GAME ENGINE ====
-    persistentBonusLevel = Number(data.bonusLevel || 1);
-    // If somehow corrupted, force minimum
+    // SET PERSISTENT BONUS LEVEL
+    persistentBonusLevel = currentUser.bonusLevel || 1;
     if (persistentBonusLevel < 1) persistentBonusLevel = 1;
 
-    // Update UI
+    // UPDATE UI
     profileNameEl && (profileNameEl.textContent = currentUser.chatId);
     starCountEl && (starCountEl.textContent = formatNumber(currentUser.stars));
     cashCountEl && (cashCountEl.textContent = '₦' + formatNumber(currentUser.cash));
 
-    console.log("%cUser loaded — Starting at Bonus Level:", "color:#00ffaa;font-weight:bold", persistentBonusLevel);
+    console.log("%cUser loaded — Bonus Level:", "color:#00ffaa;font-weight:bold", persistentBonusLevel);
 
   } catch (err) {
     console.warn("load user error", err);
-    // Fallback: safe defaults
     persistentBonusLevel = 1;
+    // Fallback UI
+    profileNameEl && (profileNameEl.textContent = "GUEST");
+    starCountEl && (starCountEl.textContent = "50");
+    cashCountEl && (cashCountEl.textContent = "₦0");
   }
 }
 

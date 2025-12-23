@@ -911,17 +911,16 @@ document.addEventListener('DOMContentLoaded', () => {
   // BUTTONS LOGIN
   // ------------------------------
 function updateRedeemLink() {
-  if (!refs.redeemBtn || !currentUser?.uid) return;
-  const token = btoa(currentUser.uid); // base64 encode
-  refs.redeemBtn.href = `tapmaster.html?t=${token}`;
+  if (!refs.redeemBtn) return;
+  refs.redeemBtn.href = "tapmaster.html";
   refs.redeemBtn.style.display = "inline-block";
 }
 
 function updateTipLink() {
-  if (!refs.tipBtn || !currentUser?.uid) return;
-  const token = btoa(currentUser.uid);
-  refs.tipBtn.href = `tapmaster.html?t=${token}`;
+  if (!refs.tipBtn) return;
+  refs.tipBtn.href = "tapmaster.html";
   refs.tipBtn.style.display = "inline-block";
+}
 }
 /* ----------------------------
    GIFT ALERT (ON-SCREEN CELEBRATION)

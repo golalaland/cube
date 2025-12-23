@@ -260,7 +260,6 @@ function formatNumber(n){ return n.toLocaleString(); }
 
 // CALL THIS BEFORE ANYTHING ELSE
 document.addEventListener("DOMContentLoaded", () => {
-  loadUserFromUrl();                // ← LOAD FROM URL FIRST
   loadCurrentUserForGame();         // ← THEN LOAD FULL DATA
   updateInfoTab();                  // ← BALANCE SHOWS
 });

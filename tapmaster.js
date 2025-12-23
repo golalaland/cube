@@ -257,77 +257,121 @@ function initializePot(){
 function randomInt(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
 function formatNumber(n){ return n.toLocaleString(); }
 
-// ---------- LOAD USER — FINAL FIXED VERSION (WORKS WITH NEW LOGIN) ----------
+
+
+// LOAD USER FROM URL PARAM (FOR DIRECT LINKS LIKE ?uid=1111_gmail_com)
+function loadUserFromUrl() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const uidParam = urlParams.get("uid");
+  if (!uidParam) return false;
+
+  const cleanUid = uidParam.trim().toLowerCase();
+  console.log("Loading user from URL uid:", cleanUid);
+
+  // Set a temporary currentUser for game
+  currentUser = {
+    uid: cleanUid,
+    // Minimal data — full load will happen in loadCurrentUserForGame()
+  };
+
+  // Optional: store in localStorage so it persists on refresh
+  localStorage.setItem("vipUser", JSON.stringify({ email: cleanUid.replace(/_/g, "@") }));
+
+  return true;
+}
+
+// CALL THIS BEFORE ANYTHING ELSE
+document.addEventListener("DOMContentLoaded", () => {
+  loadUserFromUrl();                // ← LOAD FROM URL FIRST
+  loadCurrentUserForGame();         // ← THEN LOAD FULL DATA
+  updateInfoTab();                  // ← BALANCE SHOWS
+});
+
+// ---------- LOAD USER — FINAL BULLETPROOF VERSION (2025) ----------
 async function loadCurrentUserForGame() {
   try {
-    // PRIORITY 1: Use global currentUser (set by login system)
+    let uid = null;
+    let source = "none";
+
+    // PRIORITY 1: GLOBAL currentUser (from login system)
     if (currentUser && currentUser.uid) {
-      console.log("Using global currentUser");
-      // Fetch fresh data to be safe
-      const userRef = doc(db, "users", currentUser.uid);
-      const snap = await getDoc(userRef);
-      if (snap.exists()) {
-        const data = snap.data();
-        currentUser.stars = Number(data.stars || 0);
-        currentUser.cash = Number(data.cash || 0);
-        currentUser.chatId = data.chatId || currentUser.chatId;
-        currentUser.bonusLevel = Number(data.bonusLevel || 1);
+      uid = currentUser.uid;
+      source = "global currentUser";
+    } 
+    // PRIORITY 2: URL PARAM ?uid=... (direct link)
+    else {
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlUid = urlParams.get("uid");
+      if (urlUid) {
+        uid = urlUid.trim().toLowerCase();
+        source = "URL param";
       }
-    } else {
-      // PRIORITY 2: Fallback to localStorage (old way)
+    }
+    // PRIORITY 3: localStorage (fallback)
+    if (!uid) {
       const vipRaw = localStorage.getItem("vipUser");
       const storedUser = vipRaw ? JSON.parse(vipRaw) : null;
-
-      if (!storedUser?.email) {
-        currentUser = null;
-        profileNameEl && (profileNameEl.textContent = "GUEST 0000");
-        starCountEl && (starCountEl.textContent = "50");
-        cashCountEl && (cashCountEl.textContent = "₦0");
-        persistentBonusLevel = 1;
-        return;
+      if (storedUser?.email) {
+        uid = storedUser.email
+          .trim()
+          .toLowerCase()
+          .replace(/[@.]/g, '_')
+          .replace(/_+/g, '_')
+          .replace(/^_|_$/g, '');
+        source = "localStorage";
       }
-
-      const uid = storedUser.email
-        .trim()
-        .toLowerCase()
-        .replace(/[@.]/g, '_')
-        .replace(/_+/g, '_')
-        .replace(/^_|_$/g, '');
-
-      const userRef = doc(db, "users", uid);
-      const snap = await getDoc(userRef);
-
-      if (!snap.exists()) {
-        // Create if missing
-        await setDoc(userRef, {
-          uid,
-          chatId: storedUser.chatId || storedUser.email.split('@')[0],
-          email: storedUser.email,
-          stars: 100,
-          cash: 0,
-          totalTaps: 0,
-          bonusLevel: 1,
-          createdAt: serverTimestamp(),
-          tapsDaily: {},
-          tapsWeekly: {},
-          tapsMonthly: {}
-        });
-      }
-
-      const data = (await getDoc(userRef)).data();
-      currentUser = {
-        uid,
-        chatId: data.chatId || storedUser.email.split('@')[0],
-        email: storedUser.email,
-        stars: Number(data.stars || 100),
-        cash: Number(data.cash || 0),
-        totalTaps: Number(data.totalTaps || 0),
-        bonusLevel: Number(data.bonusLevel || 1)
-      };
     }
 
-    // SET PERSISTENT BONUS LEVEL
-    persistentBonusLevel = currentUser.bonusLevel || 1;
+    // GUEST MODE IF NO UID
+    if (!uid) {
+      currentUser = null;
+      profileNameEl && (profileNameEl.textContent = "GUEST 0000");
+      starCountEl && (starCountEl.textContent = "50");
+      cashCountEl && (cashCountEl.textContent = "₦0");
+      persistentBonusLevel = 1;
+      console.log("%cGuest mode — no user found", "color:#ff6600");
+      return;
+    }
+
+    console.log(`%cLoading user from ${source}: ${uid}`, "color:#00ffaa;font-weight:bold");
+
+    const userRef = doc(db, "users", uid);
+    let snap = await getDoc(userRef);
+
+    // CREATE USER IF MISSING (first time)
+    if (!snap.exists()) {
+      console.log("User not found — creating new");
+      await setDoc(userRef, {
+        uid,
+        chatId: uid.split('_')[0] || "Player",
+        email: uid.replace(/_/g, "@"),
+        stars: 100,
+        cash: 0,
+        totalTaps: 0,
+        bonusLevel: 1,
+        createdAt: serverTimestamp(),
+        tapsDaily: {},
+        tapsWeekly: {},
+        tapsMonthly: {}
+      });
+      snap = await getDoc(userRef); // fetch fresh
+    }
+
+    const data = snap.data();
+
+    // BUILD currentUser
+    currentUser = {
+      uid,
+      chatId: data.chatId || uid.split('_')[0],
+      email: uid.replace(/_/g, "@"),
+      stars: Number(data.stars || 100),
+      cash: Number(data.cash || 0),
+      totalTaps: Number(data.totalTaps || 0),
+      bonusLevel: Number(data.bonusLevel || 1)
+    };
+
+    // PERSISTENT BONUS LEVEL
+    persistentBonusLevel = currentUser.bonusLevel;
     if (persistentBonusLevel < 1) persistentBonusLevel = 1;
 
     // UPDATE UI
@@ -335,12 +379,16 @@ async function loadCurrentUserForGame() {
     starCountEl && (starCountEl.textContent = formatNumber(currentUser.stars));
     cashCountEl && (cashCountEl.textContent = '₦' + formatNumber(currentUser.cash));
 
-    console.log("%cUser loaded — Bonus Level:", "color:#00ffaa;font-weight:bold", persistentBonusLevel);
+    // INFO TAB BALANCE
+    updateInfoTab();
+
+    console.log("%cUser loaded successfully — Bonus Level:", "color:#00ffaa;font-weight:bold", persistentBonusLevel);
 
   } catch (err) {
-    console.warn("load user error", err);
+    console.warn("Load user error:", err);
+    // Fallback to guest
+    currentUser = null;
     persistentBonusLevel = 1;
-    // Fallback UI
     profileNameEl && (profileNameEl.textContent = "GUEST");
     starCountEl && (starCountEl.textContent = "50");
     cashCountEl && (cashCountEl.textContent = "₦0");

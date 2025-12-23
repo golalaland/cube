@@ -308,41 +308,59 @@ function loadUserFromUrl() {
 
 
 // ---------- LOAD USER — FINAL BULLETPROOF VERSION (2025) ----------
-// ---------- LOAD USER — FINAL SECURE VERSION (SILENT GUEST MODE) ----------
+// ---------- LOAD USER — FINAL STRICT SECURITY VERSION ----------
 async function loadCurrentUserForGame() {
   try {
-    let uid = null;
+    let loggedInUid = null;
 
-    // LOAD FROM localStorage (persistent from chat login — SAFE)
+    // GET LOGGED IN UID FROM localStorage (persistent from chat)
     const vipRaw = localStorage.getItem("vipUser");
     const storedUser = vipRaw ? JSON.parse(vipRaw) : null;
 
     if (storedUser?.email) {
-      uid = storedUser.email
+      loggedInUid = storedUser.email
         .trim()
         .toLowerCase()
         .replace(/[@.]/g, '_')
         .replace(/_+/g, '_')
         .replace(/^_|_$/g, '');
-      console.log("%cLoaded from persistent login", "color:#00ffaa");
+      console.log("%cLogged in user found:", "color:#00ffaa", loggedInUid);
     }
 
-    // GUEST MODE IF NO LOGIN
-    if (!uid) {
+    // GET UID FROM URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlUid = urlParams.get("uid");
+
+    // STRICT CHECK: URL UID must match logged in user OR no URL UID
+    if (urlUid && loggedInUid && urlUid !== loggedInUid) {
+      console.warn("UID mismatch — blocking load");
+      alert("Invalid link — login with your own account");
       currentUser = null;
       profileNameEl && (profileNameEl.textContent = "GUEST 0000");
       starCountEl && (starCountEl.textContent = "50");
       cashCountEl && (cashCountEl.textContent = "₦0");
       persistentBonusLevel = 1;
-      // No alert — silent guest mode
       return;
     }
 
+    // NO LOGGED IN USER → GUEST MODE
+    if (!loggedInUid) {
+      currentUser = null;
+      profileNameEl && (profileNameEl.textContent = "GUEST 0000");
+      starCountEl && (starCountEl.textContent = "50");
+      cashCountEl && (cashCountEl.textContent = "₦0");
+      persistentBonusLevel = 1;
+      console.log("%cGuest mode — login in chat", "color:#ff6600");
+      return;
+    }
+
+    // LOAD LOGGED IN USER
+    const uid = loggedInUid;
     const userRef = doc(db, "users", uid);
     const snap = await getDoc(userRef);
 
     if (!snap.exists()) {
-      alert("Profile not found — login in chat again");
+      alert("Profile error — login again");
       currentUser = null;
       return;
     }
@@ -368,9 +386,11 @@ async function loadCurrentUserForGame() {
     cashCountEl && (cashCountEl.textContent = '₦' + formatNumber(currentUser.cash));
     updateInfoTab();
 
+    console.log("%cGame loaded — Welcome!", "color:#00ff9d", currentUser.chatId);
+
   } catch (err) {
-    console.warn("Game load error:", err);
-    alert("Failed to load profile — login in chat");
+    console.warn("Load error:", err);
+    alert("Failed to load — login in chat");
     currentUser = null;
     persistentBonusLevel = 1;
   }

@@ -2338,16 +2338,26 @@ function setCurrentUserFromData(data, uidKey, email) {
 
     localStorage.setItem("vipUser", JSON.stringify({ email }));
 
-    // Prompt guests for a permanent chatID
+    // Prompt GUEST users for permanent chatID
     if (currentUser.chatId?.startsWith("GUEST")) {
-      await promptForChatID(userRef, data);
+      try {
+        await promptForChatID(userRef, data);
+      } catch (e) {
+        console.warn("ChatID prompt failed or cancelled:", e);
+        // Don't block login if user cancels
+      }
     }
 
+    // SHOW UI + UPDATE EVERYTHING
     showChatUI(currentUser);
+    updateInfoTab();           // ← Balance shows instantly in Info Tab
+    safeUpdateDOM();           // ← Any other balance displays (stars/cash in header etc.)
+    revealHostTabs();          // ← Host features
+
     return true;
 
   } catch (err) {
-    console.error("❌ Login error:", err);
+    console.error("Login error:", err);
     showStarPopup("Login failed. Try again!");
     return false;
   } finally {
@@ -2355,14 +2365,18 @@ function setCurrentUserFromData(data, uidKey, email) {
   }
 }
 
-/* LOGOUT */
+/* LOGOUT — CLEAN & FAST */
 window.logoutVIP = async () => {
-  await signOut(auth);
-  localStorage.removeItem("lastVipEmail");
-  location.reload();
+  try {
+    await signOut(auth);
+  } catch (e) {
+    console.warn("Sign out failed:", e);
+  } finally {
+    localStorage.removeItem("vipUser");
+    localStorage.removeItem("lastVipEmail");
+    location.reload();
+  }
 };
-
-
 // FINAL LOGOUT — SAFE, FUN, AND WORKS WITH YOUR ANTI-AUTO-LOGIN SYSTEM
 document.getElementById("hostLogoutBtn")?.addEventListener("click", async (e) => {
   e.preventDefault();

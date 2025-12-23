@@ -2240,27 +2240,13 @@ try {
 // document.body.classList.remove('logged-in');
 
 /* ===============================
-   🔐 VIP Login (Whitelist Check)
+   🔐 VIP/Host Login — VIPs FREE WITH hasPaid, Hosts Always Free
 ================================= */
 async function loginWhitelist(email) {
   const loader = document.getElementById("postLoginLoader");
   try {
     if (loader) loader.style.display = "flex";
     await sleep(50);
-
-    // 🔍 Query whitelist by EMAIL ONLY
-    const whitelistQuery = query(
-      collection(db, "whitelist"),
-      where("email", "==", email)
-    );
-
-    const whitelistSnap = await getDocs(whitelistQuery);
-    console.log("📋 Whitelist result:", whitelistSnap.docs.map(d => d.data()));
-
-    if (whitelistSnap.empty) {
-      showStarPopup("You’re not on the whitelist.");
-      return false;
-    }
 
     const uidKey = sanitizeKey(email);
     const userRef = doc(db, "users", uidKey);
@@ -2273,30 +2259,75 @@ async function loginWhitelist(email) {
 
     const data = userSnap.data() || {};
 
-    // 🧍🏽 Set current user details
-    currentUser = {
-      uid: uidKey,
-      email: data.email,
-      phone: data.phone,
-      chatId: data.chatId,
-      chatIdLower: data.chatIdLower,
-      stars: data.stars || 0,
-      cash: data.cash || 0,
-      usernameColor: data.usernameColor || randomColor(),
-      isAdmin: !!data.isAdmin,
-      isVIP: !!data.isVIP,
-      fullName: data.fullName || "",
-      gender: data.gender || "",
-      subscriptionActive: !!data.subscriptionActive,
-      subscriptionCount: data.subscriptionCount || 0,
-      lastStarDate: data.lastStarDate || todayDate(),
-      starsGifted: data.starsGifted || 0,
-      starsToday: data.starsToday || 0,
-      hostLink: data.hostLink || null,
-      invitedBy: data.invitedBy || null,
-      inviteeGiftShown: !!data.inviteeGiftShown,
-      isHost: !!data.isHost
-    };
+    // HOSTS — ALWAYS FREE ACCESS
+    if (data.isHost) {
+      console.log("Host login — free access");
+      setCurrentUserFromData(data, uidKey, email);
+      return true;
+    }
+
+    // VIPs — ONLY NEED hasPaid: true (NO WHITELIST CHECK)
+    if (data.isVIP) {
+      if (data.hasPaid === true) {
+        console.log("VIP with hasPaid — access granted");
+        setCurrentUserFromData(data, uidKey, email);
+        return true;
+      } else {
+        showStarPopup("You're VIP but payment not confirmed.\nContact admin to activate.");
+        return false;
+      }
+    }
+
+    // NORMAL USERS — MUST BE IN WHITELIST
+    const whitelistQuery = query(
+      collection(db, "whitelist"),
+      where("email", "==", email)
+    );
+    const whitelistSnap = await getDocs(whitelistQuery);
+
+    if (whitelistSnap.empty) {
+      showStarPopup("You’re not on the whitelist.");
+      return false;
+    }
+
+    setCurrentUserFromData(data, uidKey, email);
+    return true;
+
+  } catch (err) {
+    console.error("Login check failed:", err);
+    showStarPopup("Login error — try again");
+    return false;
+  } finally {
+    if (loader) loader.style.display = "none";
+  }
+}
+
+// HELPER — SET CURRENT USER
+function setCurrentUserFromData(data, uidKey, email) {
+  currentUser = {
+    uid: uidKey,
+    email,
+    phone: data.phone,
+    chatId: data.chatId,
+    chatIdLower: data.chatIdLower,
+    stars: data.stars || 0,
+    cash: data.cash || 0,
+    usernameColor: data.usernameColor || randomColor(),
+    isAdmin: !!data.isAdmin,
+    isVIP: !!data.isVIP,
+    hasPaid: !!data.hasPaid,  // ← add this if you use it elsewhere
+    fullName: data.fullName || "",
+    gender: data.gender || "",
+    subscriptionActive: !!data.subscriptionActive,
+    subscriptionCount: data.subscriptionCount || 0,
+    lastStarDate: data.lastStarDate || todayDate(),
+    starsGifted: data.starsGifted || 0,
+    starsToday: data.starsToday || 0,
+    hostLink: data.hostLink || null,
+    invitedBy: data.invitedBy || null,
+    inviteeGiftShown: !!data.inviteeGiftShown,
+    isHost: !!data.isHost
+  };
 
     // 🧠 Setup post-login systems
     updateRedeemLink();

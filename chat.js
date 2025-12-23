@@ -2278,7 +2278,6 @@ async function loginWhitelist(email) {
         return false;
       }
     }
-
     // NORMAL USERS — MUST BE IN WHITELIST
     const whitelistQuery = query(
       collection(db, "whitelist"),
@@ -2291,7 +2290,12 @@ async function loginWhitelist(email) {
       return false;
     }
 
+    // BUILD CURRENT USER (normal user)
     setCurrentUserFromData(data, uidKey, email);
+
+    // POST-LOGIN SETUP
+    setupPostLogin(email);
+
     return true;
 
   } catch (err) {
@@ -2316,7 +2320,7 @@ function setCurrentUserFromData(data, uidKey, email) {
     usernameColor: data.usernameColor || randomColor(),
     isAdmin: !!data.isAdmin,
     isVIP: !!data.isVIP,
-    hasPaid: !!data.hasPaid,  // ← add this if you use it elsewhere
+    hasPaid: !!data.hasPaid,
     fullName: data.fullName || "",
     gender: data.gender || "",
     subscriptionActive: !!data.subscriptionActive,
@@ -2329,43 +2333,34 @@ function setCurrentUserFromData(data, uidKey, email) {
     inviteeGiftShown: !!data.inviteeGiftShown,
     isHost: !!data.isHost
   };
-
-    // 🧠 Setup post-login systems
-    updateRedeemLink();
-    setupPresence(currentUser);
-    attachMessagesListener();
-    startStarEarning(currentUser.uid);
-
-    localStorage.setItem("vipUser", JSON.stringify({ email }));
-
-    // Prompt GUEST users for permanent chatID
-    if (currentUser.chatId?.startsWith("GUEST")) {
-      try {
-        await promptForChatID(userRef, data);
-      } catch (e) {
-        console.warn("ChatID prompt failed or cancelled:", e);
-        // Don't block login if user cancels
-      }
-    }
-
-    // SHOW UI + UPDATE EVERYTHING
-    showChatUI(currentUser);
-    updateInfoTab();           // ← Balance shows instantly in Info Tab
-    safeUpdateDOM();           // ← Any other balance displays (stars/cash in header etc.)
-    revealHostTabs();          // ← Host features
-
-    return true;
-
-  } catch (err) {
-    console.error("Login error:", err);
-    showStarPopup("Login failed. Try again!");
-    return false;
-  } finally {
-    if (loader) loader.style.display = "none";
-  }
 }
 
-/* LOGOUT — CLEAN & FAST */
+// HELPER — ALL POST-LOGIN ACTIONS (DRY & CLEAN)
+function setupPostLogin(email) {
+  localStorage.setItem("vipUser", JSON.stringify({ email }));
+
+  updateRedeemLink();
+  setupPresence(currentUser);
+  attachMessagesListener();
+  startStarEarning(currentUser.uid);
+
+  // Prompt GUEST users for permanent chatID (non-blocking)
+  if (currentUser.chatId?.startsWith("GUEST")) {
+    promptForChatID(doc(db, "users", currentUser.uid), currentUser).catch(e => {
+      console.warn("ChatID prompt cancelled:", e);
+    });
+  }
+
+  // SHOW UI & UPDATE EVERYTHING
+  showChatUI(currentUser);
+  updateInfoTab();     // Info Tab balance shows
+  safeUpdateDOM();     // Header balances
+  revealHostTabs();    // Host features
+
+  console.log("WELCOME BACK:", currentUser.chatId.toUpperCase());
+}
+
+/* LOGOUT — CLEAN, FUN, SAFE */
 window.logoutVIP = async () => {
   try {
     await signOut(auth);
@@ -2374,41 +2369,42 @@ window.logoutVIP = async () => {
   } finally {
     localStorage.removeItem("vipUser");
     localStorage.removeItem("lastVipEmail");
+    sessionStorage.setItem("justLoggedOut", "true");
+    currentUser = null;
     location.reload();
   }
 };
-// FINAL LOGOUT — SAFE, FUN, AND WORKS WITH YOUR ANTI-AUTO-LOGIN SYSTEM
+
+// HOST LOGOUT BUTTON — FUN & PREVENTS DOUBLE-CLICK
 document.getElementById("hostLogoutBtn")?.addEventListener("click", async (e) => {
   e.preventDefault();
   e.stopPropagation();
 
-  const btn = e.target.closest("button") || e.target;
-  if (btn.disabled) return; // prevent double-click
-
-  btn.disabled = true; // just disable, no text change
+  const btn = e.target.closest("button");
+  if (!btn || btn.disabled) return;
+  btn.disabled = true;
 
   try {
     await signOut(auth);
+    localStorage.removeItem("vipUser");
     localStorage.removeItem("lastVipEmail");
     sessionStorage.setItem("justLoggedOut", "true");
-    window.currentUser = null;
+    currentUser = null;
 
     const messages = [
-      "See ya later, Alligator",
-      "Off you go, $STRZ waiting when you return!",
+      "See ya later, Alligator!",
+      "Off you go — $STRZ waiting when you return!",
       "Catch you on the flip side!",
       "Adios, Amigo!",
       "Peace out, Player!",
       "Hasta la vista, Baby!",
-      "hmmm, now why'd you do that..",
+      "Hmmm, now why'd you do that...",
       "Off you go, Champ!"
     ];
     const message = messages[Math.floor(Math.random() * messages.length)];
     showStarPopup(message);
 
-    // Smart reload — triggers your anti-auto-login perfectly
     setTimeout(() => location.reload(), 1800);
-
   } catch (err) {
     console.error("Logout failed:", err);
     btn.disabled = false;

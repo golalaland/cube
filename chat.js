@@ -908,20 +908,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
 });
 
-/* ----------------------------
-   REDEEM & TIP LINKS — ALWAYS VISIBLE AFTER LOGIN
------------------------------ */
 function updateRedeemLink() {
   if (!refs.redeemBtn || !currentUser?.uid) return;
-  refs.redeemBtn.href = `tapmaster.html?uid=${currentUser.uid}`;
+  // Just open the game — no uid needed anymore
+  refs.redeemBtn.href = "tapmaster.html";
   refs.redeemBtn.style.display = "inline-block";
 }
+
 function updateTipLink() {
   if (!refs.tipBtn || !currentUser?.uid) return;
-  refs.tipBtn.href = `tapmaster.html?uid=${currentUser.uid}`;
+  refs.tipBtn.href = "tapmaster.html";
   refs.tipBtn.style.display = "inline-block";
 }
-
 /* ----------------------------
    GIFT ALERT (ON-SCREEN CELEBRATION)
 ----------------------------- */

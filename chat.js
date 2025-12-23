@@ -907,17 +907,18 @@ document.addEventListener('DOMContentLoaded', () => {
   updateMessagesPlaceholder();
 
 });
-
+  // ------------------------------
+  // BUTTONS LOGIN
+  // ------------------------------
 function updateRedeemLink() {
   if (!refs.redeemBtn || !currentUser?.uid) return;
-  // Just open the game — no uid needed anymore
-  refs.redeemBtn.href = "tapmaster.html";
+  refs.redeemBtn.href = `tapmaster.html?uid=${currentUser.uid}`;
   refs.redeemBtn.style.display = "inline-block";
 }
 
 function updateTipLink() {
   if (!refs.tipBtn || !currentUser?.uid) return;
-  refs.tipBtn.href = "tapmaster.html";
+  refs.tipBtn.href = `tapmaster.html?uid=${currentUser.uid}`;
   refs.tipBtn.style.display = "inline-block";
 }
 /* ----------------------------

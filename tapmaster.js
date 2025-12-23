@@ -308,11 +308,12 @@ function loadUserFromUrl() {
 
 
 // ---------- LOAD USER — FINAL BULLETPROOF VERSION (2025) ----------
+// ---------- LOAD USER — FINAL SECURE VERSION (SILENT GUEST MODE) ----------
 async function loadCurrentUserForGame() {
   try {
     let uid = null;
 
-    // LOAD FROM localStorage (persistent from chat login)
+    // LOAD FROM localStorage (persistent from chat login — SAFE)
     const vipRaw = localStorage.getItem("vipUser");
     const storedUser = vipRaw ? JSON.parse(vipRaw) : null;
 
@@ -323,17 +324,17 @@ async function loadCurrentUserForGame() {
         .replace(/[@.]/g, '_')
         .replace(/_+/g, '_')
         .replace(/^_|_$/g, '');
-      console.log("%cLoaded from chat login", "color:#00ffaa");
+      console.log("%cLoaded from persistent login", "color:#00ffaa");
     }
 
-    // GUEST MODE
+    // GUEST MODE IF NO LOGIN
     if (!uid) {
       currentUser = null;
-      if (profileNameEl) profileNameEl.textContent = "GUEST 0000";
-      if (starCountEl) starCountEl.textContent = "50";
-      if (cashCountEl) cashCountEl.textContent = "₦0";
+      profileNameEl && (profileNameEl.textContent = "GUEST 0000");
+      starCountEl && (starCountEl.textContent = "50");
+      cashCountEl && (cashCountEl.textContent = "₦0");
       persistentBonusLevel = 1;
-      alert("Login in chat first to play with your profile!");
+      // No alert — silent guest mode
       return;
     }
 
@@ -362,19 +363,16 @@ async function loadCurrentUserForGame() {
     if (persistentBonusLevel < 1) persistentBonusLevel = 1;
 
     // UPDATE UI
-    if (profileNameEl) profileNameEl.textContent = currentUser.chatId;
-    if (starCountEl) starCountEl.textContent = formatNumber(currentUser.stars);
-    if (cashCountEl) cashCountEl.textContent = '₦' + formatNumber(currentUser.cash);
+    profileNameEl && (profileNameEl.textContent = currentUser.chatId);
+    starCountEl && (starCountEl.textContent = formatNumber(currentUser.stars));
+    cashCountEl && (cashCountEl.textContent = '₦' + formatNumber(currentUser.cash));
     updateInfoTab();
 
   } catch (err) {
     console.warn("Game load error:", err);
-    alert("Failed to load profile — try logging in again");
+    alert("Failed to load profile — login in chat");
     currentUser = null;
     persistentBonusLevel = 1;
-    profileNameEl && (profileNameEl.textContent = "GUEST");
-    starCountEl && (starCountEl.textContent = "50");
-    cashCountEl && (cashCountEl.textContent = "₦0");
   }
 }
 

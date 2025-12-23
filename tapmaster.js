@@ -285,29 +285,30 @@ function updateInfoTab() {
 
 
 
-// LOAD USER FROM URL PARAM (FOR DIRECT LINKS LIKE ?uid=1111_gmail_com)
-function loadUserFromUrl() {
-  const urlParams = new URLSearchParams(window.location.search);
-  const uidParam = urlParams.get("uid");
-  if (!uidParam) return false;
+// GET TOKEN FROM URL
+const urlParams = new URLSearchParams(window.location.search);
+const token = urlParams.get("t");
 
-  const cleanUid = uidParam.trim().toLowerCase();
-  console.log("Loading user from URL uid:", cleanUid);
+// DECODE UID FROM TOKEN (if present)
+let urlUid = null;
+if (token) {
+  try {
+    urlUid = atob(token); // base64 decode
+    console.log("Decoded token UID:", urlUid);
+  } catch (e) {
+    console.warn("Invalid token");
+  }
+}
 
-  // Set a temporary currentUser for game
-  currentUser = {
-    uid: cleanUid,
-    // Minimal data — full load will happen in loadCurrentUserForGame()
-  };
-
-  // Optional: store in localStorage so it persists on refresh
-  localStorage.setItem("vipUser", JSON.stringify({ email: cleanUid.replace(/_/g, "@") }));
-
-  return true;
+// THEN YOUR SECURITY CHECK
+if (urlUid && loggedInUid && urlUid !== loggedInUid) {
+  alert("Invalid link — not your profile");
+  // Force guest or block
+  currentUser = null;
+  return;
 }
 
 
-// ---------- LOAD USER — FINAL BULLETPROOF VERSION (2025) ----------
 // ---------- LOAD USER — FINAL STRICT SECURITY VERSION ----------
 async function loadCurrentUserForGame() {
   try {

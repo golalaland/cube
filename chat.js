@@ -921,7 +921,6 @@ function updateTipLink() {
   refs.tipBtn.href = "tapmaster.html";
   refs.tipBtn.style.display = "inline-block";
 }
-}
 /* ----------------------------
    GIFT ALERT (ON-SCREEN CELEBRATION)
 ----------------------------- */

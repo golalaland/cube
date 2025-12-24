@@ -304,18 +304,33 @@
     0%   { filter: drop-shadow(0 0 45px #c3f60c) drop-shadow(0 0 90px rgba(195,246,12,0.7)); }
     100% { filter: drop-shadow(0 0 60px #c3f60c) drop-shadow(0 0 120px rgba(195,246,12,1)); }
   }
-  .btn {
+.btn {
   position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   min-width: 200px;
   height: 48px;
+  padding: 0 2rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.4s ease;
+  overflow: hidden;
 }
 
+/* Spinner — PERFECTLY CENTERED */
 .btn .spinner {
-  width: 20px;
-  height: 20px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 24px;
+  height: 24px;
   border: 3px solid rgba(255,255,255,0.3);
   border-top-color: #fff;
   border-radius: 50%;
@@ -323,28 +338,71 @@
   display: none;
 }
 
+/* Hide text when loading */
 .btn.loading .btn-text {
   visibility: hidden;
 }
 
+/* Show spinner when loading */
 .btn.loading .spinner {
   display: block;
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
+/* Gold Luxe Button — Rich, Shiny, Premium */
 .btn.gold {
-  background: linear-gradient(135deg, #d4af37, #ffd700);
+  background: linear-gradient(135deg, #d4af37, #ffd700, #d4af37);
   color: #000;
   font-weight: 800;
+  box-shadow: 
+    0 4px 15px rgba(212,175,55,0.4),
+    inset 0 2px 8px rgba(255,255,255,0.4); /* inner shine */
+  position: relative;
+  overflow: hidden;
 }
 
+.btn.gold::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    45deg,
+    transparent,
+    rgba(255,255,255,0.3),
+    transparent
+  );
+  transform: translateX(-100%);
+  transition: transform 0.8s ease;
+}
+
+.btn.gold:hover::before {
+  transform: translateX(100%);
+}
+
+.btn.gold:hover {
+  transform: translateY(-3px);
+  box-shadow: 
+    0 10px 30px rgba(212,175,55,0.6),
+    inset 0 2px 10px rgba(255,255,255,0.5);
+}
+
+/* General hover lift */
+.btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+}
+
+/* Animation */
+@keyframes spin {
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Hidden class */
 .hidden {
   display: none;
 }
-
 </style>
 
 
@@ -371,6 +429,8 @@
   <span class="btn-text">Create Account</span>
   <span class="spinner"></span>
 </button>
+
+<div id="message"></div> <!-- ← ADD THIS -->
 
 <button id="vipPayBtn" class="btn gold hidden">
   <span class="btn-text">VIP ACCESS</span>

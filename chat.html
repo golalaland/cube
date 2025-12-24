@@ -2189,10 +2189,18 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
     flex: 0 0 150px;
   }
 }
+.google-wrap {
+  display: flex;
+  flex-direction: column;   /* ⬇ forces UNDER */
+  align-items: center;      /* ⬅ keeps centered */
+  gap: 10px;
+  width: 100%;
+}
+
 .forgot-link {
   font-size: 13px;
-  color: var(--neon);
-  opacity: 0.8;
+  color: #c3f60c;
+  opacity: 0.75;
   text-decoration: none;
 }
 
@@ -2200,7 +2208,6 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
   opacity: 1;
   text-decoration: underline;
 }
-
 </style>
 </head>
 <body>
@@ -2341,16 +2348,19 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
   Sign in with $STRZ
 </button>
 
-    <!-- Google Sign-In Button -->
-    <button id="googleSignInBtn" class="google-btn">
-      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google logo">
-      Sign in with Google
-    </button>
-  </div>
-  
-<div id="forgotWrap" style="text-align:center; margin-top:14px;">
+  <div class="google-wrap">
+
+  <!-- Google Sign-In Button -->
+  <button id="googleSignInBtn" class="google-btn">
+    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google logo">
+    Sign in with Google
+  </button>
+
+  <!-- Forgot password (just text, nothing else) -->
   <a href="/forgot.html" class="forgot-link">Forgot password?</a>
+
 </div>
+
 
 </div>
 <!-- Chat ID Modal -->

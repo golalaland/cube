@@ -655,7 +655,14 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
 }
 /* ---------- Auth Inputs ---------- */
 #authBox{display:flex;justify-content:center;margin-top:12px;}
-#emailAuthWrapper{display:flex;flex-direction:column;align-items:center;gap:10px;width:100%;}
+#emailAuthWrapper{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  width:100%;
+  align-items: stretch; /* 🔥 IMPORTANT */
+}
+
 #emailAuthWrapper input.auth-input{
   width:90%; max-width:320px;
   padding:12px 16px;
@@ -673,6 +680,9 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
   box-shadow:0 0 12px rgba(255,20,147,0.15);
 }
 /* ---------- CUBE GREEN GOOGLE BUTTON ---------- */
+  .google-btn {
+  margin: 0 auto; /* 👈 centers auto-width buttons correctly */
+}
 .google-btn {
   display: flex;
   align-items: center;

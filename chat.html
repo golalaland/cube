@@ -2189,15 +2189,14 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
     flex: 0 0 150px;
   }
 }
-.google-wrap {
-  display: flex;
-  flex-direction: column;   /* ⬇ forces UNDER */
-  align-items: center;      /* ⬅ keeps centered */
-  gap: 10px;
-  width: 100%;
+.google-block {
+  text-align: center;      /* keeps everything centered */
+  margin-top: 12px;
 }
 
 .forgot-link {
+  display: inline-block;   /* critical: prevents side flow */
+  margin-top: 8px;
   font-size: 13px;
   color: #c3f60c;
   opacity: 0.75;
@@ -2342,25 +2341,23 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
       class="auth-input"
     >
 
-<!-- VIP Access Button -->
+<!-- VIP Access Button (unchanged) -->
 <button id="whitelistLoginBtn" class="google-btn">
   <img src="https://cdn.shopify.com/s/files/1/0962/6648/6067/files/VIP__128_x_128_px.svg?v=1761812907" alt="VIP Ticket">
   Sign in with $STRZ
 </button>
 
-  <div class="google-wrap">
+<!-- Google + Forgot (tied together only) -->
+<div class="google-block">
 
-  <!-- Google Sign-In Button -->
   <button id="googleSignInBtn" class="google-btn">
     <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google logo">
     Sign in with Google
   </button>
 
-  <!-- Forgot password (just text, nothing else) -->
   <a href="/forgot.html" class="forgot-link">Forgot password?</a>
 
 </div>
-
 
 </div>
 <!-- Chat ID Modal -->

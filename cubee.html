@@ -341,7 +341,7 @@ body {
     <div class="particle" style="left:90%;animation-delay:5s;"></div>
   </div>
   
-<!-- REFINED HAMBURGER MENU -->
+<!-- REFINED HAMBURGER MENU – NO CTA, CLASSY & MINIMAL -->
 <div class="hamburger-container">
   <button class="hamburger-btn" aria-label="Menu">
     <span class="hamburger-line"></span>
@@ -351,7 +351,7 @@ body {
 </div>
 
 <nav class="mobile-menu">
-  <!-- Logo instead of text -->
+  <!-- Logo at top -->
   <div class="menu-header">
     <img src="https://cdn.shopify.com/s/files/1/0962/6648/6067/files/HABA_HOUSE.png?v=1765412962"
          alt="CUBE"
@@ -368,46 +368,50 @@ body {
     <li><a href="#rewards">WIN $STRZ</a></li>
     <li><a href="#events">Visit CUBE</a></li>
   </ul>
-</nav>
 
+  <!-- Single Telegram link (small & subtle) -->
+  <div class="menu-social">
+    <a href="https://t.me/yourtelegramgroup" aria-label="Telegram" target="_blank">
+      <img src="https://cdn.shopify.com/s/files/1/0962/6648/6067/files/telegram.png?v=1766429753"
+           alt="Telegram"
+           class="telegram-icon">
+    </a>
+  </div>
+</nav>
+  
 <style>
-  /* Hamburger Button */
-  .hamburger-container {
-    position: fixed;
-    top: 24px;
-    left: 20px;
-    z-index: 9999;
-  }
- .hamburger-btn {
+/* Hamburger Button */
+.hamburger-container {
+  position: fixed;
+  top: 24px;
+  left: 20px;
+  z-index: 9999;
+}
+
+.hamburger-btn {
   background: rgba(10, 25, 0, 0.85);
   backdrop-filter: blur(14px);
   border: 1px solid rgba(195, 246, 12, 0.5);
   border-radius: 50%;
-  width: 56px;                    /* ← smaller, more elegant */
+  width: 56px;
   height: 56px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: 6px;                       /* ← tighter spacing */
+  gap: 6px;
   cursor: pointer;
   transition: all 0.4s ease;
   box-shadow: 0 0 30px rgba(195, 246, 12, 0.35);
-  position: relative;
-  z-index: 1;
 }
 
 .hamburger-btn:hover {
-  box-shadow: 0 0 50px rgba(195, 246, 12, 0.7);
-  transform: scale(1.08);         /* ← subtle hover grow */
-}
-
-.hamburger-btn:active {
-  transform: scale(0.95);         /* ← nice tap feedback */
+  box-shadow: 0 0 45px rgba(195, 246, 12, 0.6);
+  transform: scale(1.05);
 }
 
 .hamburger-line {
-  width: 28px;                    /* ← shorter lines for balance */
+  width: 28px;
   height: 3px;
   background: #c3f60c;
   border-radius: 2px;
@@ -415,7 +419,7 @@ body {
   box-shadow: 0 0 12px #c3f60c;
 }
 
-/* Morph to X — adjusted for smaller size */
+/* X morph */
 .hamburger-btn.active .hamburger-line:nth-child(1) {
   transform: rotate(45deg) translate(7px, 7px);
 }
@@ -426,90 +430,91 @@ body {
   transform: rotate(-45deg) translate(7px, -7px);
 }
 
-  /* Mobile Menu */
-  .mobile-menu {
-    position: fixed;
-    top: 0;
-    left: -100%;
-    width: 85%;
-    max-width: 360px;
-    height: 100vh;
-    background: rgba(10,20,0,0.95);
-    backdrop-filter: blur(20px);
-    border-right: 2px solid rgba(195,246,12,0.5);
-    box-shadow: 0 0 100px rgba(195,246,12,0.4);
-    transition: left 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    z-index: 9998;
-    display: flex;
-    flex-direction: column;
-    padding: 2rem;
-  }
-  .mobile-menu.active {
-    left: 0;
-  }
+/* Mobile Menu */
+.mobile-menu {
+  position: fixed;
+  top: 0;
+  left: -100%;
+  width: 85%;
+  max-width: 360px;
+  height: 100vh;
+  background: rgba(10,20,0,0.95);
+  backdrop-filter: blur(20px);
+  border-right: 2px solid rgba(195,246,12,0.5);
+  box-shadow: 0 0 100px rgba(195,246,12,0.4);
+  transition: left 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  z-index: 9998;
+  display: flex;
+  flex-direction: column;
+  padding: 2rem;
+}
 
-  /* Logo in Header */
-  .menu-header {
-    text-align: center;
-    margin-bottom: 2rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid rgba(195,246,12,0.2);
-  }
-  .menu-logo {
-    height: 120px;
-    width: auto;
-    filter: drop-shadow(0 0 30px #c3f60c);
-  }
+.mobile-menu.active {
+  left: 0;
+}
 
-  /* Scrollable Links */
-  .menu-links {
-    list-style: none;
-    flex: 1;
-    overflow-y: auto;                 /* ← Internal scroller */
-    -webkit-overflow-scrolling: touch; /* Smooth on iOS */
-    padding-right: 10px;
-  }
-  .menu-links::-webkit-scrollbar {
-    width: 6px;
-  }
-  .menu-links::-webkit-scrollbar-track {
-    background: rgba(0,0,0,0.3);
-    border-radius: 10px;
-  }
-  .menu-links::-webkit-scrollbar-thumb {
-    background: rgba(195,246,12,0.6);
-    border-radius: 10px;
-  }
-  .menu-links li {
-    margin: 1.2rem 0;
-  }
-  .menu-links a {
-    color: #ccc;
-    font-size: 1.3rem;           /* ← Smaller, not bold */
-    font-weight: 500;
-    text-decoration: none;
-    transition: all 0.4s;
-    display: block;
-    padding: 0.8rem 0;
-  }
-  .menu-links a:hover {
-    color: #c3f60c;
-    text-shadow: 0 0 20px #c3f60c;
-    transform: translateX(10px);
-  }
-  .menu-cta {
-    display: inline-block;
-    margin: 2rem auto 0;
-    padding: 1rem 3rem;
-    background: linear-gradient(135deg, #c3f60c, #a0d00a);
-    color: #000;
-    border-radius: 60px;
-    font-weight: 800;
-    font-size: 1.2rem;
-    text-align: center;
-    box-shadow: 0 10px 40px rgba(195,246,12,0.6);
-  }
+/* Logo */
+.menu-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
 
+.menu-logo {
+  height: 100px;
+  width: auto;
+  filter: drop-shadow(0 0 30px #c3f60c);
+}
+
+/* Scrollable Links */
+.menu-links {
+  list-style: none;
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 10px;
+}
+
+.menu-links li {
+  margin: 1.2rem 0;
+}
+
+.menu-links a {
+  color: #ccc;
+  font-size: 1.2rem;        /* Smaller & lighter */
+  font-weight: 400;         /* Not bold */
+  text-decoration: none;
+  transition: all 0.3s ease;
+  display: block;
+  padding: 0.6rem 0;
+}
+
+.menu-links a:hover {
+  color: #e0ff80;
+  text-shadow: 0 0 10px rgba(195,246,12,0.6);
+  transform: translateX(8px);
+}
+
+/* Single Telegram Icon (footer-style) */
+.menu-social {
+  text-align: center;
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(195,246,12,0.2);
+}
+
+.telegram-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 1px solid #c3f60c;
+  box-shadow: 0 0 25px rgba(195,246,12,0.4);
+  transition: all 0.4s ease;
+}
+
+.telegram-icon:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 40px rgba(195,246,12,0.6);
+}
+  
  /* CENTERED SECTION HEADERS — "What's Your Edge" & "Featured" */
 .edge-header,
 .featured-header {

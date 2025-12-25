@@ -1308,18 +1308,18 @@ function createConfettiInside(container, colors) {
 }
 
 // =============================
-// RENDER MESSAGES — FINAL FIXED VERSION (2025)
+// RENDER MESSAGES — PLAIN GLASS BLACK + SMALL (2025)
 // =============================
 function renderMessagesFromArray(messages) {
   if (!refs.messagesEl) return;
 
   messages.forEach(function(item) {
-    var id = item.id || item.tempId || item.data?.id;
+    const id = item.id || item.tempId || item.data?.id;
     if (!id || document.getElementById(id)) return;
 
-    var m = item.data ?? item;
+    const m = item.data ?? item;
 
-    // BLOCK ALL BANNERS
+    // Skip banners/system messages
     if (
       m.isBanner ||
       m.type === "banner" ||
@@ -1329,102 +1329,90 @@ function renderMessagesFromArray(messages) {
       /system/i.test(m.uid || "")
     ) return;
 
-    var wrapper = document.createElement("div");
+    const wrapper = document.createElement("div");
     wrapper.className = "msg";
     wrapper.id = id;
 
-    // USERNAME — YOUR ORIGINAL COLORS ALWAYS WIN
-    var metaEl = document.createElement("span");
+    // ── Username ──
+    const metaEl = document.createElement("span");
     metaEl.className = "meta";
 
-    var nameSpan = document.createElement("span");
+    const nameSpan = document.createElement("span");
     nameSpan.className = "chat-username";
     nameSpan.textContent = m.chatId || "Guest";
-
-    var realUid = (m.uid || (m.email ? m.email.replace(/[.@]/g, '_') : m.chatId) || "unknown").replace(/[.@/\\]/g, '_');
+    
+    const realUid = (m.uid || (m.email ? m.email.replace(/[.@]/g, '_') : m.chatId) || "unknown")
+      .replace(/[.@/\\]/g, '_');
+    
     nameSpan.dataset.userId = realUid;
-
     nameSpan.style.cssText = `
-      cursor:pointer;
-      font-weight:700;
-      padding:0 4px;
-      border-radius:4px;
-      user-select:none;
-      color: ${refs.userColors && refs.userColors[m.uid] ? refs.userColors[m.uid] : "#ffffff"} !important;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 12px;
+      color: ${refs.userColors?.[m.uid] ?? "#e0e0e0"};
     `;
-
-    nameSpan.addEventListener("pointerdown", function() { nameSpan.style.background = "rgba(255,204,0,0.4)"; });
-    nameSpan.addEventListener("pointerup", function() { setTimeout(function() { nameSpan.style.background = ""; }, 200); });
 
     metaEl.append(nameSpan, document.createTextNode(": "));
     wrapper.appendChild(metaEl);
 
-    // REPLY PREVIEW
+    // ── Reply preview ── (smaller & simpler)
     if (m.replyTo) {
-      var preview = document.createElement("div");
+      const preview = document.createElement("div");
       preview.className = "reply-preview";
-      preview.style.cssText = "background:rgba(255,255,255,0.06);border-left:3px solid #b3b3b3;padding:6px 10px;margin:6px 0 4px;border-radius:0 6px 6px 0;font-size:13px;color:#aaa;cursor:pointer;line-height:1.4;";
-      var replyText = (m.replyToContent || "Original message").replace(/\n/g, " ").trim();
-      var shortText = replyText.length > 80 ? replyText.substring(0,80) + "..." : replyText;
-      preview.innerHTML = `<strong style="color:#999;"> ⤿ ${m.replyToChatId || "someone"}:</strong> <span style="color:#aaa;">${shortText}</span>`;
-      preview.onclick = function() {
-        var target = document.getElementById(m.replyTo);
+      preview.style.cssText = `
+        margin: 3px 0 2px 18px;
+        padding: 2px 8px;
+        font-size: 11px;
+        color: #999;
+        border-left: 2px solid #666;
+        background: rgba(255,255,255,0.04);
+        border-radius: 3px;
+        line-height: 1.3;
+      `;
+
+      let replyText = (m.replyToContent || "message").replace(/\n/g, " ").trim();
+      if (replyText.length > 70) replyText = replyText.slice(0, 67) + "…";
+
+      preview.innerHTML = `↳ <strong style="color:#aaa;">${m.replyToChatId || "?"}</strong>: ${replyText}`;
+      
+      preview.onclick = () => {
+        const target = document.getElementById(m.replyTo);
         if (target) {
           target.scrollIntoView({ behavior: "smooth", block: "center" });
-          target.style.background = "rgba(180,180,180,0.15)";
-          setTimeout(function() { target.style.background = ""; }, 2000);
+          target.style.background = "rgba(180,180,180,0.12)";
+          setTimeout(() => target.style.background = "", 1400);
         }
       };
+
       wrapper.appendChild(preview);
     }
 
-    // CONTENT SPAN — ALWAYS CREATED
-    var content = document.createElement("span");
+    // ── Message content ──
+    const content = document.createElement("span");
     content.className = "content";
     content.textContent = " " + (m.content || "");
 
-    // SUPER STICKER BUZZ — ONLY WHEN NEEDED
-    if (m.type === "buzz" && m.stickerGradient) {
-      wrapper.className += " super-sticker";
-      wrapper.style.cssText = `
-        display: inline-block;
-        max-width: 85%;
-        margin: 14px 10px;
-        padding: 18px 24px;
-        border-radius: 28px;
-        background: ${m.stickerGradient};
-        box-shadow: 0 10px 40px rgba(0,0,0,0.25), inset 0 2px 0 rgba(255,255,255,0.3);
-        position: relative;
-        overflow: hidden;
-        border: 3px solid rgba(255,255,255,0.25);
-        animation: stickerPop 0.7s ease-out;
-        backdrop-filter: blur(4px);
-      `;
-
-      // CONFETTI INSIDE
-      var confettiContainer = document.createElement("div");
-      confettiContainer.style.cssText = "position:absolute;inset:0;pointer-events:none;overflow:hidden;opacity:0.7;";
-      createConfettiInside(confettiContainer, extractColorsFromGradient(m.stickerGradient));
-      wrapper.appendChild(confettiContainer);
-
-      // Make text pop on hover
-      wrapper.style.transition = "transform 0.2s";
-      wrapper.onmouseenter = () => wrapper.style.transform = "scale(1.03) translateY(-4px)";
-      wrapper.onmouseleave = () => wrapper.style.transform = "scale(1)";
-
-      // Fade after 20s
-      setTimeout(function() {
-        wrapper.style.background = "rgba(255,255,255,0.06)";
-        wrapper.style.boxShadow = "0 4px 12px rgba(0,0,0,0.15)";
-        wrapper.style.border = "none";
-        confettiContainer.remove();
-      }, 20000);
-    }
-
-    // ALWAYS APPEND CONTENT — THIS WAS THE MAIN BUG
     wrapper.appendChild(content);
 
-    // TAP FOR MENU
+    // Base glass style (small, clean, dark)
+    wrapper.style.cssText = `
+      position: relative;
+      display: inline-block;
+      max-width: 86%;
+      margin: 4px 10px;
+      padding: 5px 10px;
+      font-size: 13px;
+      line-height: 1.35;
+      color: #e8e8e8;
+      background: rgba(30,30,38,0.65);
+      backdrop-filter: blur(8px) saturate(140%);
+      -webkit-backdrop-filter: blur(8px) saturate(140%);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.28);
+    `;
+
+    // Tap to open menu
     wrapper.onclick = function(e) {
       e.stopPropagation();
       showTapModal(wrapper, {
@@ -1441,89 +1429,14 @@ function renderMessagesFromArray(messages) {
     refs.messagesEl.appendChild(wrapper);
   });
 
-  // AUTO-SCROLL
+  // Auto-scroll
   if (!scrollPending) {
     scrollPending = true;
-    requestAnimationFrame(function() {
+    requestAnimationFrame(() => {
       refs.messagesEl.scrollTop = refs.messagesEl.scrollHeight;
       scrollPending = false;
     });
   }
-}
-
-/* ---------- 🔔 Messages Listener (Final Optimized Version) ---------- */
-function attachMessagesListener() {
-  const q = query(collection(db, CHAT_COLLECTION), orderBy("timestamp", "asc"));
-
-  // 💾 Track shown gift alerts
-  const shownGiftAlerts = new Set(JSON.parse(localStorage.getItem("shownGiftAlerts") || "[]"));
-  function saveShownGift(id) {
-    shownGiftAlerts.add(id);
-    localStorage.setItem("shownGiftAlerts", JSON.stringify([...shownGiftAlerts]));
-  }
-
-  // 💾 Track local pending messages to prevent double rendering
-  let localPendingMsgs = JSON.parse(localStorage.getItem("localPendingMsgs") || "{}");
-
-  onSnapshot(q, snapshot => {
-    snapshot.docChanges().forEach(change => {
-      if (change.type !== "added") return;
-
-      const msg = change.doc.data();
-      const msgId = change.doc.id;
-
-      // 🛑 Skip messages that look like local temp echoes
-      if (msg.tempId && msg.tempId.startsWith("temp_")) return;
-
-      // 🛑 Skip already rendered messages
-      if (document.getElementById(msgId)) return;
-
-      // ✅ Match Firestore-confirmed message to a locally sent one
-      for (const [tempId, pending] of Object.entries(localPendingMsgs)) {
-        const sameUser = pending.uid === msg.uid;
-        const sameText = pending.content === msg.content;
-        const createdAt = pending.createdAt || 0;
-        const msgTime = msg.timestamp?.toMillis?.() || 0;
-        const timeDiff = Math.abs(msgTime - createdAt);
-
-        if (sameUser && sameText && timeDiff < 7000) {
-          // 🔥 Remove local temp bubble
-          const tempEl = document.getElementById(tempId);
-          if (tempEl) tempEl.remove();
-
-          // 🧹 Clean up memory + storage
-          delete localPendingMsgs[tempId];
-          localStorage.setItem("localPendingMsgs", JSON.stringify(localPendingMsgs));
-          break;
-        }
-      }
-
-      // ✅ Render message
-      renderMessagesFromArray([{ id: msgId, data: msg }]);
-
-      /* 💝 Gift Alert Logic */
-      if (msg.highlight && msg.content?.includes("gifted")) {
-        const myId = currentUser?.chatId?.toLowerCase();
-        if (!myId) return;
-
-        const parts = msg.content.split(" ");
-        const sender = parts[0];
-        const receiver = parts[2];
-        const amount = parts[3];
-        if (!sender || !receiver || !amount) return;
-
-        if (receiver.toLowerCase() === myId && !shownGiftAlerts.has(msgId)) {
-          showGiftAlert(`${sender} gifted you ${amount} stars ⭐️`);
-          saveShownGift(msgId);
-        }
-      }
-
-      // 🌀 Keep scroll locked for your messages
-      if (refs.messagesEl && msg.uid === currentUser?.uid) {
-        refs.messagesEl.scrollTop = refs.messagesEl.scrollHeight;
-      }
-    });
-  });
 }
 
 /* ===== NOTIFICATIONS SYSTEM — FINAL ETERNAL EDITION ===== */

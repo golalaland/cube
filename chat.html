@@ -1663,58 +1663,33 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
   0%,100% { box-shadow: 0 0 12px rgba(255,255,255,0.2); }
   50% { box-shadow: 0 0 24px rgba(255,255,255,0.8); }
 }
-/* ---------- Chat Tap Modal — Plain Small Glass Black (2025) ---------- */
+/* ---------- Chat Tap Modal ---------- */
 .tap-modal {
   position: absolute;
-  background: rgba(28, 28, 38, 0.82);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  border-radius: 10px;
-  color: #f0f0f0;
-  font-size: 13px;
-  padding: 4px 6px;
+  background: rgba(0,0,0,0.85);
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 12px;
   display: flex;
-  gap: 4px;
+  gap: 8px;
   z-index: 9999;
   pointer-events: auto;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45);
-  overflow: hidden;
-  white-space: nowrap;           /* keeps it compact horizontally */
 }
 
 .tap-modal button {
-  background: transparent;
+  background: none;
   border: none;
-  color: #e8e8e8;
-  font-size: 13px;
-  font-weight: 500;
-  padding: 4px 10px;
-  border-radius: 6px;
+  color: #fff;
   cursor: pointer;
-  transition: all 0.13s ease;
+  font-weight: 600;
+  padding: 2px 6px;
 }
 
 .tap-modal button:hover {
-  background: rgba(255, 255, 255, 0.11);
-  color: #ffffff;
+  background: rgba(255,255,255,0.2);
+  border-radius: 4px;
 }
-
-.tap-modal button:active {
-  background: rgba(255, 255, 255, 0.18);
-  transform: scale(0.97);
-}
-
-/* Optional: make "Report" stand out slightly */
-.tap-modal button[data-action="report"] {
-  color: #ff7777;
-}
-
-.tap-modal button[data-action="report"]:hover {
-  background: rgba(255, 100, 100, 0.18);
-  color: #ff9999;
-}
-  
 #sessionBar {
   display: flex;
   justify-content: space-around; /* keeps buttons spaced nicely */

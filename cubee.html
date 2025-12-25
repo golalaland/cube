@@ -284,36 +284,69 @@ family=Rajdhani:wght@500;600;700
   .prev { left: 20px; }
   .next { right: 20px; }
   /* Features Grid */
-  .features {
-    padding: 4rem 1rem;
-    max-width: 1400px;
-    margin: 0 auto;
-  }
+ .features {
+  padding: 4rem 1rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+  /* Add side margins on mobile to prevent edge-to-edge stretching */
+  padding: 0 1rem; /* or 0 1.5rem for more breathing room */
+}
+
+.feature-card {
+  background: rgba(10, 25, 0, 0.6);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(195, 246, 12, 0.3);
+  border-radius: 20px;
+  padding: 2rem;
+  text-align: center;
+  transition: all 0.4s;
+  width: 100%;
+  box-sizing: border-box;
+  
+  /* Limit max width so cards don't grow too wide on larger screens */
+  max-width: 420px;          /* Adjust this to control overall card size */
+  margin: 0 auto;           /* Centers the card within its grid cell */
+}
+
+.feature-card:hover {
+  transform: translateY(-15px);
+  border-color: var(--neon);
+  box-shadow: 0 20px 50px var(--neon-glow);
+}
+
+.feature-card h3 {
+  font-size: 1.6rem;
+  margin: 1.5rem 0;
+  color: var(--neon);
+  text-shadow: 0 0 20px var(--neon-glow);
+}
+
+/* Mobile-specific tweaks */
+@media (max-width: 768px) {
   .features-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 2rem;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.5rem;
+    padding: 0 1.5rem;       /* Extra side padding on phones */
   }
+
   .feature-card {
-    background: rgba(10,25,0,0.6);
-    backdrop-filter: blur(15px);
-    border: 1px solid rgba(195,246,12,0.3);
-    border-radius: 20px;
-    padding: 2rem;
-    text-align: center;
-    transition: all 0.4s;
+    max-width: 360px;        /* Even tighter on mobile */
+    padding: 1.75rem;        /* Slightly less padding for compactness */
   }
-  .feature-card:hover {
-    transform: translateY(-15px);
-    border-color: var(--neon);
-    box-shadow: 0 20px 50px var(--neon-glow);
+}
+
+@media (max-width: 480px) {
+  .feature-card {
+    max-width: 340px;        /* Super compact on small phones */
+    padding: 1.5rem;
   }
-  .feature-card h3 {
-    font-size: 1.6rem;
-    margin: 1.5rem 0;
-    color: var(--neon);
-    text-shadow: 0 0 20px var(--neon-glow);
-  }
+}
   /* Responsive Adjustments */
   @media (max-width: 768px) {
     .cutie-bio { font-size: 1.1rem; padding: 0 1rem; }

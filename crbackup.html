@@ -1968,151 +1968,228 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
   justify-content: center;
   text-align: center;
 }
-/* Session Buttons — Cube Neon Theme (no glow) */
-.session-btn {
-  padding: 14px 24px;
-  background: #000;
-  color: #ff006e;
-  border: 2px solid #ff006e;
-  border-radius: 12px;
-  font-weight: 700;
-  font-size: 16px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-.session-btn:hover {
-  background: #ff006e;
-  color: #000;
-}
-
-/* Live Modal — Landscape Layout */
+/* LIVE MODAL - Fullscreen cinematic experience */
 .live-modal {
   display: none;
   position: fixed;
+  z-index: 9999;
   inset: 0;
   background: #000;
-  z-index: 9999;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
 }
-.live-modal-content {
-  height: 100vh;
+
+.live-modal .live-modal-content {
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  padding: 60px 20px 40px;
-}
-
-/* Main Layout — Video + Chat Side by Side (Landscape) */
-.live-main-layout {
-  display: flex;
+  padding: 80px 20px 60px;
+  box-sizing: border-box;
   gap: 20px;
-  height: 70vh;
-  max-height: 800px;
 }
 
-/* Video Player */
-.live-player {
-  flex: 2;
+/* Close button - clean, no circular pad, moved higher */
+.live-modal .live-close {
+  position: fixed;
+  top: 12px;               /* moved higher */
+  right: 20px;
+  color: #fff;
+  font-size: 56px;         /* larger for visibility/tap */
+  font-weight: 200;
+  cursor: pointer;
+  z-index: 30;
+  opacity: 0.8;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  line-height: 1;
+  user-select: none;
+  pointer-events: auto !important;
+}
+.live-modal .live-close:hover,
+.live-modal .live-close:active {
+  opacity: 1;
+  transform: scale(1.1);
+}
+.live-modal .live-close.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+/* Tabs - glassmorphism with glow */
+.live-modal .live-content-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+.live-modal .live-tab-btn {
+  min-width: 160px;
+  padding: 16px 32px;
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 50px;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.4s ease;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+.live-modal .live-tab-btn:hover {
+  background: rgba(255,255,255,0.15);
+  transform: translateY(-2px);
+}
+.live-modal .live-tab-btn.active {
+  background: linear-gradient(135deg, #ff3366, #ff6600);
+  box-shadow: 0 0 30px rgba(255,51,102,0.6);
+  transform: translateY(-4px);
+}
+
+/* Player - cinematic, centered, letterboxed */
+.live-modal .live-player {
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+  aspect-ratio: 16 / 9;
   background: #000;
   border-radius: 20px;
   overflow: hidden;
-  border: 2px solid #ff006e;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+.live-modal .live-player mux-player {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain; /* letterbox for perfect fit */
 }
 
-/* Chat Area */
-.live-chat {
-  flex: 1;
-  background: rgba(20,20,30,0.9);
-  border-radius: 20px;
+/* Posters - elegant fade, compact */
+.live-modal .upcoming-posters {
+  width: 100%;
+  padding: 30px 0;
+  text-align: center;
+  opacity: 1;
+  transition: opacity 1.5s ease, transform 1.5s ease;
+}
+.live-modal .upcoming-posters.fading {
+  opacity: 0;
+  transform: translateY(30px);
+}
+.live-modal .poster-grid {
   display: flex;
-  flex-direction: column;
-  border: 2px solid #ff006e;
+  overflow-x: auto;
+  gap: 20px;
+  padding: 0 20px 20px;
+  scrollbar-width: none;
 }
-.chat-messages {
-  flex: 1;
-  padding: 20px;
-  overflow-y: auto;
+.live-modal .poster-grid::-webkit-scrollbar { display: none; }
+.live-modal .poster {
+  flex: 0 0 170px;
+  text-align: center;
+}
+.live-modal .poster img {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+  transition: transform 0.4s ease;
+}
+.live-modal .poster:hover img, .live-modal .poster:active img {
+  transform: scale(1.08);
+}
+.live-modal .poster-title {
+  margin-top: 12px;
+  font-size: 15px;
+  font-weight: 600;
   color: #fff;
-}
-.chat-input-area {
-  display: flex;
-  padding: 16px;
-  border-top: 1px solid #ff006e;
-}
-#liveChatInput {
-  flex: 1;
-  padding: 12px;
-  background: #111;
-  border: 1px solid #ff006e;
-  border-radius: 12px 0 0 12px;
-  color: #fff;
-}
-#liveChatSend {
-  padding: 12px 24px;
-  background: #ff006e;
-  color: #000;
-  border: none;
-  border-radius: 0 12px 12px 0;
-  font-weight: 700;
-  cursor: pointer;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.8);
 }
 
-/* Tabs — Clean Neon */
-.live-tab-btn {
-  padding: 14px 32px;
-  background: #000;
-  color: #ff006e;
-  border: 2px solid #ff006e;
-  border-radius: 50px;
-  font-weight: 700;
-}
-.live-tab-btn.active {
-  background: #ff006e;
-  color: #000;
-}
-
-/* Paywall Modal */
-.paywall-modal {
+/* Consent Modal - clean, modern */
+.live-modal .consent-modal {
   display: none;
   position: fixed;
+  z-index: 10000;
   inset: 0;
   background: rgba(0,0,0,0.95);
-  z-index: 10000;
   align-items: center;
   justify-content: center;
+  padding: 20px;
 }
-.paywall-content {
-  background: #111;
-  padding: 40px;
+.live-modal .consent-content {
+  background: linear-gradient(135deg, #111, #222);
+  padding: 40px 30px;
   border-radius: 24px;
+  max-width: 90%;
+  width: 480px;
   text-align: center;
-  border: 2px solid #ff006e;
-  color: #fff;
+  color: #eee;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+  border: 1px solid rgba(255,255,255,0.1);
 }
-#cubeXPayBtn {
-  padding: 18px 40px;
-  background: #ff006e;
-  color: #000;
+.live-modal .consent-content h2 {
+  font-size: 30px;
+  margin-bottom: 20px;
+  background: linear-gradient(90deg, #ff3366, #ff6600);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.live-modal .consent-content ul {
+  text-align: left;
+  font-size: 17px;
+  line-height: 1.8;
+}
+.live-modal .consent-buttons {
+  margin-top: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.live-modal .consent-buttons button {
+  padding: 18px;
   border: none;
   border-radius: 50px;
-  font-weight: 700;
   font-size: 18px;
-  margin-top: 20px;
+  font-weight: 700;
   cursor: pointer;
+  transition: all 0.3s ease;
+}
+.live-modal #consentAgree {
+  background: linear-gradient(90deg, #ff3366, #ff6600);
+  color: white;
+  box-shadow: 0 8px 30px rgba(255,51,102,0.5);
+}
+.live-modal #consentAgree:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 40px rgba(255,51,102,0.7);
+}
+.live-modal #consentCancel {
+  background: rgba(255,255,255,0.1);
+  color: white;
+  backdrop-filter: blur(10px);
+}
+.live-modal #consentCancel:hover {
+  background: rgba(255,255,255,0.2);
 }
 
-/* Orientation Control Button (add in JS) */
-#orientationBtn {
-  position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  padding: 12px 24px;
-  background: #ff006e;
-  color: #000;
-  border: none;
-  border-radius: 50px;
-  font-weight: 700;
-  z-index: 9999;
-  cursor: pointer;
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .live-modal .live-modal-content {
+    padding: 70px 16px 40px;
+  }
+  .live-modal .live-tab-btn {
+    min-width: 140px;
+    padding: 14px 24px;
+    font-size: 17px;
+  }
+  .live-modal .live-player {
+    aspect-ratio: 9 / 16; /* portrait priority on mobile */
+  }
+  .live-modal .poster {
+    flex: 0 0 150px;
+  }
 }
 .google-block { 
   width: 100%;  /* ← Matches wrapper width */
@@ -2182,40 +2259,28 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
         <span>people are interacting in chatrooms</span>
     </div>
     
-<!-- Buttons (neon cube theme — no glow) -->
+<!-- Buttons (keep aligned) -->
 <div id="sessionBar">
   <button class="session-btn" id="topBallersBtn">Win $STRZ</button>
-  <button id="highlightsBtn" class="session-btn star-hosts-btn">Cuties</button>
+  <button id="highlightsBtn" class="session-btn star-hosts-btn">🌟 Cuties 🌟</button>
   <button class="session-btn" id="openHostsBtn">Livestreams</button>
 </div>
 
-<!-- Live Stream Modal — Landscape with Chat -->
+<!-- Live Stream Modal -->
 <div id="liveModal" class="live-modal">
   <div class="live-modal-content">
     <span class="live-close">&times;</span>
 
-    <!-- Tabs -->
+    <!-- Livestream Tab Switcher (unique classes) -->
     <div class="live-content-tabs">
       <button class="live-tab-btn active" data-content="regular">LiveShows</button>
       <button class="live-tab-btn" data-content="adult">cubeX</button>
     </div>
 
-    <!-- Main Layout — Landscape Video + Chat -->
-    <div class="live-main-layout">
-      <!-- Video Player -->
-      <div id="livePlayerContainer" class="live-player"></div>
+    <!-- Player Container -->
+    <div id="livePlayerContainer" class="live-player"></div>
 
-      <!-- Chat Area (right side) -->
-      <div id="liveChatArea" class="live-chat">
-        <div id="liveChatMessages" class="chat-messages"></div>
-        <div class="chat-input-area">
-          <input type="text" id="liveChatInput" placeholder="Send a message..." />
-          <button id="liveChatSend">Send</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Upcoming Posters -->
+    <!-- Upcoming Posters – fades out after 8s -->
     <div id="upcomingPosters" class="upcoming-posters">
       <div class="poster-grid">
         <div class="poster">
@@ -2230,28 +2295,21 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
           <img src="https://cdn.shopify.com/s/files/1/0962/6648/6067/files/Beige_Minimal_Romantic_Love_Questions_Card_Game_Document_1080_x_1920_px_5.jpg?v=1765500400" alt="Exclusive Drop">
           <p class="poster-title">Exclusive Drop</p>
         </div>
+        <!-- Add more posters here if needed -->
       </div>
     </div>
   </div>
 
-  <!-- cubeX Paywall Modal -->
-  <div id="cubeXPaywall" class="paywall-modal">
-    <div class="paywall-content">
-      <h2>cubeX Premium Access</h2>
-      <p>Get 7 days of exclusive adult content for ₦5,000</p>
-      <button id="cubeXPayBtn">Pay with Paystack</button>
-      <button id="cubeXCancel">Cancel</button>
-    </div>
-  </div>
-
-  <!-- Adult Consent Modal -->
+  <!-- Adult Content Consent Modal - nested inside the live-modal for proper scoping and no bleed -->
   <div id="adultConsentModal" class="consent-modal">
     <div class="consent-content">
       <h2>Adult Content Warning</h2>
       <p>You are about to view <strong>explicit adult content</strong>.</p>
+      <p>By proceeding, you confirm that:</p>
       <ul>
-        <li>You are <strong>18+</strong></li>
-        <li>You consent to viewing explicit material</li>
+        <li>You are <strong>18 years of age or older</strong> (or the legal age in your jurisdiction)</li>
+        <li>You consent to viewing sexually explicit material</li>
+        <li>You will not expose minors to this content</li>
       </ul>
       <div class="consent-buttons">
         <button id="consentAgree">I Agree</button>
@@ -2260,6 +2318,7 @@ html,body{height:100%;margin:0;font-family:'XiXi',Inter,system-ui,Segoe UI,Robot
     </div>
   </div>
 </div>
+  
     <button id="openHostsBtnz" class="featured-btnn" style="display:none;"></button>
 </div>
 

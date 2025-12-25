@@ -331,10 +331,14 @@ body {
   backdrop-filter: blur(15px);
   border: 1px solid rgba(195, 246, 12, 0.3);
   border-radius: 20px;
-  padding: 1.25rem;        /* Reduced from 2rem → more compact */
+  padding: 1.25rem;          /* kept reduced padding */
   text-align: center;
   transition: all 0.4s;
-  font-weight: 500;        /* Added: lighter than default (usually 400–600 depending on font) */
+  font-weight: 500;
+
+  max-width: 350px;          /* Adjust this value to your liking */
+  width: 100%;               /* Allows it to shrink on small screens */
+  margin: 0 auto;            /* Centers the card if it's a block element */
 }
 
 .feature-cardd:hover {
@@ -735,6 +739,9 @@ body {
   </p>
 
     </div>
+
+
+  
   
 <!-- UNLOCK YOUR EDGE -->
 <div class="edge-header">
@@ -752,16 +759,7 @@ body {
     Join the cuties who earn smarter, live freer, and win for real.
   </p>
   
-  <div class="feature-card">
-    
-    
-    
-    
-    
-    
-      <h3>LIVESTREAMS</h3>
-      <p>High-energy battles, zero lag, and real STRZ rewards. Climb the ranks, own the stage, and make every move count.</p>
-    </div>
+  
 
 
 </div>

@@ -326,21 +326,22 @@ html {
 body {
   font-size: 0.95rem;  /* base size */
 }
+.feature-cardd {
+  background: rgba(10, 25, 0, 0.6);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(195, 246, 12, 0.3);
+  border-radius: 20px;
+  padding: 1.25rem;        /* Reduced from 2rem → more compact */
+  text-align: center;
+  transition: all 0.4s;
+  font-weight: 500;        /* Added: lighter than default (usually 400–600 depending on font) */
+}
 
-    .feature-cardd {
-    background: rgba(10,25,0,0.6);
-    backdrop-filter: blur(15px);
-    border: 1px solid rgba(195,246,12,0.3);
-    border-radius: 20px;
-    padding: 2rem;
-    text-align: center;
-    transition: all 0.4s;
-  }
-  .feature-cardd:hover {
-    transform: translateY(-15px);
-    border-color: var(--neon);
-    box-shadow: 0 20px 50px var(--neon-glow);
-  }
+.feature-cardd:hover {
+  transform: translateY(-15px);
+  border-color: var(--neon);
+  box-shadow: 0 20px 50px var(--neon-glow);
+}
 </style>
 </head>
 <body>
